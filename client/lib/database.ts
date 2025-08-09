@@ -404,6 +404,7 @@ export const database = {
   guests: guestService,
   photos: photoService,
   weddingFlow: weddingFlowService,
+  invitation: invitationService,
 
   // Check if we're using Supabase or localStorage
   isUsingSupabase: isSupabaseConfigured,
