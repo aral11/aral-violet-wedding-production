@@ -401,6 +401,14 @@ export default function Debug() {
                     <li>+919731832609</li>
                   </ul>
                 </div>
+                {smsDebugStatus && Object.keys(smsDebugStatus).length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded">
+                    <strong>Debug Details:</strong>
+                    <pre className="text-xs mt-2 overflow-auto">
+                      {JSON.stringify(smsDebugStatus, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
