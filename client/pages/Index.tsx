@@ -439,8 +439,10 @@ export default function Index() {
         localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
 
         toast({
-          title: "RSVP Submitted Successfully! 🎉",
-          description: `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
+          title: isEditMode ? "RSVP Updated Successfully! ✏️" : "RSVP Submitted Successfully! 🎉",
+          description: isEditMode
+            ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
+            : `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
           duration: 5000,
         });
       } catch (localStorageError) {
