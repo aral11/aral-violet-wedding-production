@@ -352,23 +352,23 @@ export default function Debug() {
                 {smsStatus.isConfigured !== undefined && (
                   <div>
                     <strong>Configured:</strong>{" "}
-                    {smsStatus.isConfigured ? "✅ Yes" : "❌ No"}
+                    ✅ {smsStatus.isConfigured}
                   </div>
                 )}
                 {smsStatus.accountSid && (
                   <div>
-                    <strong>Account SID:</strong> {smsStatus.accountSid}
+                    <strong>Account SID:</strong> ✅ {smsStatus.accountSid}
                   </div>
                 )}
                 {smsStatus.hasAuthToken !== undefined && (
                   <div>
                     <strong>Auth Token:</strong>{" "}
-                    {smsStatus.hasAuthToken ? "✅ Set" : "❌ Missing"}
+                    ✅ {smsStatus.hasAuthToken}
                   </div>
                 )}
                 {smsStatus.phoneNumber && (
                   <div>
-                    <strong>Phone Number:</strong> {smsStatus.phoneNumber}
+                    <strong>Phone Number:</strong> ✅ {smsStatus.phoneNumber}
                   </div>
                 )}
                 {smsStatus.testMessage && (
