@@ -333,8 +333,10 @@ export default function Index() {
       }
 
       toast({
-        title: "RSVP Submitted Successfully! 🎉",
-        description: `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
+        title: isEditMode ? "RSVP Updated Successfully! ✏️" : "RSVP Submitted Successfully! 🎉",
+        description: isEditMode
+          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
+          : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
     } catch (error: any) {
