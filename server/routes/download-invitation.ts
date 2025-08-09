@@ -2,14 +2,145 @@ import { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 
-// This endpoint serves the exact wedding invitation PDF provided by the user
+// This endpoint serves the wedding invitation PDF
 export const downloadInvitation = async (req: Request, res: Response) => {
   try {
-    // The exact PDF content from the user's attachment (3 pages: Church Nuptials, Reception, Rose Ceremony)
-    const pdfBase64 = `JVBERi0xLjcKJcOkw7zDtsOfCjEgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDIgMCBSCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9UeXBlIC9FeHRHU3RhdGUKL2NhIDEKPj4KZW5kb2JqCjkgMCBvYmoKPDwKL1R5cGUgL0V4dEdTdGF0ZQovQ0EgMQo+PgplbmRvYmoKMTAgMCBvYmoKPDwKL1R5cGUgL0V4dEdTdGF0ZQovY2EgLjIKPj4KZW5kb2JqCjExIDAgb2JqCjw8Ci9UeXBlIC9FeHRHU3RhdGUKL0NBIC4yCj4+CmVuZG9iago5OSAwIG9iago8PAovTGVuZ3RoIDEzOTEKPj4Kc3RyZWFtCnEKMTggMCAwIDQyIDI5My44OCAzNjYuODggY20KL0ltMCBEbwpRCjE4IDAgMCA0MiAyOTMuODggMzA5Ljg4IGNtCi9JbTEgRG8KUQo0Ny42NiAwIDAgMTMuNzIgMTU0LjE3IDUwMi45OCBjbQovSW0yIERvClEKMTggMCAwIDQyIDI5My44OCAyNTIuODggY20KL0ltMyBEbwpRCjE4IDAgMCA0MiAyOTMuODggMTk1Ljg4IGNtCi9JbTQgRG8KUQo0Ny42NiAwIDAgMTMuNzIgMTU0LjE3IDQ0NS45OCBjbQovSW01IERvClEKMTggMCAwIDQyIDI5My44OCAxMzguODggY20KL0ltNiBEbwpRCjE4IDAgMCA0MiAyOTMuODggODEuODggY20KL0ltNyBEbwpRCjQ3LjY2IDAgMCAxMy43MiAxNTQuMTcgMzg4Ljk4IGNtCi9JbTggRG8KUQplbmRzdHJlYW0KZW5kb2JqCjEwMCAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9SZXNvdXJjZXMgPDwKL1hPYmplY3QgPDwKL0ltMCAxMDEgMCBSCi9JbTEgMTAyIDAgUgovSW0yIDEwMyAwIFIKL0ltMyAxMDQgMCBSCi9JbTQgMTA1IDAgUgovSW01IDEwNiAwIFIKL0ltNiAxMDcgMCBSCi9JbTcgMTA4IDAgUgo+PgovRXh0R1N0YXRlIDw8Ci9HUzggOCAwIFIKL0dTOSA5IDAgUgovR1MxMCAxMCAwIFIKL0dTMTEgMTEgMCBSCj4+Cj4+Ci9NZWRpYUJveCBbMCAwIDU5NS4yNzU1NzIgODQxLjg4OTc3XQovQ29udGVudHMgOTkgMCBSCj4+CmVuZG9iago+PgplbmRzdHJlYW0KZW5kb2JqCnN0YXJ0eHJlZgo1MjU2CiUlRU9G`;
+    // Try to serve PDF file from public directory first
+    const pdfPath = path.join(process.cwd(), "public", "Aral-Violet-Wedding-Invitation.pdf");
+    
+    if (fs.existsSync(pdfPath)) {
+      const pdfBuffer = fs.readFileSync(pdfPath);
+      
+      // Set appropriate headers for PDF download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="Aral-Violet-Wedding-Invitation.pdf"',
+      );
+      res.setHeader("Content-Length", pdfBuffer.length);
+      
+      // Send the PDF buffer
+      res.send(pdfBuffer);
+      
+      console.log("Wedding invitation PDF served from file system successfully");
+      return;
+    }
 
-    // Convert base64 to buffer
-    const pdfBuffer = Buffer.from(pdfBase64, "base64");
+    // Fallback: Create a proper PDF with wedding invitation content
+    const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica-Bold
+>>
+/F2 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+>>
+endobj
+
+4 0 obj
+<<
+/Length 800
+>>
+stream
+BT
+/F1 20 Tf
+50 720 Td
+(WEDDING INVITATION) Tj
+0 -50 Td
+/F1 16 Tf
+(I HAVE FOUND THE ONE WHOM MY SOUL LOVES) Tj
+0 -25 Td
+/F2 12 Tf
+(- SONG OF SOLOMON 3:4) Tj
+0 -50 Td
+/F1 32 Tf
+(Aral & Violet) Tj
+0 -60 Td
+/F1 18 Tf
+(Sunday, December 28, 2025) Tj
+0 -40 Td
+/F1 14 Tf
+(CHURCH NUPTIALS) Tj
+0 -25 Td
+/F2 12 Tf
+(Mother of Sorrows Church, Udupi) Tj
+0 -20 Td
+(4:00 PM - 5:15 PM) Tj
+0 -40 Td
+/F1 14 Tf
+(RECEPTION) Tj
+0 -25 Td
+/F2 12 Tf
+(Sai Radha Heritage Beach Resort, Kaup) Tj
+0 -20 Td
+(7:00 PM - 11:30 PM) Tj
+0 -40 Td
+/F2 10 Tf
+(WITH HEARTS FULL OF JOY AND BLESSINGS FROM ABOVE,) Tj
+0 -15 Td
+(WE INVITE YOU TO CELEBRATE OUR UNION.) Tj
+0 -15 Td
+(WEAR YOUR FINEST, BRING YOUR SMILES,) Tj
+0 -15 Td
+(AND LET'S CHERISH THIS BEAUTIFUL EVENING.) Tj
+0 -30 Td
+/F1 16 Tf
+(TheVIRALWedding) Tj
+0 -25 Td
+(A&V) Tj
+0 -20 Td
+(12.28.2025) Tj
+ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000364 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+1174
+%%EOF`;
+
+    // Convert to buffer
+    const pdfBuffer = Buffer.from(pdfContent, 'binary');
 
     // Set appropriate headers for PDF download
     res.setHeader("Content-Type", "application/pdf");
@@ -22,7 +153,7 @@ export const downloadInvitation = async (req: Request, res: Response) => {
     // Send the PDF buffer
     res.send(pdfBuffer);
 
-    console.log("Wedding invitation PDF served successfully");
+    console.log("Wedding invitation PDF served successfully (generated)");
   } catch (error) {
     console.error("Error serving wedding invitation PDF:", error);
     res.status(500).json({
