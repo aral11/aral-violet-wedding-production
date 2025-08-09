@@ -1108,20 +1108,20 @@ export default function AdminDashboard() {
         console.log("Setting invitation PDF...");
 
         try {
-          // Save to database using invitation API
-          await invitationApi.upload(base64String, file.name);
+          // Save to database using the new database service
+          await database.invitation.upload(base64String, file.name);
           console.log("Invitation saved to database");
 
           // Update local state
           setInvitationPDF(base64String);
 
-          // Also save to localStorage as backup
-          localStorage.setItem("wedding_invitation_pdf", base64String);
-          localStorage.setItem("wedding_invitation_filename", file.name);
+          const storageType = database.isUsingSupabase()
+            ? "Supabase database"
+            : "local storage";
 
           toast({
             title: "Invitation Uploaded Successfully! 💌",
-            description: `"${file.name}" saved to database and synced across devices!`,
+            description: `"${file.name}" saved to ${storageType} and synced across devices!`,
             duration: 3000,
           });
         } catch (error) {
