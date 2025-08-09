@@ -505,7 +505,7 @@ Please RSVP at our wedding website
                     downloadWeddingFlow();
                   } else {
                     toast({
-                      title: "Wedding Timeline Coming Soon! ���",
+                      title: "Wedding Timeline Coming Soon! 📅",
                       description:
                         "The reception timeline will be available for download on December 28, 2025. Please check back on our wedding day!",
                       duration: 5000,
