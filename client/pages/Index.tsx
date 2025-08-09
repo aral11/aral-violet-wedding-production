@@ -739,7 +739,7 @@ Made with love ❤️ By Aral D'Souza
           }
 
           toast({
-            title: "Invitation Downloaded! 💌",
+            title: "Invitation downloaded Successfully! 💌",
             description:
               "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
@@ -794,7 +794,7 @@ Please RSVP at our wedding website
       console.log("Default text invitation downloaded");
 
       toast({
-        title: "Invitation Downloaded! 📝",
+        title: "Invitation downloaded Successfully! 📝",
         description:
           "Your wedding invitation has been downloaded as a text file.",
         duration: 3000,
