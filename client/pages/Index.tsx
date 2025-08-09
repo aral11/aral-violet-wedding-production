@@ -137,7 +137,7 @@ export default function Index() {
         title: "Name Required! ❌",
         description: "Please enter your name before submitting your RSVP.",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -145,9 +145,10 @@ export default function Index() {
     if (!rsvpForm.email.trim()) {
       toast({
         title: "Email Required! ❌",
-        description: "Please enter your email address before submitting your RSVP.",
+        description:
+          "Please enter your email address before submitting your RSVP.",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -157,9 +158,10 @@ export default function Index() {
     if (!emailRegex.test(rsvpForm.email.trim())) {
       toast({
         title: "Invalid Email! ❌",
-        description: "Please enter a valid email address (e.g., name@example.com).",
+        description:
+          "Please enter a valid email address (e.g., name@example.com).",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -167,21 +169,23 @@ export default function Index() {
     if (!rsvpForm.phone.trim()) {
       toast({
         title: "Phone Number Required! ❌",
-        description: "Please enter your phone number before submitting your RSVP.",
+        description:
+          "Please enter your phone number before submitting your RSVP.",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     // Basic phone validation (at least 10 digits)
-    const phoneDigits = rsvpForm.phone.replace(/\D/g, '');
+    const phoneDigits = rsvpForm.phone.replace(/\D/g, "");
     if (phoneDigits.length < 10) {
       toast({
         title: "Invalid Phone Number! ❌",
-        description: "Please enter a valid phone number with at least 10 digits.",
+        description:
+          "Please enter a valid phone number with at least 10 digits.",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -191,7 +195,7 @@ export default function Index() {
         title: "Invalid Guest Count! ❌",
         description: "Please enter a valid number of guests (1-10).",
         duration: 5000,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -204,16 +208,21 @@ export default function Index() {
       const existingGuests = await database.guests.getAll();
 
       // Check for duplicates by name, email, or phone
-      const duplicateByName = existingGuests.find(guest =>
-        guest.name.toLowerCase().trim() === rsvpForm.name.toLowerCase().trim()
+      const duplicateByName = existingGuests.find(
+        (guest) =>
+          guest.name.toLowerCase().trim() ===
+          rsvpForm.name.toLowerCase().trim(),
       );
 
-      const duplicateByEmail = existingGuests.find(guest =>
-        guest.email.toLowerCase().trim() === rsvpForm.email.toLowerCase().trim()
+      const duplicateByEmail = existingGuests.find(
+        (guest) =>
+          guest.email.toLowerCase().trim() ===
+          rsvpForm.email.toLowerCase().trim(),
       );
 
-      const duplicateByPhone = existingGuests.find(guest =>
-        guest.phone.replace(/\D/g, '') === rsvpForm.phone.replace(/\D/g, '')
+      const duplicateByPhone = existingGuests.find(
+        (guest) =>
+          guest.phone.replace(/\D/g, "") === rsvpForm.phone.replace(/\D/g, ""),
       );
 
       // Show specific error messages for each type of duplicate
@@ -222,7 +231,7 @@ export default function Index() {
           title: "Duplicate RSVP Found! ❌",
           description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
           duration: 6000,
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -232,7 +241,7 @@ export default function Index() {
           title: "Email Already Used! ❌",
           description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
           duration: 6000,
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -242,12 +251,15 @@ export default function Index() {
           title: "Phone Number Already Used! ❌",
           description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
           duration: 6000,
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
 
-      console.log("No duplicates found. Submitting RSVP with side:", rsvpForm.side);
+      console.log(
+        "No duplicates found. Submitting RSVP with side:",
+        rsvpForm.side,
+      );
 
       // If no duplicates found, proceed with submission
       await database.guests.create({
@@ -316,16 +328,22 @@ export default function Index() {
         );
 
         // Check for duplicates in localStorage as well
-        const duplicateByName = existingGuests.find((guest: any) =>
-          guest.name.toLowerCase().trim() === rsvpForm.name.toLowerCase().trim()
+        const duplicateByName = existingGuests.find(
+          (guest: any) =>
+            guest.name.toLowerCase().trim() ===
+            rsvpForm.name.toLowerCase().trim(),
         );
 
-        const duplicateByEmail = existingGuests.find((guest: any) =>
-          guest.email.toLowerCase().trim() === rsvpForm.email.toLowerCase().trim()
+        const duplicateByEmail = existingGuests.find(
+          (guest: any) =>
+            guest.email.toLowerCase().trim() ===
+            rsvpForm.email.toLowerCase().trim(),
         );
 
-        const duplicateByPhone = existingGuests.find((guest: any) =>
-          guest.phone.replace(/\D/g, '') === rsvpForm.phone.replace(/\D/g, '')
+        const duplicateByPhone = existingGuests.find(
+          (guest: any) =>
+            guest.phone.replace(/\D/g, "") ===
+            rsvpForm.phone.replace(/\D/g, ""),
         );
 
         // Show specific error messages for localStorage duplicates
@@ -334,7 +352,7 @@ export default function Index() {
             title: "Duplicate RSVP Found! ❌",
             description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
             duration: 6000,
-            variant: "destructive"
+            variant: "destructive",
           });
           return;
         }
@@ -344,7 +362,7 @@ export default function Index() {
             title: "Email Already Used! ❌",
             description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
             duration: 6000,
-            variant: "destructive"
+            variant: "destructive",
           });
           return;
         }
@@ -354,7 +372,7 @@ export default function Index() {
             title: "Phone Number Already Used! ❌",
             description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
             duration: 6000,
-            variant: "destructive"
+            variant: "destructive",
           });
           return;
         }
@@ -375,12 +393,16 @@ export default function Index() {
           duration: 5000,
         });
       } catch (localStorageError) {
-        console.error("Error checking localStorage duplicates:", localStorageError);
+        console.error(
+          "Error checking localStorage duplicates:",
+          localStorageError,
+        );
         toast({
           title: "Error Submitting RSVP ❌",
-          description: "There was an error processing your RSVP. Please try again or contact us directly.",
+          description:
+            "There was an error processing your RSVP. Please try again or contact us directly.",
           duration: 6000,
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }

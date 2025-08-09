@@ -12,7 +12,10 @@ if (supabaseUrl && supabaseKey) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
   } catch (error) {
-    console.warn("❌ Failed to initialize Supabase for invitation download:", error);
+    console.warn(
+      "❌ Failed to initialize Supabase for invitation download:",
+      error,
+    );
   }
 }
 
@@ -31,9 +34,9 @@ export const downloadInvitation = async (req: Request, res: Response) => {
 
         if (!error && data && data.pdf_data) {
           // Convert base64 to buffer
-          const base64Data = data.pdf_data.split(',')[1] || data.pdf_data; // Remove data:application/pdf;base64, prefix if present
+          const base64Data = data.pdf_data.split(",")[1] || data.pdf_data; // Remove data:application/pdf;base64, prefix if present
           const pdfBuffer = Buffer.from(base64Data, "base64");
-          
+
           // Set appropriate headers for PDF download
           res.setHeader("Content-Type", "application/pdf");
           res.setHeader(
@@ -41,24 +44,32 @@ export const downloadInvitation = async (req: Request, res: Response) => {
             `attachment; filename="${data.filename || "Aral-Violet-Wedding-Invitation.pdf"}"`,
           );
           res.setHeader("Content-Length", pdfBuffer.length);
-          
+
           // Send the PDF buffer
           res.send(pdfBuffer);
-          
-          console.log("Wedding invitation PDF served from database successfully");
+
+          console.log(
+            "Wedding invitation PDF served from database successfully",
+          );
           return;
         }
       } catch (dbError) {
-        console.log("No uploaded PDF found in database, checking filesystem...");
+        console.log(
+          "No uploaded PDF found in database, checking filesystem...",
+        );
       }
     }
 
     // Second priority: Try to serve PDF file from public directory
-    const pdfPath = path.join(process.cwd(), "public", "Aral-Violet-Wedding-Invitation.pdf");
-    
+    const pdfPath = path.join(
+      process.cwd(),
+      "public",
+      "Aral-Violet-Wedding-Invitation.pdf",
+    );
+
     if (fs.existsSync(pdfPath)) {
       const pdfBuffer = fs.readFileSync(pdfPath);
-      
+
       // Set appropriate headers for PDF download
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
@@ -66,11 +77,13 @@ export const downloadInvitation = async (req: Request, res: Response) => {
         'attachment; filename="Aral-Violet-Wedding-Invitation.pdf"',
       );
       res.setHeader("Content-Length", pdfBuffer.length);
-      
+
       // Send the PDF buffer
       res.send(pdfBuffer);
-      
-      console.log("Wedding invitation PDF served from file system successfully");
+
+      console.log(
+        "Wedding invitation PDF served from file system successfully",
+      );
       return;
     }
 
@@ -225,7 +238,7 @@ startxref
 %%EOF`;
 
     // Convert to buffer
-    const pdfBuffer = Buffer.from(comprehensivePdfContent, 'binary');
+    const pdfBuffer = Buffer.from(comprehensivePdfContent, "binary");
 
     // Set appropriate headers for PDF download
     res.setHeader("Content-Type", "application/pdf");
@@ -238,7 +251,9 @@ startxref
     // Send the PDF buffer
     res.send(pdfBuffer);
 
-    console.log("Wedding invitation PDF served successfully (comprehensive fallback with all details)");
+    console.log(
+      "Wedding invitation PDF served successfully (comprehensive fallback with all details)",
+    );
   } catch (error) {
     console.error("Error serving wedding invitation PDF:", error);
     res.status(500).json({
