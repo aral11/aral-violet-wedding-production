@@ -35,7 +35,7 @@ jobs:
         run: npm run build:github
         env:
           NODE_ENV: production
-          GITHUB_REPOSITORY: aral11/aral-violet-wedding-production
+          GITHUB_REPOSITORY: aral11/aral-violet-wedding
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
