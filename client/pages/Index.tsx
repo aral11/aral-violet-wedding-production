@@ -131,6 +131,71 @@ export default function Index() {
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Basic form validation
+    if (!rsvpForm.name.trim()) {
+      toast({
+        title: "Name Required! ❌",
+        description: "Please enter your name before submitting your RSVP.",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!rsvpForm.email.trim()) {
+      toast({
+        title: "Email Required! ❌",
+        description: "Please enter your email address before submitting your RSVP.",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(rsvpForm.email.trim())) {
+      toast({
+        title: "Invalid Email! ❌",
+        description: "Please enter a valid email address (e.g., name@example.com).",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!rsvpForm.phone.trim()) {
+      toast({
+        title: "Phone Number Required! ❌",
+        description: "Please enter your phone number before submitting your RSVP.",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic phone validation (at least 10 digits)
+    const phoneDigits = rsvpForm.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      toast({
+        title: "Invalid Phone Number! ❌",
+        description: "Please enter a valid phone number with at least 10 digits.",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (rsvpForm.guests < 1 || rsvpForm.guests > 10) {
+      toast({
+        title: "Invalid Guest Count! ❌",
+        description: "Please enter a valid number of guests (1-10).",
+        duration: 5000,
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Validation: Check for duplicate submissions
     try {
       console.log("Checking for duplicate RSVP submissions...");
