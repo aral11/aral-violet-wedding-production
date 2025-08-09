@@ -324,39 +324,57 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
-      // Check if there's a custom invitation PDF uploaded
-      const invitation = await invitationApi.get();
+      // First try to download the static PDF from public directory
+      const link = document.createElement("a");
+      link.href = "/Aral-Violet-Wedding-Invitation.pdf";
+      link.download = "Aral-Violet-Wedding-Invitation.pdf";
+      link.target = "_blank";
+      link.click();
+      console.log("Invitation PDF downloaded from public directory");
 
-      if (invitation) {
-        // Download the uploaded PDF invitation
-        const link = document.createElement("a");
-        link.href = invitation.pdfData;
-        link.download =
-          invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
-        link.click();
-        console.log("Invitation downloaded from database");
-        return;
-      }
+      toast({
+        title: "Invitation Downloaded! 💌",
+        description: "Your wedding invitation PDF has been downloaded successfully.",
+        duration: 3000,
+      });
+      return;
     } catch (error) {
-      console.warn(
-        "API unavailable, checking localStorage fallback:",
-        handleApiError(error),
-      );
+      console.warn("Static PDF not available, checking database:", error);
 
-      // Fallback to localStorage if API is not available
-      const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-      if (savedInvitation) {
-        const link = document.createElement("a");
-        link.href = savedInvitation;
-        link.download = "Aral-Violet-Wedding-Invitation.pdf";
-        link.click();
-        console.log("Invitation downloaded from localStorage fallback");
-        return;
+      // Fallback: Check if there's a custom invitation PDF uploaded to database
+      try {
+        const invitation = await invitationApi.get();
+
+        if (invitation) {
+          // Download the uploaded PDF invitation
+          const link = document.createElement("a");
+          link.href = invitation.pdfData;
+          link.download =
+            invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
+          link.click();
+          console.log("Invitation downloaded from database");
+          return;
+        }
+      } catch (apiError) {
+        console.warn(
+          "API unavailable, checking localStorage fallback:",
+          handleApiError(apiError),
+        );
+
+        // Fallback to localStorage if API is not available
+        const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
+        if (savedInvitation) {
+          const link = document.createElement("a");
+          link.href = savedInvitation;
+          link.download = "Aral-Violet-Wedding-Invitation.pdf";
+          link.click();
+          console.log("Invitation downloaded from localStorage fallback");
+          return;
+        }
       }
-    }
 
-    // Final fallback to text invitation
-    const invitationContent = `
+      // Final fallback to text invitation
+      const invitationContent = `
 WEDDING INVITATION
 ==================
 
@@ -387,16 +405,23 @@ A&V
 12.28.2025
 
 Please RSVP at our wedding website
-    `;
+      `;
 
-    const blob = new Blob([invitationContent], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "aral-violet-wedding-invitation.txt";
-    a.click();
-    window.URL.revokeObjectURL(url);
-    console.log("Default text invitation downloaded");
+      const blob = new Blob([invitationContent], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "aral-violet-wedding-invitation.txt";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      console.log("Default text invitation downloaded");
+
+      toast({
+        title: "Invitation Downloaded! 📝",
+        description: "Your wedding invitation has been downloaded as a text file.",
+        duration: 3000,
+      });
+    }
   };
 
   return (
