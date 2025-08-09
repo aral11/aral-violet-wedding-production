@@ -21,14 +21,17 @@ if (supabaseUrl && supabaseKey) {
 
 // Get all guests
 export const getGuests: RequestHandler = async (req, res) => {
+  console.log("👥 Guests API called - GET /api/guests");
   try {
     if (supabase) {
+      console.log("👥 Using Supabase for guests");
       const { data, error } = await supabase
         .from("guests")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("👥 Supabase error:", error);
         throw error;
       }
 
@@ -48,13 +51,15 @@ export const getGuests: RequestHandler = async (req, res) => {
         updatedAt: row.updated_at,
       }));
 
+      console.log(`👥 Returning ${guests.length} guests from Supabase`);
       res.json(guests);
     } else {
+      console.log("👥 No Supabase client - returning empty array");
       // Fallback to empty array
       res.json([]);
     }
   } catch (error) {
-    console.error("Error fetching guests:", error);
+    console.error("👥 Error fetching guests:", error);
     // Return empty array for graceful fallback
     res.json([]);
   }

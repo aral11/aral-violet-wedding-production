@@ -588,12 +588,22 @@ Made with love ❤️ By Aral D'Souza
   const downloadInvitation = async () => {
     try {
       // First priority: Check if there's a custom invitation PDF uploaded from admin
-      console.log("Checking for uploaded invitation from admin...");
+      console.log("🔍 Checking for uploaded invitation from admin...");
 
       try {
         const uploadedInvitation = await database.invitation.get();
+        console.log("📋 Database invitation result:", uploadedInvitation);
 
         if (uploadedInvitation && uploadedInvitation.pdf_data) {
+          console.log(
+            "✅ Found uploaded invitation! Filename:",
+            uploadedInvitation.filename,
+          );
+          console.log(
+            "📄 PDF data length:",
+            uploadedInvitation.pdf_data.length,
+          );
+
           // Download the uploaded PDF invitation
           const link = document.createElement("a");
           link.href = uploadedInvitation.pdf_data;
@@ -604,17 +614,19 @@ Made with love ❤️ By Aral D'Souza
           toast({
             title: "Invitation Downloaded! 💌",
             description:
-              "Your beautiful wedding invitation PDF has been downloaded successfully.",
+              "Your custom uploaded wedding invitation has been downloaded successfully.",
             duration: 3000,
           });
 
           console.log(
-            "Uploaded invitation PDF downloaded successfully from admin",
+            "✅ Uploaded invitation PDF downloaded successfully from admin database",
           );
           return;
+        } else {
+          console.log("❌ No uploaded invitation found in database");
         }
       } catch (dbError) {
-        console.log("No uploaded invitation found, trying server endpoint...");
+        console.log("❌ Database error, trying server endpoint...", dbError);
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
