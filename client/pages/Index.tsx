@@ -432,7 +432,7 @@ export default function Index() {
       }
     }
 
-    // Reset form regardless of storage method
+    // Reset form and edit mode regardless of storage method
     setRsvpForm({
       name: "",
       email: "",
@@ -444,6 +444,8 @@ export default function Index() {
       dietaryRestrictions: "",
       needsAccommodation: false,
     });
+    setIsEditMode(false);
+    setEditingGuestId(null);
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
@@ -605,7 +607,7 @@ Made with love ❤️ By Aral D'Souza
           link.click();
 
           toast({
-            title: "Invitation Downloaded! 💌",
+            title: "Invitation Downloaded! ���",
             description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
           });
