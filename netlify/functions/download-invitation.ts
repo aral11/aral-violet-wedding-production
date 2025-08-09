@@ -47,9 +47,7 @@ export const handler: Handler = async (event, context) => {
           };
         }
       } catch (dbError) {
-        console.log(
-          "No uploaded PDF found in database, using fallback...",
-        );
+        console.log("No uploaded PDF found in database, using fallback...");
       }
     }
 
@@ -207,7 +205,8 @@ startxref
       statusCode: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="Aral-Violet-Wedding-Invitation.pdf"',
+        "Content-Disposition":
+          'attachment; filename="Aral-Violet-Wedding-Invitation.pdf"',
         "Content-Length": pdfBuffer.length.toString(),
       },
       body: pdfBuffer.toString("base64"),
