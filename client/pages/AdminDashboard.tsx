@@ -2270,11 +2270,29 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => {
-                                setInvitationPDF(null);
-                                localStorage.removeItem(
-                                  "wedding_invitation_pdf",
-                                );
+                              onClick={async () => {
+                                try {
+                                  await database.invitation.delete();
+                                  setInvitationPDF(null);
+
+                                  toast({
+                                    title: "Invitation Removed! 🗑️",
+                                    description: "Custom invitation has been removed. Guests will now download the default text invitation.",
+                                    duration: 3000,
+                                  });
+                                } catch (error) {
+                                  console.error("Error removing invitation:", error);
+                                  // Fallback to local removal
+                                  setInvitationPDF(null);
+                                  localStorage.removeItem("wedding_invitation_pdf");
+                                  localStorage.removeItem("wedding_invitation_filename");
+
+                                  toast({
+                                    title: "Invitation Removed! 🗑️",
+                                    description: "Custom invitation has been removed locally.",
+                                    duration: 3000,
+                                  });
+                                }
                               }}
                             >
                               <Trash2 size={14} className="mr-1" />
