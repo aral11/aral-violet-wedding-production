@@ -10,13 +10,19 @@ export interface RSVPDetails {
   needsAccommodation: boolean;
 }
 
-const API_BASE = "/api";
+// Check deployment platform and use appropriate API endpoints
+const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+const API_BASE = isNetlify ? "/.netlify/functions" : "/api";
 
 export const sendRSVPNotification = async (
   rsvpDetails: RSVPDetails,
 ): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_BASE}/sms/send-rsvp-notification`, {
+    const endpoint = isNetlify
+      ? `${API_BASE}/sms-send-rsvp-notification`
+      : `${API_BASE}/sms/send-rsvp-notification`;
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +47,11 @@ export const sendRSVPNotification = async (
 
 export const testSMSService = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_BASE}/sms/test`, {
+    const endpoint = isNetlify
+      ? `${API_BASE}/sms-test`
+      : `${API_BASE}/sms/test`;
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
