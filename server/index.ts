@@ -27,6 +27,7 @@ import {
   deleteInvitation,
 } from "./routes/invitation";
 import { sendRSVPSMSNotification, testSMS } from "./routes/sms";
+import { debugSMS } from "./routes/debug-sms";
 import { downloadInvitation } from "./routes/download-invitation";
 
 export async function createServer() {
