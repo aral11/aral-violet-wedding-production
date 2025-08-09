@@ -1425,8 +1425,33 @@ Please RSVP at our wedding website
                   type="submit"
                   className="w-full bg-olive-600 hover:bg-olive-700 text-white py-3 text-lg"
                 >
-                  Submit RSVP
+                  {isEditMode ? "Update RSVP" : "Submit RSVP"}
                 </Button>
+
+                {isEditMode && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsEditMode(false);
+                      setEditingGuestId(null);
+                      setRsvpForm({
+                        name: "",
+                        email: "",
+                        phone: "",
+                        attending: true,
+                        guests: 1,
+                        side: "groom" as "groom" | "bride",
+                        message: "",
+                        dietaryRestrictions: "",
+                        needsAccommodation: false,
+                      });
+                    }}
+                    variant="outline"
+                    className="w-full mt-3 border-sage-300 text-sage-700 hover:bg-sage-50"
+                  >
+                    Cancel Edit / Submit New RSVP
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>
