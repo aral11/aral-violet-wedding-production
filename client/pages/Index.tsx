@@ -1207,32 +1207,34 @@ Please RSVP at our wedding website
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Your Name(s) *
+                      Your Name(s) * {isEditMode && <span className="text-xs text-blue-600">(Read-only)</span>}
                     </label>
                     <Input
                       type="text"
                       value={rsvpForm.name}
                       onChange={(e) =>
-                        setRsvpForm({ ...rsvpForm, name: e.target.value })
+                        !isEditMode && setRsvpForm({ ...rsvpForm, name: e.target.value })
                       }
                       placeholder="Enter your name(s)"
                       required
-                      className="border-sage-300 focus:border-olive-500"
+                      readOnly={isEditMode}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Email Address *
+                      Email Address * {isEditMode && <span className="text-xs text-blue-600">(Read-only)</span>}
                     </label>
                     <Input
                       type="email"
                       value={rsvpForm.email}
                       onChange={(e) =>
-                        setRsvpForm({ ...rsvpForm, email: e.target.value })
+                        !isEditMode && setRsvpForm({ ...rsvpForm, email: e.target.value })
                       }
                       placeholder="Enter your email"
                       required
-                      className="border-sage-300 focus:border-olive-500"
+                      readOnly={isEditMode}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     />
                   </div>
                 </div>
