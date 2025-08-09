@@ -595,8 +595,14 @@ Made with love ❤️ By Aral D'Souza
         console.log("📋 Database invitation result:", uploadedInvitation);
 
         if (uploadedInvitation && uploadedInvitation.pdf_data) {
-          console.log("✅ Found uploaded invitation! Filename:", uploadedInvitation.filename);
-          console.log("📄 PDF data length:", uploadedInvitation.pdf_data.length);
+          console.log(
+            "✅ Found uploaded invitation! Filename:",
+            uploadedInvitation.filename,
+          );
+          console.log(
+            "📄 PDF data length:",
+            uploadedInvitation.pdf_data.length,
+          );
 
           // Download the uploaded PDF invitation
           const link = document.createElement("a");
