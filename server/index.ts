@@ -77,6 +77,7 @@ export async function createServer() {
   // SMS API
   app.post("/api/sms/send-rsvp-notification", sendRSVPSMSNotification);
   app.post("/api/sms/test", testSMS);
+  app.get("/api/sms/debug", debugSMS);
 
   // Download invitation PDF
   app.get("/api/download-invitation", downloadInvitation);
