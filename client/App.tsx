@@ -21,7 +21,12 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter
-        basename={import.meta.env.PROD ? "/aral-violet-wedding" : "/"}
+        basename={
+          import.meta.env.PROD &&
+          import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+            ? "/aral-violet-wedding"
+            : "/"
+        }
       >
         <AuthProvider>
           <Routes>
