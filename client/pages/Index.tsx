@@ -604,6 +604,12 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.pdf_data.length,
           );
 
+          // Validate PDF data format
+          if (!uploadedInvitation.pdf_data.startsWith('data:')) {
+            console.log("❌ Invalid PDF data format, trying server endpoint...");
+            throw new Error("Invalid PDF data format");
+          }
+
           // Download the uploaded PDF invitation - Mobile-friendly approach
           const link = document.createElement("a");
           link.href = uploadedInvitation.pdf_data;
