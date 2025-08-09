@@ -12,6 +12,7 @@ export default function Debug() {
   const [supabaseStatus, setSupabaseStatus] = useState<any>({});
   const [databaseStatus, setDatabaseStatus] = useState<any>({});
   const [smsStatus, setSmsStatus] = useState<any>({});
+  const [smsDebugStatus, setSmsDebugStatus] = useState<any>({});
 
   useEffect(() => {
     // Load localStorage data
@@ -127,6 +128,19 @@ export default function Debug() {
     }
 
     setSmsStatus(results);
+  };
+
+  const debugSMSDetailed = async () => {
+    try {
+      const response = await fetch("/api/sms/debug");
+      const data = await response.json();
+      setSmsDebugStatus(data);
+    } catch (error: any) {
+      setSmsDebugStatus({
+        error: "Failed to fetch SMS debug info",
+        message: error.message,
+      });
+    }
   };
 
   const testAPI = async () => {
@@ -348,7 +362,12 @@ export default function Debug() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button onClick={testSMS}>Test SMS Service</Button>
+                <div className="space-x-2">
+                  <Button onClick={testSMS}>Test SMS Service</Button>
+                  <Button onClick={debugSMSDetailed} variant="outline">
+                    Debug SMS
+                  </Button>
+                </div>
                 {smsStatus.isConfigured !== undefined && (
                   <div>
                     <strong>Configured:</strong> ✅ {smsStatus.isConfigured}
@@ -382,6 +401,14 @@ export default function Debug() {
                     <li>+919731832609</li>
                   </ul>
                 </div>
+                {smsDebugStatus && Object.keys(smsDebugStatus).length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded">
+                    <strong>Debug Details:</strong>
+                    <pre className="text-xs mt-2 overflow-auto">
+                      {JSON.stringify(smsDebugStatus, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
