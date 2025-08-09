@@ -131,8 +131,60 @@ export default function Index() {
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation: Check for duplicate submissions
     try {
-      console.log("Submitting RSVP with side:", rsvpForm.side);
+      console.log("Checking for duplicate RSVP submissions...");
+
+      // Get existing guests to check for duplicates
+      const existingGuests = await database.guests.getAll();
+
+      // Check for duplicates by name, email, or phone
+      const duplicateByName = existingGuests.find(guest =>
+        guest.name.toLowerCase().trim() === rsvpForm.name.toLowerCase().trim()
+      );
+
+      const duplicateByEmail = existingGuests.find(guest =>
+        guest.email.toLowerCase().trim() === rsvpForm.email.toLowerCase().trim()
+      );
+
+      const duplicateByPhone = existingGuests.find(guest =>
+        guest.phone.replace(/\D/g, '') === rsvpForm.phone.replace(/\D/g, '')
+      );
+
+      // Show specific error messages for each type of duplicate
+      if (duplicateByName) {
+        toast({
+          title: "Duplicate RSVP Found! ❌",
+          description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+          duration: 6000,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (duplicateByEmail) {
+        toast({
+          title: "Email Already Used! ❌",
+          description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
+          duration: 6000,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (duplicateByPhone) {
+        toast({
+          title: "Phone Number Already Used! ❌",
+          description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
+          duration: 6000,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log("No duplicates found. Submitting RSVP with side:", rsvpForm.side);
+
+      // If no duplicates found, proceed with submission
       await database.guests.create({
         name: rsvpForm.name,
         email: rsvpForm.email,
@@ -186,30 +238,87 @@ export default function Index() {
         description: `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.warn(
         "API unavailable, falling back to localStorage:",
         handleApiError(error),
       );
 
       // Fallback to localStorage if API is not available
-      const existingGuests = JSON.parse(
-        localStorage.getItem("wedding_guests") || "[]",
-      );
-      const newGuest = {
-        id: Date.now().toString(),
-        ...rsvpForm,
-        createdAt: new Date().toISOString(),
-      };
-      const updatedGuests = [...existingGuests, newGuest];
-      localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
-      console.log("RSVP saved to localStorage fallback");
+      try {
+        const existingGuests = JSON.parse(
+          localStorage.getItem("wedding_guests") || "[]",
+        );
 
-      toast({
-        title: "RSVP Submitted Successfully! 🎉",
-        description: `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
-        duration: 5000,
-      });
+        // Check for duplicates in localStorage as well
+        const duplicateByName = existingGuests.find((guest: any) =>
+          guest.name.toLowerCase().trim() === rsvpForm.name.toLowerCase().trim()
+        );
+
+        const duplicateByEmail = existingGuests.find((guest: any) =>
+          guest.email.toLowerCase().trim() === rsvpForm.email.toLowerCase().trim()
+        );
+
+        const duplicateByPhone = existingGuests.find((guest: any) =>
+          guest.phone.replace(/\D/g, '') === rsvpForm.phone.replace(/\D/g, '')
+        );
+
+        // Show specific error messages for localStorage duplicates
+        if (duplicateByName) {
+          toast({
+            title: "Duplicate RSVP Found! ❌",
+            description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+            duration: 6000,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (duplicateByEmail) {
+          toast({
+            title: "Email Already Used! ❌",
+            description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
+            duration: 6000,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (duplicateByPhone) {
+          toast({
+            title: "Phone Number Already Used! ❌",
+            description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
+            duration: 6000,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // If no duplicates, save to localStorage
+        const newGuest = {
+          id: Date.now().toString(),
+          ...rsvpForm,
+          createdAt: new Date().toISOString(),
+        };
+        const updatedGuests = [...existingGuests, newGuest];
+        localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
+        console.log("RSVP saved to localStorage fallback");
+
+        toast({
+          title: "RSVP Submitted Successfully! 🎉",
+          description: `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
+          duration: 5000,
+        });
+      } catch (localStorageError) {
+        console.error("Error checking localStorage duplicates:", localStorageError);
+        toast({
+          title: "Error Submitting RSVP ❌",
+          description: "There was an error processing your RSVP. Please try again or contact us directly.",
+          duration: 6000,
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     // Reset form regardless of storage method
