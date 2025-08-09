@@ -266,22 +266,35 @@ export default function Index() {
       }
 
       console.log(
-        "No duplicates found. Submitting RSVP with side:",
+        isEditMode ? "Updating existing RSVP with side:" : "Creating new RSVP with side:",
         rsvpForm.side,
       );
 
-      // If no duplicates found, proceed with submission
-      await database.guests.create({
-        name: rsvpForm.name,
-        email: rsvpForm.email,
-        phone: rsvpForm.phone,
-        attending: rsvpForm.attending,
-        guests: rsvpForm.guests,
-        side: rsvpForm.side,
-        message: rsvpForm.message || undefined,
-        dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
-        needs_accommodation: rsvpForm.needsAccommodation,
-      });
+      // Submit or update RSVP
+      if (isEditMode && editingGuestId) {
+        // Update existing guest
+        await database.guests.update(editingGuestId, {
+          attending: rsvpForm.attending,
+          guests: rsvpForm.guests,
+          side: rsvpForm.side,
+          message: rsvpForm.message || undefined,
+          dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
+          needs_accommodation: rsvpForm.needsAccommodation,
+        });
+      } else {
+        // Create new guest
+        await database.guests.create({
+          name: rsvpForm.name,
+          email: rsvpForm.email,
+          phone: rsvpForm.phone,
+          attending: rsvpForm.attending,
+          guests: rsvpForm.guests,
+          side: rsvpForm.side,
+          message: rsvpForm.message || undefined,
+          dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
+          needs_accommodation: rsvpForm.needsAccommodation,
+        });
+      }
 
       const storageType = database.isUsingSupabase()
         ? "Supabase database"
