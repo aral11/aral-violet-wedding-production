@@ -73,7 +73,7 @@ export const guestService = {
 
   async update(
     id: string,
-    updates: Partial<Omit<SupabaseGuest, "id" | "created_at">>
+    updates: Partial<Omit<SupabaseGuest, "id" | "created_at">>,
   ): Promise<SupabaseGuest> {
     if (isSupabaseConfigured()) {
       try {
@@ -111,9 +111,12 @@ export const guestService = {
     return guest;
   },
 
-  updateInLocalStorage(id: string, updates: Partial<SupabaseGuest>): SupabaseGuest {
+  updateInLocalStorage(
+    id: string,
+    updates: Partial<SupabaseGuest>,
+  ): SupabaseGuest {
     const existing = this.getFromLocalStorage();
-    const index = existing.findIndex(guest => guest.id === id);
+    const index = existing.findIndex((guest) => guest.id === id);
 
     if (index === -1) {
       throw new Error("Guest not found for update");
@@ -348,7 +351,10 @@ export const invitationService = {
     return this.getFromLocalStorage();
   },
 
-  async upload(pdfData: string, filename?: string): Promise<SupabaseInvitation> {
+  async upload(
+    pdfData: string,
+    filename?: string,
+  ): Promise<SupabaseInvitation> {
     if (isSupabaseConfigured()) {
       try {
         // Delete existing invitation first (only keep the latest)
@@ -404,7 +410,10 @@ export const invitationService = {
         // Also remove from localStorage
         this.removeFromLocalStorage();
       } catch (error) {
-        console.warn("Supabase unavailable, removing from localStorage:", error);
+        console.warn(
+          "Supabase unavailable, removing from localStorage:",
+          error,
+        );
         this.removeFromLocalStorage();
       }
     } else {

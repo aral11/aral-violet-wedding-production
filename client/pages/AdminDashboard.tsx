@@ -2277,19 +2277,28 @@ export default function AdminDashboard() {
 
                                   toast({
                                     title: "Invitation Removed! 🗑️",
-                                    description: "Custom invitation has been removed. Guests will now download the default text invitation.",
+                                    description:
+                                      "Custom invitation has been removed. Guests will now download the default text invitation.",
                                     duration: 3000,
                                   });
                                 } catch (error) {
-                                  console.error("Error removing invitation:", error);
+                                  console.error(
+                                    "Error removing invitation:",
+                                    error,
+                                  );
                                   // Fallback to local removal
                                   setInvitationPDF(null);
-                                  localStorage.removeItem("wedding_invitation_pdf");
-                                  localStorage.removeItem("wedding_invitation_filename");
+                                  localStorage.removeItem(
+                                    "wedding_invitation_pdf",
+                                  );
+                                  localStorage.removeItem(
+                                    "wedding_invitation_filename",
+                                  );
 
                                   toast({
                                     title: "Invitation Removed! 🗑️",
-                                    description: "Custom invitation has been removed locally.",
+                                    description:
+                                      "Custom invitation has been removed locally.",
                                     duration: 3000,
                                   });
                                 }

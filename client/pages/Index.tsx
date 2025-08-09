@@ -228,7 +228,8 @@ export default function Index() {
       );
 
       // Find any existing RSVP for editing
-      const existingGuest = duplicateByName || duplicateByEmail || duplicateByPhone;
+      const existingGuest =
+        duplicateByName || duplicateByEmail || duplicateByPhone;
 
       if (existingGuest && !isEditMode) {
         // Switch to edit mode and populate form with existing data
@@ -266,7 +267,9 @@ export default function Index() {
       }
 
       console.log(
-        isEditMode ? "Updating existing RSVP with side:" : "Creating new RSVP with side:",
+        isEditMode
+          ? "Updating existing RSVP with side:"
+          : "Creating new RSVP with side:",
         rsvpForm.side,
       );
 
@@ -333,7 +336,9 @@ export default function Index() {
       }
 
       toast({
-        title: isEditMode ? "RSVP Updated Successfully! ✏️" : "RSVP Submitted Successfully! 🎉",
+        title: isEditMode
+          ? "RSVP Updated Successfully! ✏️"
+          : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
           ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
           : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
@@ -371,7 +376,8 @@ export default function Index() {
         );
 
         // Find any existing RSVP for editing in localStorage
-        const existingLocalGuest = duplicateByName || duplicateByEmail || duplicateByPhone;
+        const existingLocalGuest =
+          duplicateByName || duplicateByEmail || duplicateByPhone;
 
         if (existingLocalGuest && !isEditMode) {
           // Switch to edit mode and populate form with existing data
@@ -397,7 +403,11 @@ export default function Index() {
           return;
         }
 
-        if (existingLocalGuest && isEditMode && existingLocalGuest.id !== editingGuestId) {
+        if (
+          existingLocalGuest &&
+          isEditMode &&
+          existingLocalGuest.id !== editingGuestId
+        ) {
           // Trying to edit but conflicting with a different guest
           toast({
             title: "Conflict Detected! ❌",
@@ -423,7 +433,7 @@ export default function Index() {
                   dietaryRestrictions: rsvpForm.dietaryRestrictions,
                   needsAccommodation: rsvpForm.needsAccommodation,
                 }
-              : guest
+              : guest,
           );
           console.log("RSVP updated in localStorage fallback");
         } else {
@@ -439,7 +449,9 @@ export default function Index() {
         localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
 
         toast({
-          title: isEditMode ? "RSVP Updated Successfully! ✏️" : "RSVP Submitted Successfully! 🎉",
+          title: isEditMode
+            ? "RSVP Updated Successfully! ✏️"
+            : "RSVP Submitted Successfully! 🎉",
           description: isEditMode
             ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
             : `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
@@ -585,16 +597,20 @@ Made with love ❤️ By Aral D'Souza
           // Download the uploaded PDF invitation
           const link = document.createElement("a");
           link.href = uploadedInvitation.pdf_data;
-          link.download = uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
+          link.download =
+            uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.click();
 
           toast({
             title: "Invitation Downloaded! 💌",
-            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
           });
 
-          console.log("Uploaded invitation PDF downloaded successfully from admin");
+          console.log(
+            "Uploaded invitation PDF downloaded successfully from admin",
+          );
           return;
         }
       } catch (dbError) {
@@ -619,7 +635,9 @@ Made with love ❤️ By Aral D'Souza
           duration: 3000,
         });
 
-        console.log("Wedding invitation PDF downloaded successfully from server");
+        console.log(
+          "Wedding invitation PDF downloaded successfully from server",
+        );
         return;
       }
 
@@ -637,7 +655,8 @@ Made with love ❤️ By Aral D'Souza
 
           toast({
             title: "Invitation Downloaded! ���",
-            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
           });
 
@@ -660,7 +679,8 @@ Made with love ❤️ By Aral D'Souza
 
           toast({
             title: "Invitation Downloaded! 💌",
-            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
           });
 
@@ -723,7 +743,8 @@ Please RSVP at our wedding website
 
       toast({
         title: "Download Error ❌",
-        description: "There was an error downloading the invitation. Please try again.",
+        description:
+          "There was an error downloading the invitation. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
@@ -1193,7 +1214,8 @@ Please RSVP at our wedding website
 
               {isEditMode && (
                 <div className="bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded mb-6">
-                  📝 <strong>Edit Mode:</strong> You're updating your existing RSVP. Name and email are locked for security.
+                  📝 <strong>Edit Mode:</strong> You're updating your existing
+                  RSVP. Name and email are locked for security.
                 </div>
               )}
 
@@ -1207,34 +1229,46 @@ Please RSVP at our wedding website
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Your Name(s) * {isEditMode && <span className="text-xs text-blue-600">(Read-only)</span>}
+                      Your Name(s) *{" "}
+                      {isEditMode && (
+                        <span className="text-xs text-blue-600">
+                          (Read-only)
+                        </span>
+                      )}
                     </label>
                     <Input
                       type="text"
                       value={rsvpForm.name}
                       onChange={(e) =>
-                        !isEditMode && setRsvpForm({ ...rsvpForm, name: e.target.value })
+                        !isEditMode &&
+                        setRsvpForm({ ...rsvpForm, name: e.target.value })
                       }
                       placeholder="Enter your name(s)"
                       required
                       readOnly={isEditMode}
-                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Email Address * {isEditMode && <span className="text-xs text-blue-600">(Read-only)</span>}
+                      Email Address *{" "}
+                      {isEditMode && (
+                        <span className="text-xs text-blue-600">
+                          (Read-only)
+                        </span>
+                      )}
                     </label>
                     <Input
                       type="email"
                       value={rsvpForm.email}
                       onChange={(e) =>
-                        !isEditMode && setRsvpForm({ ...rsvpForm, email: e.target.value })
+                        !isEditMode &&
+                        setRsvpForm({ ...rsvpForm, email: e.target.value })
                       }
                       placeholder="Enter your email"
                       required
                       readOnly={isEditMode}
-                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                     />
                   </div>
                 </div>
