@@ -71,6 +71,34 @@ export const guestService = {
     });
   },
 
+  async update(
+    id: string,
+    updates: Partial<Omit<SupabaseGuest, "id" | "created_at">>
+  ): Promise<SupabaseGuest> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from("guests")
+          .update(updates)
+          .eq("id", id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Update localStorage as well
+        this.updateInLocalStorage(id, data);
+
+        return data;
+      } catch (error) {
+        console.warn("Supabase unavailable, updating in localStorage:", error);
+        return this.updateInLocalStorage(id, updates);
+      }
+    }
+
+    return this.updateInLocalStorage(id, updates);
+  },
+
   getFromLocalStorage(): SupabaseGuest[] {
     const saved = localStorage.getItem("wedding_guests");
     return saved ? JSON.parse(saved) : [];
