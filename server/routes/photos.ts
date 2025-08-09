@@ -21,14 +21,17 @@ if (supabaseUrl && supabaseKey) {
 
 // Get all photos
 export const getPhotos: RequestHandler = async (req, res) => {
+  console.log("📸 Photos API called - GET /api/photos");
   try {
     if (supabase) {
+      console.log("📸 Using Supabase for photos");
       const { data, error } = await supabase
         .from("photos")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("📸 Supabase error:", error);
         throw error;
       }
 
@@ -39,13 +42,15 @@ export const getPhotos: RequestHandler = async (req, res) => {
         createdAt: row.created_at,
       }));
 
+      console.log(`📸 Returning ${photos.length} photos from Supabase`);
       res.json(photos);
     } else {
+      console.log("📸 No Supabase client - returning empty array");
       // Fallback to empty array
       res.json([]);
     }
   } catch (error) {
-    console.error("Error fetching photos:", error);
+    console.error("📸 Error fetching photos:", error);
     // Return empty array for graceful fallback
     res.json([]);
   }
