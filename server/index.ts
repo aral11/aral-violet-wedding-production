@@ -36,17 +36,8 @@ export async function createServer() {
   app.use(express.json({ limit: "50mb" })); // Increased limit for base64 images/PDFs
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-  // Initialize database
-  try {
-    await initializeDatabase();
-    console.log("Database initialized successfully");
-  } catch (error) {
-    console.error("Failed to initialize database:", error);
-    console.log(
-      "Server will continue with fallback mode - all data will be stored in localStorage",
-    );
-    // Don't throw error, let server start without DB for now
-  }
+  // Skip SQL Server initialization - using Supabase instead
+  console.log("Using Supabase database - skipping SQL Server initialization");
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
