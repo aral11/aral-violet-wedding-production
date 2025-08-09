@@ -110,6 +110,20 @@ export const guestService = {
     localStorage.setItem("wedding_guests", JSON.stringify(updated));
     return guest;
   },
+
+  updateInLocalStorage(id: string, updates: Partial<SupabaseGuest>): SupabaseGuest {
+    const existing = this.getFromLocalStorage();
+    const index = existing.findIndex(guest => guest.id === id);
+
+    if (index === -1) {
+      throw new Error("Guest not found for update");
+    }
+
+    const updatedGuest = { ...existing[index], ...updates };
+    existing[index] = updatedGuest;
+    localStorage.setItem("wedding_guests", JSON.stringify(existing));
+    return updatedGuest;
+  },
 };
 
 // Photo Database Service
