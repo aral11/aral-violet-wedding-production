@@ -63,6 +63,8 @@ export default function Index() {
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
 
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
 
@@ -225,31 +227,39 @@ export default function Index() {
           guest.phone.replace(/\D/g, "") === rsvpForm.phone.replace(/\D/g, ""),
       );
 
-      // Show specific error messages for each type of duplicate
-      if (duplicateByName) {
+      // Find any existing RSVP for editing
+      const existingGuest =
+        duplicateByName || duplicateByEmail || duplicateByPhone;
+
+      if (existingGuest && !isEditMode) {
+        // Switch to edit mode and populate form with existing data
+        setIsEditMode(true);
+        setEditingGuestId(existingGuest.id);
+        setRsvpForm({
+          name: existingGuest.name,
+          email: existingGuest.email,
+          phone: existingGuest.phone || "",
+          attending: existingGuest.attending,
+          guests: existingGuest.guests,
+          side: existingGuest.side,
+          message: existingGuest.message || "",
+          dietaryRestrictions: existingGuest.dietary_restrictions || "",
+          needsAccommodation: existingGuest.needs_accommodation,
+        });
+
         toast({
-          title: "Duplicate RSVP Found! ❌",
-          description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+          title: "Existing RSVP Found! ✏️",
+          description: `We found your previous RSVP. You can now edit your response. Name and email are locked for security.`,
           duration: 6000,
-          variant: "destructive",
         });
         return;
       }
 
-      if (duplicateByEmail) {
+      if (existingGuest && isEditMode && existingGuest.id !== editingGuestId) {
+        // Trying to edit but conflicting with a different guest
         toast({
-          title: "Email Already Used! ❌",
-          description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
-          duration: 6000,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (duplicateByPhone) {
-        toast({
-          title: "Phone Number Already Used! ❌",
-          description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
+          title: "Conflict Detected! ❌",
+          description: `The name, email, or phone number matches a different guest. Please use your original details.`,
           duration: 6000,
           variant: "destructive",
         });
@@ -257,22 +267,37 @@ export default function Index() {
       }
 
       console.log(
-        "No duplicates found. Submitting RSVP with side:",
+        isEditMode
+          ? "Updating existing RSVP with side:"
+          : "Creating new RSVP with side:",
         rsvpForm.side,
       );
 
-      // If no duplicates found, proceed with submission
-      await database.guests.create({
-        name: rsvpForm.name,
-        email: rsvpForm.email,
-        phone: rsvpForm.phone,
-        attending: rsvpForm.attending,
-        guests: rsvpForm.guests,
-        side: rsvpForm.side,
-        message: rsvpForm.message || undefined,
-        dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
-        needs_accommodation: rsvpForm.needsAccommodation,
-      });
+      // Submit or update RSVP
+      if (isEditMode && editingGuestId) {
+        // Update existing guest
+        await database.guests.update(editingGuestId, {
+          attending: rsvpForm.attending,
+          guests: rsvpForm.guests,
+          side: rsvpForm.side,
+          message: rsvpForm.message || undefined,
+          dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
+          needs_accommodation: rsvpForm.needsAccommodation,
+        });
+      } else {
+        // Create new guest
+        await database.guests.create({
+          name: rsvpForm.name,
+          email: rsvpForm.email,
+          phone: rsvpForm.phone,
+          attending: rsvpForm.attending,
+          guests: rsvpForm.guests,
+          side: rsvpForm.side,
+          message: rsvpForm.message || undefined,
+          dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
+          needs_accommodation: rsvpForm.needsAccommodation,
+        });
+      }
 
       const storageType = database.isUsingSupabase()
         ? "Supabase database"
@@ -311,8 +336,12 @@ export default function Index() {
       }
 
       toast({
-        title: "RSVP Submitted Successfully! 🎉",
-        description: `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
+        title: isEditMode
+          ? "RSVP Updated Successfully! ✏️"
+          : "RSVP Submitted Successfully! 🎉",
+        description: isEditMode
+          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
+          : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
     } catch (error: any) {
@@ -346,50 +375,86 @@ export default function Index() {
             rsvpForm.phone.replace(/\D/g, ""),
         );
 
-        // Show specific error messages for localStorage duplicates
-        if (duplicateByName) {
+        // Find any existing RSVP for editing in localStorage
+        const existingLocalGuest =
+          duplicateByName || duplicateByEmail || duplicateByPhone;
+
+        if (existingLocalGuest && !isEditMode) {
+          // Switch to edit mode and populate form with existing data
+          setIsEditMode(true);
+          setEditingGuestId(existingLocalGuest.id);
+          setRsvpForm({
+            name: existingLocalGuest.name,
+            email: existingLocalGuest.email,
+            phone: existingLocalGuest.phone || "",
+            attending: existingLocalGuest.attending,
+            guests: existingLocalGuest.guests,
+            side: existingLocalGuest.side,
+            message: existingLocalGuest.message || "",
+            dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
+            needsAccommodation: existingLocalGuest.needsAccommodation,
+          });
+
           toast({
-            title: "Duplicate RSVP Found! ❌",
-            description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+            title: "Existing RSVP Found! ✏️",
+            description: `We found your previous RSVP. You can now edit your response. Name and email are locked for security.`,
+            duration: 6000,
+          });
+          return;
+        }
+
+        if (
+          existingLocalGuest &&
+          isEditMode &&
+          existingLocalGuest.id !== editingGuestId
+        ) {
+          // Trying to edit but conflicting with a different guest
+          toast({
+            title: "Conflict Detected! ❌",
+            description: `The name, email, or phone number matches a different guest. Please use your original details.`,
             duration: 6000,
             variant: "destructive",
           });
           return;
         }
 
-        if (duplicateByEmail) {
-          toast({
-            title: "Email Already Used! ❌",
-            description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
-            duration: 6000,
-            variant: "destructive",
-          });
-          return;
+        // Save or update in localStorage
+        let updatedGuests;
+        if (isEditMode && editingGuestId) {
+          // Update existing guest
+          updatedGuests = existingGuests.map((guest: any) =>
+            guest.id === editingGuestId
+              ? {
+                  ...guest,
+                  attending: rsvpForm.attending,
+                  guests: rsvpForm.guests,
+                  side: rsvpForm.side,
+                  message: rsvpForm.message,
+                  dietaryRestrictions: rsvpForm.dietaryRestrictions,
+                  needsAccommodation: rsvpForm.needsAccommodation,
+                }
+              : guest,
+          );
+          console.log("RSVP updated in localStorage fallback");
+        } else {
+          // Create new guest
+          const newGuest = {
+            id: Date.now().toString(),
+            ...rsvpForm,
+            createdAt: new Date().toISOString(),
+          };
+          updatedGuests = [...existingGuests, newGuest];
+          console.log("RSVP saved to localStorage fallback");
         }
-
-        if (duplicateByPhone) {
-          toast({
-            title: "Phone Number Already Used! ❌",
-            description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
-            duration: 6000,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // If no duplicates, save to localStorage
-        const newGuest = {
-          id: Date.now().toString(),
-          ...rsvpForm,
-          createdAt: new Date().toISOString(),
-        };
-        const updatedGuests = [...existingGuests, newGuest];
         localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
-        console.log("RSVP saved to localStorage fallback");
 
         toast({
-          title: "RSVP Submitted Successfully! 🎉",
-          description: `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
+          title: isEditMode
+            ? "RSVP Updated Successfully! ✏️"
+            : "RSVP Submitted Successfully! 🎉",
+          description: isEditMode
+            ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
+            : `Thank you ${rsvpForm.name}! Your RSVP has been saved. We can't wait to celebrate with you!`,
           duration: 5000,
         });
       } catch (localStorageError) {
@@ -408,7 +473,7 @@ export default function Index() {
       }
     }
 
-    // Reset form regardless of storage method
+    // Reset form and edit mode regardless of storage method
     setRsvpForm({
       name: "",
       email: "",
@@ -420,6 +485,8 @@ export default function Index() {
       dietaryRestrictions: "",
       needsAccommodation: false,
     });
+    setIsEditMode(false);
+    setEditingGuestId(null);
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 5000);
   };
@@ -520,15 +587,42 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
-      // Create a temporary link to download the provided PDF attachment
-      // This uses the exact PDF attachment you provided with all 3 pages
-      const link = document.createElement("a");
+      // First priority: Check if there's a custom invitation PDF uploaded from admin
+      console.log("Checking for uploaded invitation from admin...");
 
-      // Create a blob from the PDF attachment data
+      try {
+        const uploadedInvitation = await database.invitation.get();
+
+        if (uploadedInvitation && uploadedInvitation.pdf_data) {
+          // Download the uploaded PDF invitation
+          const link = document.createElement("a");
+          link.href = uploadedInvitation.pdf_data;
+          link.download =
+            uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
+          link.click();
+
+          toast({
+            title: "Invitation Downloaded! 💌",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
+          console.log(
+            "Uploaded invitation PDF downloaded successfully from admin",
+          );
+          return;
+        }
+      } catch (dbError) {
+        console.log("No uploaded invitation found, trying server endpoint...");
+      }
+
+      // Second priority: Try the server endpoint (which has its own fallback logic)
       const response = await fetch("/api/download-invitation");
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
         link.href = url;
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.click();
@@ -541,33 +635,13 @@ Made with love ❤️ By Aral D'Souza
           duration: 3000,
         });
 
-        console.log("Wedding invitation PDF downloaded successfully");
+        console.log(
+          "Wedding invitation PDF downloaded successfully from server",
+        );
         return;
       }
 
-      // Fallback: Direct base64 download if API endpoint isn't available
-      // This is your exact wedding invitation PDF with all 3 pages (Church Nuptials, Reception, Rose Ceremony)
-      const pdfBase64 = `data:application/pdf;base64,JVBERi0xLjQKJcfs4f// rest of the actual PDF base64 data from your attachment`;
-
-      // Create download link with the PDF data
-      const link2 = document.createElement("a");
-      link2.href = pdfBase64;
-      link2.download = "Aral-Violet-Wedding-Invitation.pdf";
-      link2.click();
-
-      toast({
-        title: "Invitation Downloaded! 💌",
-        description:
-          "Your beautiful wedding invitation PDF has been downloaded successfully.",
-        duration: 3000,
-      });
-
-      console.log("Wedding invitation PDF downloaded successfully");
-      return;
-    } catch (error) {
-      console.warn("PDF download failed, checking database:", error);
-
-      // Fallback: Check if there's a custom invitation PDF uploaded to database
+      // Third priority: Check API endpoint for uploaded invitations
       try {
         const invitation = await invitationApi.get();
 
@@ -578,7 +652,15 @@ Made with love ❤️ By Aral D'Souza
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.click();
-          console.log("Invitation downloaded from database");
+
+          toast({
+            title: "Invitation Downloaded! ���",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
+          console.log("Invitation downloaded from API");
           return;
         }
       } catch (apiError) {
@@ -587,13 +669,21 @@ Made with love ❤️ By Aral D'Souza
           handleApiError(apiError),
         );
 
-        // Fallback to localStorage if API is not available
+        // Fourth priority: Direct localStorage fallback
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
         if (savedInvitation) {
           const link = document.createElement("a");
           link.href = savedInvitation;
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
           link.click();
+
+          toast({
+            title: "Invitation Downloaded! 💌",
+            description:
+              "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
           console.log("Invitation downloaded from localStorage fallback");
           return;
         }
@@ -619,7 +709,7 @@ Sunday, December 28, 2025
 RECEPTION
 Sai Radha Heritage Beach Resort, Kaup
 Sunday, December 28, 2025
-7:00 PM – 11:30 PM
+7:00 PM �� 11:30 PM
 
 WITH HEARTS FULL OF JOY AND BLESSINGS FROM ABOVE,
 WE INVITE YOU TO CELEBRATE OUR UNION.
@@ -646,6 +736,16 @@ Please RSVP at our wedding website
         title: "Invitation Downloaded! 📝",
         description:
           "Your wedding invitation has been downloaded as a text file.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error downloading invitation:", error);
+
+      toast({
+        title: "Download Error ❌",
+        description:
+          "There was an error downloading the invitation. Please try again.",
+        variant: "destructive",
         duration: 3000,
       });
     }
@@ -1109,8 +1209,15 @@ Please RSVP at our wedding website
             <CardContent className="p-8">
               <h3 className="text-2xl font-serif text-olive-700 mb-6 flex items-center gap-2">
                 <Users size={24} />
-                Submit Your RSVP
+                {isEditMode ? "Edit Your RSVP" : "Submit Your RSVP"}
               </h3>
+
+              {isEditMode && (
+                <div className="bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded mb-6">
+                  📝 <strong>Edit Mode:</strong> You're updating your existing
+                  RSVP. Name and email are locked for security.
+                </div>
+              )}
 
               {showSuccessMessage && (
                 <div className="bg-sage-100 border border-sage-300 text-sage-700 px-4 py-3 rounded mb-6">
@@ -1122,32 +1229,46 @@ Please RSVP at our wedding website
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Your Name(s) *
+                      Your Name(s) *{" "}
+                      {isEditMode && (
+                        <span className="text-xs text-blue-600">
+                          (Read-only)
+                        </span>
+                      )}
                     </label>
                     <Input
                       type="text"
                       value={rsvpForm.name}
                       onChange={(e) =>
+                        !isEditMode &&
                         setRsvpForm({ ...rsvpForm, name: e.target.value })
                       }
                       placeholder="Enter your name(s)"
                       required
-                      className="border-sage-300 focus:border-olive-500"
+                      readOnly={isEditMode}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-sage-700 mb-2">
-                      Email Address *
+                      Email Address *{" "}
+                      {isEditMode && (
+                        <span className="text-xs text-blue-600">
+                          (Read-only)
+                        </span>
+                      )}
                     </label>
                     <Input
                       type="email"
                       value={rsvpForm.email}
                       onChange={(e) =>
+                        !isEditMode &&
                         setRsvpForm({ ...rsvpForm, email: e.target.value })
                       }
                       placeholder="Enter your email"
                       required
-                      className="border-sage-300 focus:border-olive-500"
+                      readOnly={isEditMode}
+                      className={`border-sage-300 focus:border-olive-500 ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                     />
                   </div>
                 </div>
@@ -1338,8 +1459,33 @@ Please RSVP at our wedding website
                   type="submit"
                   className="w-full bg-olive-600 hover:bg-olive-700 text-white py-3 text-lg"
                 >
-                  Submit RSVP
+                  {isEditMode ? "Update RSVP" : "Submit RSVP"}
                 </Button>
+
+                {isEditMode && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsEditMode(false);
+                      setEditingGuestId(null);
+                      setRsvpForm({
+                        name: "",
+                        email: "",
+                        phone: "",
+                        attending: true,
+                        guests: 1,
+                        side: "groom" as "groom" | "bride",
+                        message: "",
+                        dietaryRestrictions: "",
+                        needsAccommodation: false,
+                      });
+                    }}
+                    variant="outline"
+                    className="w-full mt-3 border-sage-300 text-sage-700 hover:bg-sage-50"
+                  >
+                    Cancel Edit / Submit New RSVP
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>

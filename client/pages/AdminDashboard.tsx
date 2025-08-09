@@ -217,10 +217,23 @@ export default function AdminDashboard() {
         }
       }
 
-      // Load invitation PDF
-      const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-      if (savedInvitation) {
-        setInvitationPDF(savedInvitation);
+      // Load invitation PDF using database service
+      try {
+        const invitation = await database.invitation.get();
+        if (invitation && invitation.pdf_data) {
+          setInvitationPDF(invitation.pdf_data);
+          const storageType = database.isUsingSupabase()
+            ? "Supabase"
+            : "localStorage";
+          console.log(`Invitation loaded from ${storageType}`);
+        }
+      } catch (error) {
+        console.log("Error loading invitation:", error);
+        // Fallback to localStorage
+        const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
+        if (savedInvitation) {
+          setInvitationPDF(savedInvitation);
+        }
       }
     };
 
@@ -1108,20 +1121,20 @@ export default function AdminDashboard() {
         console.log("Setting invitation PDF...");
 
         try {
-          // Save to database using invitation API
-          await invitationApi.upload(base64String, file.name);
+          // Save to database using the new database service
+          await database.invitation.upload(base64String, file.name);
           console.log("Invitation saved to database");
 
           // Update local state
           setInvitationPDF(base64String);
 
-          // Also save to localStorage as backup
-          localStorage.setItem("wedding_invitation_pdf", base64String);
-          localStorage.setItem("wedding_invitation_filename", file.name);
+          const storageType = database.isUsingSupabase()
+            ? "Supabase database"
+            : "local storage";
 
           toast({
             title: "Invitation Uploaded Successfully! 💌",
-            description: `"${file.name}" saved to database and synced across devices!`,
+            description: `"${file.name}" saved to ${storageType} and synced across devices!`,
             duration: 3000,
           });
         } catch (error) {
@@ -2257,11 +2270,38 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => {
-                                setInvitationPDF(null);
-                                localStorage.removeItem(
-                                  "wedding_invitation_pdf",
-                                );
+                              onClick={async () => {
+                                try {
+                                  await database.invitation.delete();
+                                  setInvitationPDF(null);
+
+                                  toast({
+                                    title: "Invitation Removed! 🗑️",
+                                    description:
+                                      "Custom invitation has been removed. Guests will now download the default text invitation.",
+                                    duration: 3000,
+                                  });
+                                } catch (error) {
+                                  console.error(
+                                    "Error removing invitation:",
+                                    error,
+                                  );
+                                  // Fallback to local removal
+                                  setInvitationPDF(null);
+                                  localStorage.removeItem(
+                                    "wedding_invitation_pdf",
+                                  );
+                                  localStorage.removeItem(
+                                    "wedding_invitation_filename",
+                                  );
+
+                                  toast({
+                                    title: "Invitation Removed! 🗑️",
+                                    description:
+                                      "Custom invitation has been removed locally.",
+                                    duration: 3000,
+                                  });
+                                }
                               }}
                             >
                               <Trash2 size={14} className="mr-1" />
