@@ -1,12 +1,17 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+  VITE_DEPLOYMENT_PLATFORM = "netlify"
 
 # Handle SPA client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# API function handlers
+[functions]
+  directory = "netlify/functions"

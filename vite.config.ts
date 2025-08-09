@@ -8,7 +8,9 @@ export default defineConfig(({ mode }) => ({
   // Set base path for GitHub Pages if in production
   // The base path will be automatically set by GitHub Actions
   base:
-    process.env.NODE_ENV === "production" && process.env.GITHUB_REPOSITORY
+    process.env.NODE_ENV === "production" &&
+    process.env.GITHUB_REPOSITORY &&
+    process.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
       ? `/${process.env.GITHUB_REPOSITORY.split("/")[1]}/`
       : "/",
   server: {
