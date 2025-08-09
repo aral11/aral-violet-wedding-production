@@ -63,6 +63,8 @@ export default function Index() {
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
 
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
 
