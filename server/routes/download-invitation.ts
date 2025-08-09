@@ -1,11 +1,59 @@
 import { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
+import { createClient } from "@supabase/supabase-js";
 
-// This endpoint serves the actual wedding invitation PDF
+// Supabase configuration
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+  } catch (error) {
+    console.warn("❌ Failed to initialize Supabase for invitation download:", error);
+  }
+}
+
+// This endpoint serves the wedding invitation PDF
 export const downloadInvitation = async (req: Request, res: Response) => {
   try {
-    // First, try to serve PDF file from public directory
+    // First priority: Check if there's an uploaded PDF in the database
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from("invitations")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && data && data.pdf_data) {
+          // Convert base64 to buffer
+          const base64Data = data.pdf_data.split(',')[1] || data.pdf_data; // Remove data:application/pdf;base64, prefix if present
+          const pdfBuffer = Buffer.from(base64Data, "base64");
+          
+          // Set appropriate headers for PDF download
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${data.filename || "Aral-Violet-Wedding-Invitation.pdf"}"`,
+          );
+          res.setHeader("Content-Length", pdfBuffer.length);
+          
+          // Send the PDF buffer
+          res.send(pdfBuffer);
+          
+          console.log("Wedding invitation PDF served from database successfully");
+          return;
+        }
+      } catch (dbError) {
+        console.log("No uploaded PDF found in database, checking filesystem...");
+      }
+    }
+
+    // Second priority: Try to serve PDF file from public directory
     const pdfPath = path.join(process.cwd(), "public", "Aral-Violet-Wedding-Invitation.pdf");
     
     if (fs.existsSync(pdfPath)) {
@@ -26,8 +74,11 @@ export const downloadInvitation = async (req: Request, res: Response) => {
       return;
     }
 
-    // Fallback: Serve a notice PDF if the actual PDF isn't uploaded yet
-    const noticePdfContent = `%PDF-1.4
+    // Third priority: Check localStorage fallback (if available via the frontend)
+    // This is handled by the client-side downloadInvitation function
+
+    // Final fallback: Serve a comprehensive PDF with all the wedding details
+    const comprehensivePdfContent = `%PDF-1.4
 1 0 obj
 <<
 /Type /Catalog
@@ -68,59 +119,69 @@ endobj
 
 4 0 obj
 <<
-/Length 1200
+/Length 1800
 >>
 stream
 BT
-/F1 24 Tf
+/F1 20 Tf
 50 720 Td
-(ARAL & VIOLET WEDDING INVITATION) Tj
-0 -50 Td
-/F2 16 Tf
+(WEDDING INVITATION) Tj
+0 -30 Td
+/F2 14 Tf
 (I HAVE FOUND THE ONE WHOM MY SOUL LOVES.) Tj
-0 -25 Td
-/F2 12 Tf
+0 -20 Td
 (- SONG OF SOLOMON 3:4) Tj
-0 -50 Td
-/F1 18 Tf
+0 -40 Td
+/F2 12 Tf
 (TOGETHER WITH OUR FAMILIES) Tj
 0 -40 Td
-/F1 32 Tf
+/F1 28 Tf
 (Aral & Violet) Tj
 0 -50 Td
-/F2 12 Tf
+/F2 10 Tf
 (Son of David Mark & Ashwini D'Souza) Tj
-0 -20 Td
+0 -15 Td
 (Daughter of late Benedict Swamy & Juliet Swamy) Tj
+0 -40 Td
+/F2 12 Tf
+(WITH LOVE AND GRATITUDE,) Tj
+0 -15 Td
+(WE INVITE YOU TO SHARE IN OUR JOY AND) Tj
+0 -15 Td
+(WITNESS THE BEGINNING OF OUR NEW LIFE TOGETHER.) Tj
 0 -40 Td
 /F1 16 Tf
 (28 December 2025 | Sunday) Tj
 0 -40 Td
 /F1 14 Tf
 (CHURCH NUPTIALS) Tj
-0 -25 Td
+0 -20 Td
 /F2 12 Tf
 (04:00 PM) Tj
 0 -15 Td
-(Mother of Sorrows Church, Udupi) Tj
+(AT MOTHER OF SORROWS CHURCH) Tj
+0 -15 Td
+(UDUPI) Tj
 0 -40 Td
 /F1 14 Tf
 (RECEPTION) Tj
-0 -25 Td
+0 -20 Td
 /F2 12 Tf
 (07:00 PM) Tj
 0 -15 Td
-(Sai Radha Heritage Beach Resort, Kaup) Tj
+(AT SAI RADHA HERITAGE BEACH RESORT) Tj
+0 -15 Td
+(KAUP) Tj
 0 -40 Td
 /F1 14 Tf
 (ROSE CEREMONY) Tj
-0 -25 Td
+0 -20 Td
 /F2 12 Tf
-(27th December 2025 | Saturday) Tj
+(Saturday | 27th December 2025) Tj
 0 -15 Td
 (7:00 PM onwards) Tj
 0 -15 Td
-(Aral House, Kemmannu) Tj
+(ARAL House, Kemmannu) Tj
 0 -15 Td
 (Near Maria Goratti Convent) Tj
 0 -40 Td
@@ -132,8 +193,17 @@ BT
 (WEAR YOUR FINEST, BRING YOUR SMILES,) Tj
 0 -15 Td
 (AND LET'S CHERISH THIS BEAUTIFUL EVENING.) Tj
-0 -25 Td
-(YOUR PRESENCE AND BLESSINGS ARE OUR GREATEST GIFT.) Tj
+0 -30 Td
+(YOUR PRESENCE AND BLESSINGS) Tj
+0 -15 Td
+(ARE OUR GREATEST GIFT.) Tj
+0 -30 Td
+/F2 12 Tf
+(RSVP VIA WHATSAPP:) Tj
+0 -20 Td
+(DAVID MARK - +919731832609) Tj
+0 -15 Td
+(ARAL - +918105003858) Tj
 ET
 endstream
 endobj
@@ -151,11 +221,11 @@ trailer
 /Root 1 0 R
 >>
 startxref
-1614
+2214
 %%EOF`;
 
     // Convert to buffer
-    const pdfBuffer = Buffer.from(noticePdfContent, 'binary');
+    const pdfBuffer = Buffer.from(comprehensivePdfContent, 'binary');
 
     // Set appropriate headers for PDF download
     res.setHeader("Content-Type", "application/pdf");
@@ -168,7 +238,7 @@ startxref
     // Send the PDF buffer
     res.send(pdfBuffer);
 
-    console.log("Wedding invitation PDF served successfully (generated with all details)");
+    console.log("Wedding invitation PDF served successfully (comprehensive fallback with all details)");
   } catch (error) {
     console.error("Error serving wedding invitation PDF:", error);
     res.status(500).json({
