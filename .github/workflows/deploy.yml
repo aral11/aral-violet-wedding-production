@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, curry-works]
   pull_request:
-    branches: [main]
+    branches: [main, curry-works]
 
 permissions:
   contents: read
@@ -35,7 +35,7 @@ jobs:
         run: npm run build:github
         env:
           NODE_ENV: production
-          GITHUB_REPOSITORY: aral11/aral-violet-wedding
+          GITHUB_REPOSITORY: aral11/aral-violet-wedding-production
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
