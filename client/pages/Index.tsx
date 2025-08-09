@@ -227,31 +227,38 @@ export default function Index() {
           guest.phone.replace(/\D/g, "") === rsvpForm.phone.replace(/\D/g, ""),
       );
 
-      // Show specific error messages for each type of duplicate
-      if (duplicateByName) {
+      // Find any existing RSVP for editing
+      const existingGuest = duplicateByName || duplicateByEmail || duplicateByPhone;
+
+      if (existingGuest && !isEditMode) {
+        // Switch to edit mode and populate form with existing data
+        setIsEditMode(true);
+        setEditingGuestId(existingGuest.id);
+        setRsvpForm({
+          name: existingGuest.name,
+          email: existingGuest.email,
+          phone: existingGuest.phone || "",
+          attending: existingGuest.attending,
+          guests: existingGuest.guests,
+          side: existingGuest.side,
+          message: existingGuest.message || "",
+          dietaryRestrictions: existingGuest.dietary_restrictions || "",
+          needsAccommodation: existingGuest.needs_accommodation,
+        });
+
         toast({
-          title: "Duplicate RSVP Found! ❌",
-          description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+          title: "Existing RSVP Found! ✏️",
+          description: `We found your previous RSVP. You can now edit your response. Name and email are locked for security.`,
           duration: 6000,
-          variant: "destructive",
         });
         return;
       }
 
-      if (duplicateByEmail) {
+      if (existingGuest && isEditMode && existingGuest.id !== editingGuestId) {
+        // Trying to edit but conflicting with a different guest
         toast({
-          title: "Email Already Used! ❌",
-          description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
-          duration: 6000,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (duplicateByPhone) {
-        toast({
-          title: "Phone Number Already Used! ❌",
-          description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
+          title: "Conflict Detected! ❌",
+          description: `The name, email, or phone number matches a different guest. Please use your original details.`,
           duration: 6000,
           variant: "destructive",
         });
