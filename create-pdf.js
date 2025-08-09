@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // Simple PDF creation for the wedding invitation
 // This will create a proper PDF file in the public directory
@@ -77,14 +77,14 @@ startxref
 574
 %%EOF`;
 
-  const publicDir = path.join(process.cwd(), 'public');
-  const pdfPath = path.join(publicDir, 'Aral-Violet-Wedding-Invitation.pdf');
-  
+  const publicDir = path.join(process.cwd(), "public");
+  const pdfPath = path.join(publicDir, "Aral-Violet-Wedding-Invitation.pdf");
+
   // Write as binary data
-  fs.writeFileSync(pdfPath, pdfContent, 'binary');
-  
-  console.log('Wedding invitation PDF created at:', pdfPath);
-  console.log('File size:', fs.statSync(pdfPath).size, 'bytes');
+  fs.writeFileSync(pdfPath, pdfContent, "binary");
+
+  console.log("Wedding invitation PDF created at:", pdfPath);
+  console.log("File size:", fs.statSync(pdfPath).size, "bytes");
 };
 
 createPDF();

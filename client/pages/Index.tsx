@@ -340,7 +340,8 @@ Made with love ❤️ By Aral D'Souza
 
         toast({
           title: "Invitation Downloaded! 💌",
-          description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+          description:
+            "Your beautiful wedding invitation PDF has been downloaded successfully.",
           duration: 3000,
         });
 
@@ -360,13 +361,13 @@ Made with love ❤️ By Aral D'Souza
 
       toast({
         title: "Invitation Downloaded! 💌",
-        description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+        description:
+          "Your beautiful wedding invitation PDF has been downloaded successfully.",
         duration: 3000,
       });
 
       console.log("Wedding invitation PDF downloaded successfully");
       return;
-
     } catch (error) {
       console.warn("PDF download failed, checking database:", error);
 
@@ -447,7 +448,8 @@ Please RSVP at our wedding website
 
       toast({
         title: "Invitation Downloaded! 📝",
-        description: "Your wedding invitation has been downloaded as a text file.",
+        description:
+          "Your wedding invitation has been downloaded as a text file.",
         duration: 3000,
       });
     }
