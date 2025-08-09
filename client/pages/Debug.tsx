@@ -108,26 +108,22 @@ export default function Debug() {
   const testSMS = async () => {
     const results: any = {};
 
-    // Check if SMS is configured
-    results.isConfigured = isSMSConfigured();
-    results.accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || "Not set";
-    results.hasAuthToken = !!import.meta.env.VITE_TWILIO_AUTH_TOKEN;
-    results.phoneNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER || "Not set";
+    // SMS configuration is now server-side only
+    results.isConfigured = "Server-side configured";
+    results.accountSid = "Server environment";
+    results.hasAuthToken = "Server environment";
+    results.phoneNumber = "Server environment";
 
-    if (results.isConfigured) {
-      try {
-        results.testMessage = "Sending test SMS...";
-        const success = await testSMSService();
-        results.testMessage = success
-          ? "✅ Test SMS sent successfully!"
-          : "❌ Test SMS failed";
-        results.testSuccess = success;
-      } catch (error: any) {
-        results.testMessage = `❌ SMS test error: ${error.message}`;
-        results.testSuccess = false;
-      }
-    } else {
-      results.testMessage = "SMS service not configured";
+    try {
+      results.testMessage = "Sending test SMS...";
+      const success = await testSMSService();
+      results.testMessage = success
+        ? "✅ Test SMS sent successfully!"
+        : "❌ Test SMS failed";
+      results.testSuccess = success;
+    } catch (error: any) {
+      results.testMessage = `❌ SMS test error: ${error.message}`;
+      results.testSuccess = false;
     }
 
     setSmsStatus(results);
@@ -355,24 +351,22 @@ export default function Debug() {
                 <Button onClick={testSMS}>Test SMS Service</Button>
                 {smsStatus.isConfigured !== undefined && (
                   <div>
-                    <strong>Configured:</strong>{" "}
-                    {smsStatus.isConfigured ? "✅ Yes" : "❌ No"}
+                    <strong>Configured:</strong> ✅ {smsStatus.isConfigured}
                   </div>
                 )}
                 {smsStatus.accountSid && (
                   <div>
-                    <strong>Account SID:</strong> {smsStatus.accountSid}
+                    <strong>Account SID:</strong> ✅ {smsStatus.accountSid}
                   </div>
                 )}
                 {smsStatus.hasAuthToken !== undefined && (
                   <div>
-                    <strong>Auth Token:</strong>{" "}
-                    {smsStatus.hasAuthToken ? "✅ Set" : "❌ Missing"}
+                    <strong>Auth Token:</strong> ✅ {smsStatus.hasAuthToken}
                   </div>
                 )}
                 {smsStatus.phoneNumber && (
                   <div>
-                    <strong>Phone Number:</strong> {smsStatus.phoneNumber}
+                    <strong>Phone Number:</strong> ✅ {smsStatus.phoneNumber}
                   </div>
                 )}
                 {smsStatus.testMessage && (

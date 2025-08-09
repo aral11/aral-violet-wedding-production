@@ -604,6 +604,14 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.pdf_data.length,
           );
 
+          // Validate PDF data format
+          if (!uploadedInvitation.pdf_data.startsWith("data:")) {
+            console.log(
+              "❌ Invalid PDF data format, trying server endpoint...",
+            );
+            throw new Error("Invalid PDF data format");
+          }
+
           // Download the uploaded PDF invitation - Mobile-friendly approach
           const link = document.createElement("a");
           link.href = uploadedInvitation.pdf_data;
@@ -646,6 +654,11 @@ Made with love ❤️ By Aral D'Souza
         }
       } catch (dbError) {
         console.log("❌ Database error, trying server endpoint...", dbError);
+        toast({
+          title: "Database Access Issue",
+          description: "Trying alternative download method...",
+          duration: 2000,
+        });
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
@@ -693,14 +706,16 @@ Made with love ❤️ By Aral D'Souza
         if (invitation) {
           // Download the uploaded PDF invitation - Mobile-friendly
           const link = document.createElement("a");
-          link.href = invitation.pdfData;
+          // Handle both API response format (pdfData) and database format (pdf_data)
+          const pdfData = invitation.pdfData || (invitation as any).pdf_data;
+          link.href = pdfData;
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
           // Mobile-friendly download
           if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(invitation.pdfData, "_blank");
+            window.open(pdfData, "_blank");
           } else {
             document.body.appendChild(link);
             link.click();
@@ -722,6 +737,11 @@ Made with love ❤️ By Aral D'Souza
           "API unavailable, checking localStorage fallback:",
           handleApiError(apiError),
         );
+        toast({
+          title: "API Unavailable",
+          description: "Checking for locally saved invitation...",
+          duration: 2000,
+        });
 
         // Fourth priority: Direct localStorage fallback
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
@@ -891,7 +911,7 @@ Please RSVP at our wedding website
                     downloadWeddingFlow();
                   } else {
                     toast({
-                      title: "Wedding Timeline Coming Soon! 📅",
+                      title: "Wedding Timeline Coming Soon! ��",
                       description:
                         "The reception timeline will be available for download on December 28, 2025. Please check back on our wedding day!",
                       duration: 5000,
