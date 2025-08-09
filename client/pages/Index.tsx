@@ -1188,8 +1188,14 @@ Please RSVP at our wedding website
             <CardContent className="p-8">
               <h3 className="text-2xl font-serif text-olive-700 mb-6 flex items-center gap-2">
                 <Users size={24} />
-                Submit Your RSVP
+                {isEditMode ? "Edit Your RSVP" : "Submit Your RSVP"}
               </h3>
+
+              {isEditMode && (
+                <div className="bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded mb-6">
+                  📝 <strong>Edit Mode:</strong> You're updating your existing RSVP. Name and email are locked for security.
+                </div>
+              )}
 
               {showSuccessMessage && (
                 <div className="bg-sage-100 border border-sage-300 text-sage-700 px-4 py-3 rounded mb-6">
