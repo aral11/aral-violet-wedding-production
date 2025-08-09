@@ -450,7 +450,7 @@ export default function Index() {
 
         toast({
           title: isEditMode
-            ? "RSVP Updated Successfully! ✏��"
+            ? "RSVP Updated Successfully! ✏️"
             : "RSVP Submitted Successfully! 🎉",
           description: isEditMode
             ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
@@ -646,6 +646,11 @@ Made with love ❤️ By Aral D'Souza
         }
       } catch (dbError) {
         console.log("❌ Database error, trying server endpoint...", dbError);
+        toast({
+          title: "Database Access Issue",
+          description: "Trying alternative download method...",
+          duration: 2000,
+        });
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
