@@ -1,31 +1,55 @@
 import { RequestHandler } from "express";
-import { getDbConnection, sql } from "../config/database";
-import { WeddingFlowItem } from "../models";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase configuration
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log("✅ Supabase client initialized for wedding flow service");
+  } catch (error) {
+    console.warn("❌ Failed to initialize Supabase for wedding flow:", error);
+  }
+} else {
+  console.warn(
+    "⚠️ Supabase credentials not found - wedding flow service will use fallback",
+  );
+}
 
 // Get all wedding flow items
 export const getWeddingFlow: RequestHandler = async (req, res) => {
   try {
-    const pool = await getDbConnection();
-    const result = await pool.request().query(`
-      SELECT id, time, title, description, duration, type, created_at, updated_at
-      FROM wedding_flow 
-      ORDER BY time ASC
-    `);
-    
-    const flowItems = result.recordset.map(row => ({
-      id: row.id,
-      time: row.time,
-      title: row.title,
-      description: row.description,
-      duration: row.duration,
-      type: row.type,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at?.toISOString()
-    }));
-    
-    res.json(flowItems);
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("wedding_flow")
+        .select("*")
+        .order("time", { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      const flowItems = data.map((row: any) => ({
+        id: row.id,
+        time: row.time,
+        title: row.title,
+        description: row.description,
+        duration: row.duration,
+        type: row.type,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+
+      res.json(flowItems);
+    } else {
+      // Fallback to empty array
+      res.json([]);
+    }
   } catch (error) {
-    console.error('Error fetching wedding flow:', error);
+    console.error("Error fetching wedding flow:", error);
     // Return empty array for graceful fallback
     res.json([]);
   }
@@ -37,47 +61,68 @@ export const createFlowItem: RequestHandler = async (req, res) => {
     const { time, title, description, duration, type } = req.body;
 
     if (!time || !title || !type) {
-      return res.status(400).json({ error: 'Time, title, and type are required' });
+      return res
+        .status(400)
+        .json({ error: "Time, title, and type are required" });
     }
 
-    const id = Date.now().toString();
-    const pool = await getDbConnection();
-    
-    await pool.request()
-      .input('id', sql.NVarChar, id)
-      .input('time', sql.NVarChar, time)
-      .input('title', sql.NVarChar, title)
-      .input('description', sql.NVarChar, description || '')
-      .input('duration', sql.NVarChar, duration || null)
-      .input('type', sql.NVarChar, type)
-      .query(`
-        INSERT INTO wedding_flow (id, time, title, description, duration, type)
-        VALUES (@id, @time, @title, @description, @duration, @type)
-      `);
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("wedding_flow")
+        .insert([
+          {
+            time,
+            title,
+            description: description || "",
+            duration: duration || null,
+            type,
+          },
+        ])
+        .select()
+        .single();
 
-    const newFlowItem: WeddingFlowItem = {
-      id,
-      time,
-      title,
-      description: description || '',
-      duration,
-      type,
-      created_at: new Date()
-    };
+      if (error) {
+        throw error;
+      }
 
-    res.status(201).json(newFlowItem);
+      const newFlowItem = {
+        id: data.id,
+        time: data.time,
+        title: data.title,
+        description: data.description,
+        duration: data.duration,
+        type: data.type,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      };
+
+      res.status(201).json(newFlowItem);
+    } else {
+      // Fallback response
+      const id = Date.now().toString();
+      const newFlowItem = {
+        id,
+        time,
+        title,
+        description: description || "",
+        duration,
+        type,
+        createdAt: new Date().toISOString(),
+      };
+      res.status(201).json(newFlowItem);
+    }
   } catch (error) {
-    console.error('Error creating flow item:', error);
+    console.error("Error creating flow item:", error);
     // Return success response for graceful fallback
     const id = Date.now().toString();
-    const newFlowItem: WeddingFlowItem = {
+    const newFlowItem = {
       id,
       time: req.body.time,
       title: req.body.title,
-      description: req.body.description,
+      description: req.body.description || "",
       duration: req.body.duration,
       type: req.body.type,
-      created_at: new Date()
+      createdAt: new Date().toISOString(),
     };
     res.status(201).json(newFlowItem);
   }
@@ -89,32 +134,29 @@ export const updateFlowItem: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const { time, title, description, duration, type } = req.body;
 
-    const pool = await getDbConnection();
-    
-    await pool.request()
-      .input('id', sql.NVarChar, id)
-      .input('time', sql.NVarChar, time)
-      .input('title', sql.NVarChar, title)
-      .input('description', sql.NVarChar, description || '')
-      .input('duration', sql.NVarChar, duration || null)
-      .input('type', sql.NVarChar, type)
-      .input('updated_at', sql.DateTime2, new Date())
-      .query(`
-        UPDATE wedding_flow SET 
-          time = @time,
-          title = @title,
-          description = @description,
-          duration = @duration,
-          type = @type,
-          updated_at = @updated_at
-        WHERE id = @id
-      `);
+    if (supabase) {
+      const { error } = await supabase
+        .from("wedding_flow")
+        .update({
+          time,
+          title,
+          description: description || "",
+          duration: duration || null,
+          type,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
 
-    res.json({ message: 'Flow item updated successfully' });
+      if (error) {
+        throw error;
+      }
+    }
+
+    res.json({ message: "Flow item updated successfully" });
   } catch (error) {
-    console.error('Error updating flow item:', error);
+    console.error("Error updating flow item:", error);
     // Return success response for graceful fallback
-    res.json({ message: 'Flow item updated successfully' });
+    res.json({ message: "Flow item updated successfully" });
   }
 };
 
@@ -122,20 +164,22 @@ export const updateFlowItem: RequestHandler = async (req, res) => {
 export const deleteFlowItem: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const pool = await getDbConnection();
-    
-    const result = await pool.request()
-      .input('id', sql.NVarChar, id)
-      .query('DELETE FROM wedding_flow WHERE id = @id');
 
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: 'Flow item not found' });
+    if (supabase) {
+      const { error } = await supabase
+        .from("wedding_flow")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
     }
 
-    res.json({ message: 'Flow item deleted successfully' });
+    res.json({ message: "Flow item deleted successfully" });
   } catch (error) {
-    console.error('Error deleting flow item:', error);
+    console.error("Error deleting flow item:", error);
     // Return success response for graceful fallback
-    res.json({ message: 'Flow item deleted successfully' });
+    res.json({ message: "Flow item deleted successfully" });
   }
 };
