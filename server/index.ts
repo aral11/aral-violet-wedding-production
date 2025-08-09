@@ -27,6 +27,7 @@ import {
   deleteInvitation,
 } from "./routes/invitation";
 import { sendRSVPSMSNotification, testSMS } from "./routes/sms";
+import { downloadInvitation } from "./routes/download-invitation";
 
 export async function createServer() {
   const app = express();
@@ -75,6 +76,9 @@ export async function createServer() {
   // SMS API
   app.post("/api/sms/send-rsvp-notification", sendRSVPSMSNotification);
   app.post("/api/sms/test", testSMS);
+
+  // Download invitation PDF
+  app.get("/api/download-invitation", downloadInvitation);
 
   return app;
 }

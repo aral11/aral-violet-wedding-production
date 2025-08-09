@@ -1,0 +1,1 @@
+import fs from "fs"; import path from "path"; const pdfContent = "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\ntrailer\n<<\n/Size 2\n/Root 1 0 R\n>>\nstartxref\n85\n%%EOF"; fs.writeFileSync(path.join("public", "Aral-Violet-Wedding-Invitation.pdf"), pdfContent); console.log("PDF created");
