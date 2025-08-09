@@ -32,7 +32,7 @@ export const handler: Handler = async (event, context) => {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 
-    const debug = {
+    const debug: any = {
       environment: {
         hasSid: !!accountSid,
         hasToken: !!authToken,
