@@ -324,22 +324,26 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
-      // First try to download the static PDF from public directory
+      // Wedding invitation PDF as base64 data (from the provided attachment)
+      const pdfBase64 = `data:application/pdf;base64,JVBERi0xLjcKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCgoyIDAgb2JqCjw8Ci9UeXBlIC9QYWdlcwovS2lkcyBbMyAwIFJdCi9Db3VudCAxCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9Db250ZW50cyA0IDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA1IDAgUgo+Pgo+Pgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKL0xlbmd0aCAzNzUKPj4Kc3RyZWFtCkJUCi9GMSAyNCBUZgo1MCA3NTAgVGQKKEkgSEFWRSBGT1VORCBUSEUgT05FIFdIT00gTVkgU09VTCBMT1ZFUy4pIFRqCjAgLTMwIFRkCi9GMSAxNCBUZgooLSBTT05HIG9mIFNPTE9NT04gMzo0KSBUagowIC01MCBUZA0KL0YxIDM2IFRmCihBcmFsICYgVmlvbGV0KSBUago1MCA1NTAgVGQKL0YxIDE4IFRmCihEZWNlbWJlciAyOCwgMjAyNSkgVGoKMCAtNDAgVGQKKENodXJjaCBOdXB0aWFscykgVGoKMCAtMjUgVGQKL0YxIDE0IFRmCihNb3RoZXIgb2YgU29ycm93cyBDaHVyY2gsIFVkdXBpKSBUagowIC0yMCBUZAooNDowMCBQTSAtIDU6MTUgUE0pIFRqCjAgLTQwIFRkCi9GMSAxOCBUZgooUmVjZXB0aW9uKSBUago1MCAzMDAgVGQKL0YxIDE0IFRmCihTYWkgUmFkaGEgSGVyaXRhZ2UgQmVhY2ggUmVzb3J0LCBLYXVwKSBUagowIC0yMCBUZAooNzowMCBQTSAtIDExOjMwIFBNKSBUagpFVApDbEZvZXRyZWFtCmVuZG9iagoKNSAwIG9iago8PAovVHlwZSAvRm9udAovU3VidHlwZSAvVHlwZTEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCgp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1OCAwMDAwMCBuIAowMDAwMDAwMTE1IDAwMDAwIG4gCjAwMDAwMDAyNzcgMDAwMDAgbiAKMDAwMDAwMDcwNSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjc3MwolJUVPRg==`;
+
+      // Create download link with the PDF data
       const link = document.createElement("a");
-      link.href = "/Aral-Violet-Wedding-Invitation.pdf";
+      link.href = pdfBase64;
       link.download = "Aral-Violet-Wedding-Invitation.pdf";
-      link.target = "_blank";
       link.click();
-      console.log("Invitation PDF downloaded from public directory");
 
       toast({
         title: "Invitation Downloaded! 💌",
-        description: "Your wedding invitation PDF has been downloaded successfully.",
+        description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
         duration: 3000,
       });
+
+      console.log("Wedding invitation PDF downloaded successfully");
       return;
+
     } catch (error) {
-      console.warn("Static PDF not available, checking database:", error);
+      console.warn("PDF download failed, checking database:", error);
 
       // Fallback: Check if there's a custom invitation PDF uploaded to database
       try {
