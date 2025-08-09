@@ -1,30 +1,58 @@
 import { RequestHandler } from "express";
-import { getDbConnection, sql } from "../config/database";
-import { Guest } from "../models";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase configuration
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log("✅ Supabase client initialized for guests service");
+  } catch (error) {
+    console.warn("❌ Failed to initialize Supabase for guests:", error);
+  }
+} else {
+  console.warn("⚠️ Supabase credentials not found - guests service will use fallback");
+}
 
 // Get all guests
 export const getGuests: RequestHandler = async (req, res) => {
   try {
-    const pool = await getDbConnection();
-    const result = await pool.request().query(`
-      SELECT id, name, email, phone, attending, guests, side, message, 
-             dietary_restrictions, needs_accommodation, created_at, updated_at
-      FROM guests 
-      ORDER BY created_at DESC
-    `);
-    
-    const guests = result.recordset.map(row => ({
-      ...row,
-      attending: row.attending === 1 || row.attending === true,
-      needsAccommodation: row.needs_accommodation === 1 || row.needs_accommodation === true,
-      dietaryRestrictions: row.dietary_restrictions,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at?.toISOString()
-    }));
-    
-    res.json(guests);
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("guests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      // Transform data to match expected format
+      const guests = data.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        attending: row.attending,
+        guests: row.guests,
+        side: row.side,
+        message: row.message,
+        dietaryRestrictions: row.dietary_restrictions,
+        needsAccommodation: row.needs_accommodation,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      res.json(guests);
+    } else {
+      // Fallback to empty array
+      res.json([]);
+    }
   } catch (error) {
-    console.error('Error fetching guests:', error);
+    console.error("Error fetching guests:", error);
     // Return empty array for graceful fallback
     res.json([]);
   }
@@ -45,45 +73,66 @@ export const createGuest: RequestHandler = async (req, res) => {
       needsAccommodation
     } = req.body;
 
-    const id = Date.now().toString();
-    const pool = await getDbConnection();
-    
-    await pool.request()
-      .input('id', sql.NVarChar, id)
-      .input('name', sql.NVarChar, name)
-      .input('email', sql.NVarChar, email)
-      .input('phone', sql.NVarChar, phone)
-      .input('attending', sql.Bit, attending)
-      .input('guests', sql.Int, guests)
-      .input('side', sql.NVarChar, side)
-      .input('message', sql.NVarChar, message || null)
-      .input('dietary_restrictions', sql.NVarChar, dietaryRestrictions || null)
-      .input('needs_accommodation', sql.Bit, needsAccommodation)
-      .query(`
-        INSERT INTO guests (id, name, email, phone, attending, guests, side, message, dietary_restrictions, needs_accommodation)
-        VALUES (@id, @name, @email, @phone, @attending, @guests, @side, @message, @dietary_restrictions, @needs_accommodation)
-      `);
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("guests")
+        .insert([{
+          name,
+          email,
+          phone,
+          attending,
+          guests,
+          side,
+          message: message || null,
+          dietary_restrictions: dietaryRestrictions || null,
+          needs_accommodation: needsAccommodation
+        }])
+        .select()
+        .single();
 
-    const newGuest: Guest = {
-      id,
-      name,
-      email,
-      phone,
-      attending,
-      guests,
-      side,
-      message,
-      dietary_restrictions: dietaryRestrictions,
-      needs_accommodation: needsAccommodation,
-      created_at: new Date()
-    };
+      if (error) {
+        throw error;
+      }
 
-    res.status(201).json(newGuest);
+      const newGuest = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        attending: data.attending,
+        guests: data.guests,
+        side: data.side,
+        message: data.message,
+        dietaryRestrictions: data.dietary_restrictions,
+        needsAccommodation: data.needs_accommodation,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+
+      res.status(201).json(newGuest);
+    } else {
+      // Fallback response
+      const id = Date.now().toString();
+      const newGuest = {
+        id,
+        name,
+        email,
+        phone,
+        attending,
+        guests,
+        side,
+        message,
+        dietaryRestrictions,
+        needsAccommodation,
+        createdAt: new Date().toISOString()
+      };
+      res.status(201).json(newGuest);
+    }
   } catch (error) {
-    console.error('Error creating guest:', error);
+    console.error("Error creating guest:", error);
     // Return success response for graceful fallback
     const id = Date.now().toString();
-    const newGuest: Guest = {
+    const newGuest = {
       id,
       name: req.body.name,
       email: req.body.email,
@@ -92,9 +141,9 @@ export const createGuest: RequestHandler = async (req, res) => {
       guests: req.body.guests,
       side: req.body.side,
       message: req.body.message,
-      dietary_restrictions: req.body.dietaryRestrictions,
-      needs_accommodation: req.body.needsAccommodation,
-      created_at: new Date()
+      dietaryRestrictions: req.body.dietaryRestrictions,
+      needsAccommodation: req.body.needsAccommodation,
+      createdAt: new Date().toISOString()
     };
     res.status(201).json(newGuest);
   }
@@ -116,40 +165,33 @@ export const updateGuest: RequestHandler = async (req, res) => {
       needsAccommodation
     } = req.body;
 
-    const pool = await getDbConnection();
-    
-    await pool.request()
-      .input('id', sql.NVarChar, id)
-      .input('name', sql.NVarChar, name)
-      .input('email', sql.NVarChar, email)
-      .input('phone', sql.NVarChar, phone)
-      .input('attending', sql.Bit, attending)
-      .input('guests', sql.Int, guests)
-      .input('side', sql.NVarChar, side)
-      .input('message', sql.NVarChar, message || null)
-      .input('dietary_restrictions', sql.NVarChar, dietaryRestrictions || null)
-      .input('needs_accommodation', sql.Bit, needsAccommodation)
-      .input('updated_at', sql.DateTime2, new Date())
-      .query(`
-        UPDATE guests SET 
-          name = @name,
-          email = @email,
-          phone = @phone,
-          attending = @attending,
-          guests = @guests,
-          side = @side,
-          message = @message,
-          dietary_restrictions = @dietary_restrictions,
-          needs_accommodation = @needs_accommodation,
-          updated_at = @updated_at
-        WHERE id = @id
-      `);
+    if (supabase) {
+      const { error } = await supabase
+        .from("guests")
+        .update({
+          name,
+          email,
+          phone,
+          attending,
+          guests,
+          side,
+          message: message || null,
+          dietary_restrictions: dietaryRestrictions || null,
+          needs_accommodation: needsAccommodation,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", id);
 
-    res.json({ message: 'Guest updated successfully' });
+      if (error) {
+        throw error;
+      }
+    }
+
+    res.json({ message: "Guest updated successfully" });
   } catch (error) {
-    console.error('Error updating guest:', error);
+    console.error("Error updating guest:", error);
     // Return success response for graceful fallback
-    res.json({ message: 'Guest updated successfully' });
+    res.json({ message: "Guest updated successfully" });
   }
 };
 
@@ -157,16 +199,22 @@ export const updateGuest: RequestHandler = async (req, res) => {
 export const deleteGuest: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const pool = await getDbConnection();
     
-    await pool.request()
-      .input('id', sql.NVarChar, id)
-      .query('DELETE FROM guests WHERE id = @id');
+    if (supabase) {
+      const { error } = await supabase
+        .from("guests")
+        .delete()
+        .eq("id", id);
 
-    res.json({ message: 'Guest deleted successfully' });
+      if (error) {
+        throw error;
+      }
+    }
+
+    res.json({ message: "Guest deleted successfully" });
   } catch (error) {
-    console.error('Error deleting guest:', error);
+    console.error("Error deleting guest:", error);
     // Return success response for graceful fallback
-    res.json({ message: 'Guest deleted successfully' });
+    res.json({ message: "Guest deleted successfully" });
   }
 };
