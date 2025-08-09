@@ -12,6 +12,7 @@ export default function Debug() {
   const [supabaseStatus, setSupabaseStatus] = useState<any>({});
   const [databaseStatus, setDatabaseStatus] = useState<any>({});
   const [smsStatus, setSmsStatus] = useState<any>({});
+  const [smsDebugStatus, setSmsDebugStatus] = useState<any>({});
 
   useEffect(() => {
     // Load localStorage data
