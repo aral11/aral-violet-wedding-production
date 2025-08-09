@@ -408,15 +408,35 @@ export default function Index() {
           return;
         }
 
-        // If no duplicates, save to localStorage
-        const newGuest = {
-          id: Date.now().toString(),
-          ...rsvpForm,
-          createdAt: new Date().toISOString(),
-        };
-        const updatedGuests = [...existingGuests, newGuest];
+        // Save or update in localStorage
+        let updatedGuests;
+        if (isEditMode && editingGuestId) {
+          // Update existing guest
+          updatedGuests = existingGuests.map((guest: any) =>
+            guest.id === editingGuestId
+              ? {
+                  ...guest,
+                  attending: rsvpForm.attending,
+                  guests: rsvpForm.guests,
+                  side: rsvpForm.side,
+                  message: rsvpForm.message,
+                  dietaryRestrictions: rsvpForm.dietaryRestrictions,
+                  needsAccommodation: rsvpForm.needsAccommodation,
+                }
+              : guest
+          );
+          console.log("RSVP updated in localStorage fallback");
+        } else {
+          // Create new guest
+          const newGuest = {
+            id: Date.now().toString(),
+            ...rsvpForm,
+            createdAt: new Date().toISOString(),
+          };
+          updatedGuests = [...existingGuests, newGuest];
+          console.log("RSVP saved to localStorage fallback");
+        }
         localStorage.setItem("wedding_guests", JSON.stringify(updatedGuests));
-        console.log("RSVP saved to localStorage fallback");
 
         toast({
           title: "RSVP Submitted Successfully! 🎉",
