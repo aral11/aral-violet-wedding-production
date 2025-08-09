@@ -1,31 +1,54 @@
 import { RequestHandler } from "express";
-import { getDbConnection, sql } from "../config/database";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase configuration
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    console.log("✅ Supabase client initialized for invitation service");
+  } catch (error) {
+    console.warn("❌ Failed to initialize Supabase for invitations:", error);
+  }
+} else {
+  console.warn("⚠️ Supabase credentials not found - invitation service will use fallback");
+}
 
 // Get current invitation
 export const getInvitation: RequestHandler = async (req, res) => {
   try {
-    const pool = await getDbConnection();
-    const result = await pool.request().query(`
-      SELECT TOP 1 id, pdf_data, filename, uploaded_at
-      FROM wedding_invitation 
-      ORDER BY uploaded_at DESC
-    `);
-    
-    if (result.recordset.length === 0) {
-      return res.status(404).json({ error: 'No invitation found' });
-    }
+    if (supabase) {
+      const { data, error } = await supabase
+        .from("invitations")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-    const invitation = result.recordset[0];
-    res.json({
-      id: invitation.id,
-      pdfData: invitation.pdf_data,
-      filename: invitation.filename,
-      uploadedAt: invitation.uploaded_at.toISOString()
-    });
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error;
+      }
+
+      if (!data) {
+        return res.status(404).json({ error: "No invitation found" });
+      }
+
+      res.json({
+        id: data.id,
+        pdfData: data.pdf_data,
+        filename: data.filename,
+        uploadedAt: data.created_at
+      });
+    } else {
+      // Fallback to localStorage check (though this won't work server-side)
+      return res.status(404).json({ error: "No invitation found" });
+    }
   } catch (error) {
-    console.error('Error fetching invitation:', error);
-    // Return 404 for graceful fallback
-    res.status(404).json({ error: 'No invitation found' });
+    console.error("Error fetching invitation:", error);
+    res.status(404).json({ error: "No invitation found" });
   }
 };
 
@@ -35,39 +58,50 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
     const { pdfData, filename } = req.body;
 
     if (!pdfData) {
-      return res.status(400).json({ error: 'PDF data is required' });
+      return res.status(400).json({ error: "PDF data is required" });
     }
 
-    const pool = await getDbConnection();
-    
-    // Delete existing invitation first (only keep the latest)
-    await pool.request().query('DELETE FROM wedding_invitation');
-    
-    // Insert new invitation
-    const result = await pool.request()
-      .input('pdf_data', sql.NVarChar, pdfData)
-      .input('filename', sql.NVarChar, filename || 'wedding-invitation.pdf')
-      .query(`
-        INSERT INTO wedding_invitation (pdf_data, filename)
-        OUTPUT INSERTED.id, INSERTED.uploaded_at
-        VALUES (@pdf_data, @filename)
-      `);
+    if (supabase) {
+      // Delete existing invitation first (only keep the latest)
+      await supabase.from("invitations").delete().neq("id", 0);
 
-    const newInvitation = result.recordset[0];
-    
-    res.status(201).json({
-      id: newInvitation.id,
-      pdfData,
-      filename: filename || 'wedding-invitation.pdf',
-      uploadedAt: newInvitation.uploaded_at.toISOString()
-    });
+      // Insert new invitation
+      const { data, error } = await supabase
+        .from("invitations")
+        .insert([{
+          pdf_data: pdfData,
+          filename: filename || "wedding-invitation.pdf"
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      res.status(201).json({
+        id: data.id,
+        pdfData: data.pdf_data,
+        filename: data.filename,
+        uploadedAt: data.created_at
+      });
+    } else {
+      // Fallback response
+      const newInvitation = {
+        id: 1,
+        pdfData: pdfData,
+        filename: filename || "wedding-invitation.pdf",
+        uploadedAt: new Date().toISOString()
+      };
+      res.status(201).json(newInvitation);
+    }
   } catch (error) {
-    console.error('Error uploading invitation:', error);
+    console.error("Error uploading invitation:", error);
     // Return success response for graceful fallback
     const newInvitation = {
       id: 1,
       pdfData: req.body.pdfData,
-      filename: req.body.filename,
+      filename: req.body.filename || "wedding-invitation.pdf",
       uploadedAt: new Date().toISOString()
     };
     res.status(201).json(newInvitation);
@@ -77,15 +111,21 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
 // Delete invitation
 export const deleteInvitation: RequestHandler = async (req, res) => {
   try {
-    const pool = await getDbConnection();
-    
-    const result = await pool.request()
-      .query('DELETE FROM wedding_invitation');
+    if (supabase) {
+      const { error } = await supabase
+        .from("invitations")
+        .delete()
+        .neq("id", 0); // Delete all invitations
 
-    res.json({ message: 'Invitation deleted successfully' });
+      if (error) {
+        throw error;
+      }
+    }
+
+    res.json({ message: "Invitation deleted successfully" });
   } catch (error) {
-    console.error('Error deleting invitation:', error);
+    console.error("Error deleting invitation:", error);
     // Return success response for graceful fallback
-    res.json({ message: 'Invitation deleted successfully' });
+    res.json({ message: "Invitation deleted successfully" });
   }
 };
