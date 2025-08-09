@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, curry-works]
+    branches: ["*"]
   pull_request:
-    branches: [main, curry-works]
+    branches: ["*"]
 
 permissions:
   contents: read
