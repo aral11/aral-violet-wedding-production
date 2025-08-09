@@ -672,7 +672,7 @@ Made with love ❤️ By Aral D'Souza
         window.URL.revokeObjectURL(url);
 
         toast({
-          title: "Invitation Downloaded! 💌",
+          title: "Invitation downloaded Successfully! 💌",
           description:
             "Your beautiful wedding invitation PDF has been downloaded successfully.",
           duration: 3000,
@@ -706,7 +706,7 @@ Made with love ❤️ By Aral D'Souza
           }
 
           toast({
-            title: "Invitation Downloaded! ���",
+            title: "Invitation downloaded Successfully! 💌",
             description:
               "Your beautiful wedding invitation PDF has been downloaded successfully.",
             duration: 3000,
