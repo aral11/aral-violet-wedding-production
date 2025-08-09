@@ -41,10 +41,14 @@ export const debugSMS = async (req: Request, res: Response) => {
         if (fromNumber) {
           try {
             const phoneNumbers = await client.incomingPhoneNumbers.list();
-            const ownedNumber = phoneNumbers.find(p => p.phoneNumber === fromNumber);
+            const ownedNumber = phoneNumbers.find(
+              (p) => p.phoneNumber === fromNumber,
+            );
             debug.twilioTest.phoneNumberOwned = !!ownedNumber;
             debug.twilioTest.totalOwnedNumbers = phoneNumbers.length;
-            debug.twilioTest.ownedNumbers = phoneNumbers.map(p => p.phoneNumber);
+            debug.twilioTest.ownedNumbers = phoneNumbers.map(
+              (p) => p.phoneNumber,
+            );
           } catch (error: any) {
             debug.twilioTest.phoneNumberError = error.message;
           }
@@ -52,9 +56,11 @@ export const debugSMS = async (req: Request, res: Response) => {
       } else {
         debug.credentials.clientInitialized = false;
         debug.credentials.missingVars = [];
-        if (!accountSid) debug.credentials.missingVars.push("TWILIO_ACCOUNT_SID");
+        if (!accountSid)
+          debug.credentials.missingVars.push("TWILIO_ACCOUNT_SID");
         if (!authToken) debug.credentials.missingVars.push("TWILIO_AUTH_TOKEN");
-        if (!fromNumber) debug.credentials.missingVars.push("TWILIO_PHONE_NUMBER");
+        if (!fromNumber)
+          debug.credentials.missingVars.push("TWILIO_PHONE_NUMBER");
       }
     } catch (error: any) {
       debug.credentials.initError = error.message;
