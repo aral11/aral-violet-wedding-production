@@ -604,15 +604,32 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.pdf_data.length,
           );
 
-          // Download the uploaded PDF invitation
+          // Download the uploaded PDF invitation - Mobile-friendly approach
           const link = document.createElement("a");
           link.href = uploadedInvitation.pdf_data;
           link.download =
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
-          link.click();
+          link.target = "_blank";
+
+          // For mobile browsers that might not support download attribute
+          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+            // On mobile, open in new tab/window instead of direct download
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+              window.open(uploadedInvitation.pdf_data, '_blank');
+            } else {
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          } else {
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
 
           toast({
-            title: "Invitation Downloaded! 💌",
+            title: "Invitation downloaded Successfully! 💌",
             description:
               "Your custom uploaded wedding invitation has been downloaded successfully.",
             duration: 3000,
@@ -641,7 +658,17 @@ Made with love ❤️ By Aral D'Souza
         const link = document.createElement("a");
         link.href = url;
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
-        link.click();
+        link.target = "_blank";
+
+        // Mobile-friendly download
+        if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+          // On mobile, open in new tab/window
+          window.open(url, '_blank');
+        } else {
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
         window.URL.revokeObjectURL(url);
 
         toast({
@@ -662,12 +689,21 @@ Made with love ❤️ By Aral D'Souza
         const invitation = await invitationApi.get();
 
         if (invitation) {
-          // Download the uploaded PDF invitation
+          // Download the uploaded PDF invitation - Mobile-friendly
           const link = document.createElement("a");
           link.href = invitation.pdfData;
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
-          link.click();
+          link.target = "_blank";
+
+          // Mobile-friendly download
+          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+            window.open(invitation.pdfData, '_blank');
+          } else {
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
 
           toast({
             title: "Invitation Downloaded! ���",
@@ -691,7 +727,16 @@ Made with love ❤️ By Aral D'Souza
           const link = document.createElement("a");
           link.href = savedInvitation;
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
-          link.click();
+          link.target = "_blank";
+
+          // Mobile-friendly download
+          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+            window.open(savedInvitation, '_blank');
+          } else {
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
 
           toast({
             title: "Invitation Downloaded! 💌",
