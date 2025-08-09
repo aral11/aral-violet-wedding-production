@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
 
-// This endpoint serves the wedding invitation PDF
+// This endpoint serves the actual wedding invitation PDF
 export const downloadInvitation = async (req: Request, res: Response) => {
   try {
-    // Try to serve PDF file from public directory first
+    // First, try to serve PDF file from public directory
     const pdfPath = path.join(process.cwd(), "public", "Aral-Violet-Wedding-Invitation.pdf");
     
     if (fs.existsSync(pdfPath)) {
@@ -26,8 +26,8 @@ export const downloadInvitation = async (req: Request, res: Response) => {
       return;
     }
 
-    // Fallback: Create a proper PDF with wedding invitation content
-    const pdfContent = `%PDF-1.4
+    // Fallback: Serve a notice PDF if the actual PDF isn't uploaded yet
+    const noticePdfContent = `%PDF-1.4
 1 0 obj
 <<
 /Type /Catalog
@@ -68,41 +68,61 @@ endobj
 
 4 0 obj
 <<
-/Length 800
+/Length 1200
 >>
 stream
 BT
-/F1 20 Tf
+/F1 24 Tf
 50 720 Td
-(WEDDING INVITATION) Tj
+(ARAL & VIOLET WEDDING INVITATION) Tj
 0 -50 Td
-/F1 16 Tf
-(I HAVE FOUND THE ONE WHOM MY SOUL LOVES) Tj
+/F2 16 Tf
+(I HAVE FOUND THE ONE WHOM MY SOUL LOVES.) Tj
 0 -25 Td
 /F2 12 Tf
 (- SONG OF SOLOMON 3:4) Tj
 0 -50 Td
+/F1 18 Tf
+(TOGETHER WITH OUR FAMILIES) Tj
+0 -40 Td
 /F1 32 Tf
 (Aral & Violet) Tj
-0 -60 Td
-/F1 18 Tf
-(Sunday, December 28, 2025) Tj
+0 -50 Td
+/F2 12 Tf
+(Son of David Mark & Ashwini D'Souza) Tj
+0 -20 Td
+(Daughter of late Benedict Swamy & Juliet Swamy) Tj
+0 -40 Td
+/F1 16 Tf
+(28 December 2025 | Sunday) Tj
 0 -40 Td
 /F1 14 Tf
 (CHURCH NUPTIALS) Tj
 0 -25 Td
 /F2 12 Tf
+(04:00 PM) Tj
+0 -15 Td
 (Mother of Sorrows Church, Udupi) Tj
-0 -20 Td
-(4:00 PM - 5:15 PM) Tj
 0 -40 Td
 /F1 14 Tf
 (RECEPTION) Tj
 0 -25 Td
 /F2 12 Tf
+(07:00 PM) Tj
+0 -15 Td
 (Sai Radha Heritage Beach Resort, Kaup) Tj
-0 -20 Td
-(7:00 PM - 11:30 PM) Tj
+0 -40 Td
+/F1 14 Tf
+(ROSE CEREMONY) Tj
+0 -25 Td
+/F2 12 Tf
+(27th December 2025 | Saturday) Tj
+0 -15 Td
+(7:00 PM onwards) Tj
+0 -15 Td
+(Aral House, Kemmannu) Tj
+0 -15 Td
+(Near Maria Goratti Convent) Tj
 0 -40 Td
 /F2 10 Tf
 (WITH HEARTS FULL OF JOY AND BLESSINGS FROM ABOVE,) Tj
@@ -112,13 +132,8 @@ BT
 (WEAR YOUR FINEST, BRING YOUR SMILES,) Tj
 0 -15 Td
 (AND LET'S CHERISH THIS BEAUTIFUL EVENING.) Tj
-0 -30 Td
-/F1 16 Tf
-(TheVIRALWedding) Tj
 0 -25 Td
-(A&V) Tj
-0 -20 Td
-(12.28.2025) Tj
+(YOUR PRESENCE AND BLESSINGS ARE OUR GREATEST GIFT.) Tj
 ET
 endstream
 endobj
@@ -136,11 +151,11 @@ trailer
 /Root 1 0 R
 >>
 startxref
-1174
+1614
 %%EOF`;
 
     // Convert to buffer
-    const pdfBuffer = Buffer.from(pdfContent, 'binary');
+    const pdfBuffer = Buffer.from(noticePdfContent, 'binary');
 
     // Set appropriate headers for PDF download
     res.setHeader("Content-Type", "application/pdf");
@@ -153,7 +168,7 @@ startxref
     // Send the PDF buffer
     res.send(pdfBuffer);
 
-    console.log("Wedding invitation PDF served successfully (generated)");
+    console.log("Wedding invitation PDF served successfully (generated with all details)");
   } catch (error) {
     console.error("Error serving wedding invitation PDF:", error);
     res.status(500).json({
