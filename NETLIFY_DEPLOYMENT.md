@@ -8,7 +8,7 @@ Your wedding website is now properly configured for Netlify deployment!
 
 1. **✅ Netlify Configuration**: Updated `netlify.toml` with correct build command
 2. **✅ SPA Routing**: Fixed client-side routing for single page application
-3. **✅ Build Process**: Created dedicated Netlify build script 
+3. **✅ Build Process**: Created dedicated Netlify build script
 4. **✅ Base Path**: Fixed Vite configuration for Netlify vs GitHub Pages
 5. **✅ API Functions**: Simplified Netlify functions for static deployment
 6. **✅ Redirects**: Proper SPA redirect handling
@@ -16,13 +16,16 @@ Your wedding website is now properly configured for Netlify deployment!
 ## Quick Deploy to Netlify:
 
 ### Option 1: Auto Deploy (Recommended)
+
 1. **Connect GitHub to Netlify**:
+
    - Go to [Netlify](https://netlify.com)
    - Click "Add new site" > "Import from Git"
    - Connect your GitHub account
    - Select `aral11/aral-violet-wedding` repository
 
 2. **Configure Build Settings**:
+
    - Build command: `npm run build:netlify` (auto-detected)
    - Publish directory: `dist` (auto-detected)
    - Node version: `18` (auto-detected)
@@ -30,6 +33,7 @@ Your wedding website is now properly configured for Netlify deployment!
 3. **Deploy**: Click "Deploy site" - Done! 🎉
 
 ### Option 2: Manual Deploy
+
 ```bash
 # Build for Netlify
 npm run build:netlify
@@ -53,17 +57,19 @@ If you want to enable database features on Netlify, add these environment variab
 ✅ **Admin Dashboard**: Management interface (login: aral/aral2025)  
 ✅ **Mobile Responsive**: Works perfectly on all devices  
 ✅ **Fast Loading**: Optimized static files  
-✅ **SPA Routing**: Smooth navigation without page reloads  
+✅ **SPA Routing**: Smooth navigation without page reloads
 
 ## Fixed Issues:
 
 ### ❌ Before (Blank Page Issues):
+
 - Wrong build command using full-stack setup
 - GitHub Pages base path applied to Netlify
 - Server-side dependencies in Netlify functions
 - Missing SPA redirect configuration
 
 ### ✅ After (Working Deployment):
+
 - Dedicated Netlify build process (`npm run build:netlify`)
 - Correct base path for Netlify (`/` instead of repo path)
 - Simplified static-friendly API functions
@@ -72,6 +78,7 @@ If you want to enable database features on Netlify, add these environment variab
 ## Branch Management Fixed:
 
 The GitHub Actions workflow was triggering on multiple branches. Now it only:
+
 - ✅ Deploys from `main` branch only
 - ✅ No automatic PR deployments
 - ✅ Clean single-branch workflow
@@ -79,8 +86,9 @@ The GitHub Actions workflow was triggering on multiple branches. Now it only:
 ## Testing Your Deployment:
 
 After deploying to Netlify, test these features:
+
 1. **Home page loads** ✅
-2. **Navigation works** ✅ 
+2. **Navigation works** ✅
 3. **RSVP form submits** ✅
 4. **Photo upload works** ✅
 5. **Admin dashboard accessible** ✅
@@ -89,6 +97,7 @@ After deploying to Netlify, test these features:
 ## Troubleshooting:
 
 If you still see a blank page:
+
 1. Check Netlify build logs for errors
 2. Verify build command is `npm run build:netlify`
 3. Ensure publish directory is `dist`
@@ -97,6 +106,7 @@ If you still see a blank page:
 ## Custom Domain (Optional):
 
 To use your own domain:
+
 1. In Netlify dashboard, go to "Domain management"
 2. Click "Add custom domain"
 3. Follow the DNS configuration steps
