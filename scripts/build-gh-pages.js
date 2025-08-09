@@ -6,7 +6,7 @@ console.log("🚀 Building for GitHub Pages...");
 
 // Set environment variables
 process.env.NODE_ENV = "production";
-process.env.GITHUB_REPOSITORY = "aral11/aral-violet-wedding-production";
+process.env.GITHUB_REPOSITORY = "aral11/aral-violet-wedding";
 
 // Run the build
 try {
