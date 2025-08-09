@@ -450,7 +450,7 @@ export default function Index() {
 
         toast({
           title: isEditMode
-            ? "RSVP Updated Successfully! ✏️"
+            ? "RSVP Updated Successfully! ✏��"
             : "RSVP Submitted Successfully! 🎉",
           description: isEditMode
             ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
@@ -693,14 +693,16 @@ Made with love ❤️ By Aral D'Souza
         if (invitation) {
           // Download the uploaded PDF invitation - Mobile-friendly
           const link = document.createElement("a");
-          link.href = invitation.pdfData;
+          // Handle both API response format (pdfData) and database format (pdf_data)
+          const pdfData = invitation.pdfData || (invitation as any).pdf_data;
+          link.href = pdfData;
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
           // Mobile-friendly download
           if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(invitation.pdfData, "_blank");
+            window.open(pdfData, "_blank");
           } else {
             document.body.appendChild(link);
             link.click();
