@@ -520,15 +520,38 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
-      // Create a temporary link to download the provided PDF attachment
-      // This uses the exact PDF attachment you provided with all 3 pages
-      const link = document.createElement("a");
+      // First priority: Check if there's a custom invitation PDF uploaded from admin
+      console.log("Checking for uploaded invitation from admin...");
 
-      // Create a blob from the PDF attachment data
+      try {
+        const uploadedInvitation = await database.invitation.get();
+
+        if (uploadedInvitation && uploadedInvitation.pdf_data) {
+          // Download the uploaded PDF invitation
+          const link = document.createElement("a");
+          link.href = uploadedInvitation.pdf_data;
+          link.download = uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
+          link.click();
+
+          toast({
+            title: "Invitation Downloaded! 💌",
+            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
+          console.log("Uploaded invitation PDF downloaded successfully from admin");
+          return;
+        }
+      } catch (dbError) {
+        console.log("No uploaded invitation found, trying server endpoint...");
+      }
+
+      // Second priority: Try the server endpoint (which has its own fallback logic)
       const response = await fetch("/api/download-invitation");
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
         link.href = url;
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.click();
@@ -541,33 +564,11 @@ Made with love ❤️ By Aral D'Souza
           duration: 3000,
         });
 
-        console.log("Wedding invitation PDF downloaded successfully");
+        console.log("Wedding invitation PDF downloaded successfully from server");
         return;
       }
 
-      // Fallback: Direct base64 download if API endpoint isn't available
-      // This is your exact wedding invitation PDF with all 3 pages (Church Nuptials, Reception, Rose Ceremony)
-      const pdfBase64 = `data:application/pdf;base64,JVBERi0xLjQKJcfs4f// rest of the actual PDF base64 data from your attachment`;
-
-      // Create download link with the PDF data
-      const link2 = document.createElement("a");
-      link2.href = pdfBase64;
-      link2.download = "Aral-Violet-Wedding-Invitation.pdf";
-      link2.click();
-
-      toast({
-        title: "Invitation Downloaded! 💌",
-        description:
-          "Your beautiful wedding invitation PDF has been downloaded successfully.",
-        duration: 3000,
-      });
-
-      console.log("Wedding invitation PDF downloaded successfully");
-      return;
-    } catch (error) {
-      console.warn("PDF download failed, checking database:", error);
-
-      // Fallback: Check if there's a custom invitation PDF uploaded to database
+      // Third priority: Check API endpoint for uploaded invitations
       try {
         const invitation = await invitationApi.get();
 
@@ -578,7 +579,14 @@ Made with love ❤️ By Aral D'Souza
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.click();
-          console.log("Invitation downloaded from database");
+
+          toast({
+            title: "Invitation Downloaded! 💌",
+            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
+          console.log("Invitation downloaded from API");
           return;
         }
       } catch (apiError) {
@@ -587,13 +595,20 @@ Made with love ❤️ By Aral D'Souza
           handleApiError(apiError),
         );
 
-        // Fallback to localStorage if API is not available
+        // Fourth priority: Direct localStorage fallback
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
         if (savedInvitation) {
           const link = document.createElement("a");
           link.href = savedInvitation;
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
           link.click();
+
+          toast({
+            title: "Invitation Downloaded! 💌",
+            description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+            duration: 3000,
+          });
+
           console.log("Invitation downloaded from localStorage fallback");
           return;
         }
@@ -646,6 +661,15 @@ Please RSVP at our wedding website
         title: "Invitation Downloaded! 📝",
         description:
           "Your wedding invitation has been downloaded as a text file.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error downloading invitation:", error);
+
+      toast({
+        title: "Download Error ❌",
+        description: "There was an error downloading the invitation. Please try again.",
+        variant: "destructive",
         duration: 3000,
       });
     }
