@@ -1,6 +1,8 @@
 // API utility functions for wedding website
 
-const API_BASE = "/api";
+// Check deployment platform and use appropriate API endpoints
+const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+const API_BASE = isNetlify ? "/.netlify/functions" : "/api";
 
 // Types
 export interface Guest {
@@ -188,7 +190,8 @@ export const weddingFlowApi = {
 export const invitationApi = {
   async get(): Promise<WeddingInvitation | null> {
     try {
-      return await apiCall<WeddingInvitation>("/invitation");
+      const endpoint = isNetlify ? "/invitation-get" : "/invitation";
+      return await apiCall<WeddingInvitation>(endpoint);
     } catch (error) {
       // Return null if no invitation found
       if (
@@ -202,14 +205,16 @@ export const invitationApi = {
   },
 
   async upload(pdfData: string, filename?: string): Promise<WeddingInvitation> {
-    return apiCall<WeddingInvitation>("/invitation", {
+    const endpoint = isNetlify ? "/invitation-upload" : "/invitation";
+    return apiCall<WeddingInvitation>(endpoint, {
       method: "POST",
       body: JSON.stringify({ pdfData, filename }),
     });
   },
 
   async delete(): Promise<{ message: string }> {
-    return apiCall<{ message: string }>("/invitation", {
+    const endpoint = isNetlify ? "/invitation-delete" : "/invitation";
+    return apiCall<{ message: string }>(endpoint, {
       method: "DELETE",
     });
   },
