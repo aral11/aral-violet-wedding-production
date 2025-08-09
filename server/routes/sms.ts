@@ -48,20 +48,8 @@ export const sendRSVPSMSNotification = async (req: Request, res: Response) => {
     const sideText =
       rsvpDetails.side === "groom" ? "Aral's side" : "Violet's side";
 
-    const message = `🎉 NEW RSVP RECEIVED! 
-
-👤 Name: ${rsvpDetails.name}
-📧 Email: ${rsvpDetails.email}
-📱 Phone: ${rsvpDetails.phone}
-${attendingText}
-👥 Guests: ${rsvpDetails.guests}
-👨‍👩‍👧‍👦 Side: ${sideText}
-
-${rsvpDetails.message ? `💬 Message: ${rsvpDetails.message}` : ""}
-${rsvpDetails.dietaryRestrictions ? `🍽️ Dietary: ${rsvpDetails.dietaryRestrictions}` : ""}
-${rsvpDetails.needsAccommodation ? "🏨 Needs Accommodation: Yes" : ""}
-
-TheVIRALWedding - A&V 💕`;
+    // Create optimized message for trial account (under 160 chars to avoid segments)
+    const message = `RSVP: ${rsvpDetails.name} ${attendingText} +${rsvpDetails.guests} guests (${sideText}) - A&V Wedding`;
 
     console.log(
       "📱 SMS Message to be sent to",
