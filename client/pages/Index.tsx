@@ -614,9 +614,11 @@ Made with love ❤️ By Aral D'Souza
           // For mobile browsers that might not support download attribute
           if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
             // On mobile, open in new tab/window instead of direct download
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(
+              navigator.userAgent,
+            );
             if (isMobile) {
-              window.open(uploadedInvitation.pdf_data, '_blank');
+              window.open(uploadedInvitation.pdf_data, "_blank");
             } else {
               document.body.appendChild(link);
               link.click();
@@ -663,7 +665,7 @@ Made with love ❤️ By Aral D'Souza
         // Mobile-friendly download
         if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
           // On mobile, open in new tab/window
-          window.open(url, '_blank');
+          window.open(url, "_blank");
         } else {
           document.body.appendChild(link);
           link.click();
@@ -698,7 +700,7 @@ Made with love ❤️ By Aral D'Souza
 
           // Mobile-friendly download
           if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(invitation.pdfData, '_blank');
+            window.open(invitation.pdfData, "_blank");
           } else {
             document.body.appendChild(link);
             link.click();
@@ -731,7 +733,7 @@ Made with love ❤️ By Aral D'Souza
 
           // Mobile-friendly download
           if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(savedInvitation, '_blank');
+            window.open(savedInvitation, "_blank");
           } else {
             document.body.appendChild(link);
             link.click();

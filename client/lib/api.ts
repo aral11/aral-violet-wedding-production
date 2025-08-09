@@ -65,15 +65,22 @@ async function apiCall<T>(
     if (!response.ok) {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
         throw new Error(
           errorData.error || `HTTP ${response.status}: ${response.statusText}`,
         );
       } else {
         // If response is not JSON (like HTML), it's likely a routing issue
         const textContent = await response.text();
-        if (textContent.includes("<!doctype") || textContent.includes("<html")) {
-          throw new Error("API endpoint returned HTML instead of JSON - check server routing");
+        if (
+          textContent.includes("<!doctype") ||
+          textContent.includes("<html")
+        ) {
+          throw new Error(
+            "API endpoint returned HTML instead of JSON - check server routing",
+          );
         }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -83,7 +90,9 @@ async function apiCall<T>(
     if (!contentType || !contentType.includes("application/json")) {
       const textContent = await response.text();
       if (textContent.includes("<!doctype") || textContent.includes("<html")) {
-        throw new Error("API endpoint returned HTML instead of JSON - check server routing");
+        throw new Error(
+          "API endpoint returned HTML instead of JSON - check server routing",
+        );
       }
       throw new Error("API response is not JSON");
     }
