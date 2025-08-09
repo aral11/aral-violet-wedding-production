@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbar for mobile tab navigation */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom breakpoint for extra small screens */
+@media (min-width: 400px) {
+  .xs\:inline {
+    display: inline;
+  }
+}
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 84 30% 35%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 86 35% 65%;
+    --accent-foreground: 84 30% 35%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 84 30% 35%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Wedding theme colors - Olive Green */
+    --olive-50: 84 50% 95%;
+    --olive-100: 84 45% 88%;
+    --olive-200: 84 40% 78%;
+    --olive-300: 84 35% 68%;
+    --olive-400: 84 35% 58%;
+    --olive-500: 84 30% 48%;
+    --olive-600: 84 30% 35%;
+    --olive-700: 84 35% 25%;
+    --olive-800: 84 40% 18%;
+    --olive-900: 84 45% 12%;
+    --olive-950: 84 50% 8%;
+
+    /* Wedding theme colors - Sage Green */
+    --sage-50: 99 22% 96%;
+    --sage-100: 101 20% 90%;
+    --sage-200: 99 19% 81%;
+    --sage-300: 99 19% 70%;
+    --sage-400: 99 18% 60%;
+    --sage-500: 99 22% 49%;
+    --sage-600: 99 25% 39%;
+    --sage-700: 99 26% 31%;
+    --sage-800: 99 24% 26%;
+    --sage-900: 99 23% 22%;
+    --sage-950: 99 28% 12%;
+
+    /* Wedding theme colors - Cream */
+    --cream-50: 48 100% 98%;
+    --cream-100: 48 75% 95%;
+    --cream-200: 47 69% 89%;
+    --cream-300: 47 60% 82%;
+    --cream-400: 46 55% 73%;
+    --cream-500: 45 54% 64%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
