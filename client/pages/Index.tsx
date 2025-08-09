@@ -618,7 +618,11 @@ Made with love ❤️ By Aral D'Souza
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
-      const response = await fetch("/api/download-invitation");
+      const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+      const downloadEndpoint = isNetlify
+        ? "/.netlify/functions/download-invitation"
+        : "/api/download-invitation";
+      const response = await fetch(downloadEndpoint);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
