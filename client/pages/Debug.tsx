@@ -362,7 +362,12 @@ export default function Debug() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button onClick={testSMS}>Test SMS Service</Button>
+                <div className="space-x-2">
+                  <Button onClick={testSMS}>Test SMS Service</Button>
+                  <Button onClick={debugSMSDetailed} variant="outline">
+                    Debug SMS
+                  </Button>
+                </div>
                 {smsStatus.isConfigured !== undefined && (
                   <div>
                     <strong>Configured:</strong> ✅ {smsStatus.isConfigured}
