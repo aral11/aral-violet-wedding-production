@@ -133,9 +133,10 @@ export default function Debug() {
   const debugSMSDetailed = async () => {
     try {
       // Use appropriate endpoint based on deployment
-      const debugUrl = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify"
-        ? "/.netlify/functions/sms-debug"
-        : "/api/sms/debug";
+      const debugUrl =
+        import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify"
+          ? "/.netlify/functions/sms-debug"
+          : "/api/sms/debug";
 
       const response = await fetch(debugUrl);
       const data = await response.json();
