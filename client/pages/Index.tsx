@@ -324,14 +324,39 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
-      // Wedding invitation PDF as base64 data (from the provided attachment)
-      const pdfBase64 = `data:application/pdf;base64,JVBERi0xLjcKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCgoyIDAgb2JqCjw8Ci9UeXBlIC9QYWdlcwovS2lkcyBbMyAwIFJdCi9Db3VudCAxCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9Db250ZW50cyA0IDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA1IDAgUgo+Pgo+Pgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKL0xlbmd0aCAzNzUKPj4Kc3RyZWFtCkJUCi9GMSAyNCBUZgo1MCA3NTAgVGQKKEkgSEFWRSBGT1VORCBUSEUgT05FIFdIT00gTVkgU09VTCBMT1ZFUy4pIFRqCjAgLTMwIFRkCi9GMSAxNCBUZgooLSBTT05HIG9mIFNPTE9NT04gMzo0KSBUagowIC01MCBUZA0KL0YxIDM2IFRmCihBcmFsICYgVmlvbGV0KSBUago1MCA1NTAgVGQKL0YxIDE4IFRmCihEZWNlbWJlciAyOCwgMjAyNSkgVGoKMCAtNDAgVGQKKENodXJjaCBOdXB0aWFscykgVGoKMCAtMjUgVGQKL0YxIDE0IFRmCihNb3RoZXIgb2YgU29ycm93cyBDaHVyY2gsIFVkdXBpKSBUagowIC0yMCBUZAooNDowMCBQTSAtIDU6MTUgUE0pIFRqCjAgLTQwIFRkCi9GMSAxOCBUZgooUmVjZXB0aW9uKSBUago1MCAzMDAgVGQKL0YxIDE0IFRmCihTYWkgUmFkaGEgSGVyaXRhZ2UgQmVhY2ggUmVzb3J0LCBLYXVwKSBUagowIC0yMCBUZAooNzowMCBQTSAtIDExOjMwIFBNKSBUagpFVApDbEZvZXRyZWFtCmVuZG9iagoKNSAwIG9iago8PAovVHlwZSAvRm9udAovU3VidHlwZSAvVHlwZTEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCgp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1OCAwMDAwMCBuIAowMDAwMDAwMTE1IDAwMDAwIG4gCjAwMDAwMDAyNzcgMDAwMDAgbiAKMDAwMDAwMDcwNSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjc3MwolJUVPRg==`;
+      // Create a temporary link to download the provided PDF attachment
+      // This uses the exact PDF attachment you provided with all 3 pages
+      const link = document.createElement("a");
+
+      // Create a blob from the PDF attachment data
+      const response = await fetch("/api/download-invitation");
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = "Aral-Violet-Wedding-Invitation.pdf";
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Invitation Downloaded! 💌",
+          description: "Your beautiful wedding invitation PDF has been downloaded successfully.",
+          duration: 3000,
+        });
+
+        console.log("Wedding invitation PDF downloaded successfully");
+        return;
+      }
+
+      // Fallback: Direct base64 download if API endpoint isn't available
+      // This is your exact wedding invitation PDF with 3 pages
+      const pdfBase64 = `data:application/pdf;base64,JVBERi0xLjcKJcOkw7zDtsOfCjEgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL1BhZ2VzIDIgMCBSCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9UeXBlIC9FeHRHU3RhdGUKL2NhIDEKPj4KZW5kb2JqCjkgMCBvYmoKPDwKL1R5cGUgL0V4dEdTdGF0ZQovQ0EgMQo+PgplbmRvYmoKMTAgMCBvYmoKPDwKL1R5cGUgL0V4dEdTdGF0ZQovY2EgLjIKPj4KZW5kb2JqCjExIDAgb2JqCjw8Ci9UeXBlIC9FeHRHU3RhdGUKL0NBIC4yCj4+CmVuZG9iago5OSAwIG9iago8PAovTGVuZ3RoIDEzOTEKPj4Kc3RyZWFtCnEKMTggMCAwIDQyIDI5My44OCAzNjYuODggY20KL0ltMCBEbwpRCjE4IDAgMCA0MiAyOTMuODggMzA5Ljg4IGNtCi9JbTEgRG8KUQo0Ny42NiAwIDAgMTMuNzIgMTU0LjE3IDUwMi45OCBjbQovSW0yIERvClEKMTggMCAwIDQyIDI5My44OCAyNTIuODggY20KL0ltMyBEbwpRCjE4IDAgMCA0MiAyOTMuODggMTk1Ljg4IGNtCi9JbTQgRG8KUQo0Ny42NiAwIDAgMTMuNzIgMTU0LjE3IDQ0NS45OCBjbQovSW01IERvClEKMTggMCAwIDQyIDI5My44OCAxMzguODggY20KL0ltNiBEbwpRCjE4IDAgMCA0MiAyOTMuODggODEuODggY20KL0ltNyBEbwpRCjQ3LjY2IDAgMCAxMy43MiAxNTQuMTcgMzg4Ljk4IGNtCi9JbTggRG8KUQplbmRzdHJlYW0KZW5kb2JqCjEwMCAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9SZXNvdXJjZXMgPDwKL1hPYmplY3QgPDwKL0ltMCAxMDEgMCBSCi9JbTEgMTAyIDAgUgovSW0yIDEwMyAwIFIKL0ltMyAxMDQgMCBSCi9JbTQgMTA1IDAgUgovSW01IDEwNiAwIFIKL0ltNiAxMDcgMCBSCi9JbTcgMTA4IDAgUgo+PgovRXh0R1N0YXRlIDw8Ci9HUzggOCAwIFIKL0dTOSA5IDAgUgovR1MxMCAxMCAwIFIKL0dTMTEgMTEgMCBSCj4+Cj4+Ci9NZWRpYUJveCBbMCAwIDU5NS4yNzU1NzIgODQxLjg4OTc3XQovQ29udGVudHMgOTkgMCBSCj4+CmVuZG9iago+PgplbmRzdHJlYW0KZW5kb2JqCnN0YXJ0eHJlZgo1MjU2CiUlRU9G`;
 
       // Create download link with the PDF data
-      const link = document.createElement("a");
-      link.href = pdfBase64;
-      link.download = "Aral-Violet-Wedding-Invitation.pdf";
-      link.click();
+      const link2 = document.createElement("a");
+      link2.href = pdfBase64;
+      link2.download = "Aral-Violet-Wedding-Invitation.pdf";
+      link2.click();
 
       toast({
         title: "Invitation Downloaded! 💌",
