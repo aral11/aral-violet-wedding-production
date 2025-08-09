@@ -351,8 +351,7 @@ export default function Debug() {
                 <Button onClick={testSMS}>Test SMS Service</Button>
                 {smsStatus.isConfigured !== undefined && (
                   <div>
-                    <strong>Configured:</strong>{" "}
-                    ✅ {smsStatus.isConfigured}
+                    <strong>Configured:</strong> ✅ {smsStatus.isConfigured}
                   </div>
                 )}
                 {smsStatus.accountSid && (
@@ -362,8 +361,7 @@ export default function Debug() {
                 )}
                 {smsStatus.hasAuthToken !== undefined && (
                   <div>
-                    <strong>Auth Token:</strong>{" "}
-                    ✅ {smsStatus.hasAuthToken}
+                    <strong>Auth Token:</strong> ✅ {smsStatus.hasAuthToken}
                   </div>
                 )}
                 {smsStatus.phoneNumber && (

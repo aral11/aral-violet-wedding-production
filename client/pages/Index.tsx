@@ -605,8 +605,10 @@ Made with love ❤️ By Aral D'Souza
           );
 
           // Validate PDF data format
-          if (!uploadedInvitation.pdf_data.startsWith('data:')) {
-            console.log("❌ Invalid PDF data format, trying server endpoint...");
+          if (!uploadedInvitation.pdf_data.startsWith("data:")) {
+            console.log(
+              "❌ Invalid PDF data format, trying server endpoint...",
+            );
             throw new Error("Invalid PDF data format");
           }
 
