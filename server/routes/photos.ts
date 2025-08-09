@@ -14,7 +14,9 @@ if (supabaseUrl && supabaseKey) {
     console.warn("❌ Failed to initialize Supabase for photos:", error);
   }
 } else {
-  console.warn("⚠️ Supabase credentials not found - photos service will use fallback");
+  console.warn(
+    "⚠️ Supabase credentials not found - photos service will use fallback",
+  );
 }
 
 // Get all photos
@@ -34,7 +36,7 @@ export const getPhotos: RequestHandler = async (req, res) => {
         id: row.id,
         photoData: row.photo_data,
         uploadedBy: row.uploaded_by,
-        createdAt: row.created_at
+        createdAt: row.created_at,
       }));
 
       res.json(photos);
@@ -61,10 +63,12 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
     if (supabase) {
       const { data, error } = await supabase
         .from("photos")
-        .insert([{
-          photo_data: photoData,
-          uploaded_by: uploadedBy
-        }])
+        .insert([
+          {
+            photo_data: photoData,
+            uploaded_by: uploadedBy,
+          },
+        ])
         .select()
         .single();
 
@@ -76,7 +80,7 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
         id: data.id,
         photoData: data.photo_data,
         uploadedBy: data.uploaded_by,
-        createdAt: data.created_at
+        createdAt: data.created_at,
       };
 
       res.status(201).json(newPhoto);
@@ -87,7 +91,7 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
         id,
         photoData,
         uploadedBy,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
       res.status(201).json(newPhoto);
     }
@@ -99,7 +103,7 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
       id,
       photoData: req.body.photoData,
       uploadedBy: req.body.uploadedBy || "admin",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     res.status(201).json(newPhoto);
   }
@@ -109,12 +113,9 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
 export const deletePhoto: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (supabase) {
-      const { error } = await supabase
-        .from("photos")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("photos").delete().eq("id", id);
 
       if (error) {
         throw error;
@@ -141,7 +142,7 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
     if (supabase) {
       const photosToInsert = photos.map((photoData: string) => ({
         photo_data: photoData,
-        uploaded_by: uploadedBy
+        uploaded_by: uploadedBy,
       }));
 
       const { data, error } = await supabase
@@ -157,12 +158,12 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
         id: row.id,
         photoData: row.photo_data,
         uploadedBy: row.uploaded_by,
-        createdAt: row.created_at
+        createdAt: row.created_at,
       }));
 
       res.status(201).json({
         message: `Successfully uploaded ${uploadedPhotos.length} photos`,
-        photos: uploadedPhotos
+        photos: uploadedPhotos,
       });
     } else {
       // Fallback response
@@ -170,25 +171,27 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
         id: (Date.now() + index).toString(),
         photoData,
         uploadedBy,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       }));
       res.status(201).json({
         message: `Successfully uploaded ${uploadedPhotos.length} photos`,
-        photos: uploadedPhotos
+        photos: uploadedPhotos,
       });
     }
   } catch (error) {
     console.error("Error bulk uploading photos:", error);
     // Return success response for graceful fallback
-    const uploadedPhotos = req.body.photos.map((photoData: string, index: number) => ({
-      id: (Date.now() + index).toString(),
-      photoData,
-      uploadedBy: req.body.uploadedBy || "admin",
-      createdAt: new Date().toISOString()
-    }));
+    const uploadedPhotos = req.body.photos.map(
+      (photoData: string, index: number) => ({
+        id: (Date.now() + index).toString(),
+        photoData,
+        uploadedBy: req.body.uploadedBy || "admin",
+        createdAt: new Date().toISOString(),
+      }),
+    );
     res.status(201).json({
       message: `Successfully uploaded ${uploadedPhotos.length} photos`,
-      photos: uploadedPhotos
+      photos: uploadedPhotos,
     });
   }
 };

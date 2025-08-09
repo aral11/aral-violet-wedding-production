@@ -14,7 +14,9 @@ if (supabaseUrl && supabaseKey) {
     console.warn("❌ Failed to initialize Supabase for guests:", error);
   }
 } else {
-  console.warn("⚠️ Supabase credentials not found - guests service will use fallback");
+  console.warn(
+    "⚠️ Supabase credentials not found - guests service will use fallback",
+  );
 }
 
 // Get all guests
@@ -43,7 +45,7 @@ export const getGuests: RequestHandler = async (req, res) => {
         dietaryRestrictions: row.dietary_restrictions,
         needsAccommodation: row.needs_accommodation,
         createdAt: row.created_at,
-        updatedAt: row.updated_at
+        updatedAt: row.updated_at,
       }));
 
       res.json(guests);
@@ -70,23 +72,25 @@ export const createGuest: RequestHandler = async (req, res) => {
       side,
       message,
       dietaryRestrictions,
-      needsAccommodation
+      needsAccommodation,
     } = req.body;
 
     if (supabase) {
       const { data, error } = await supabase
         .from("guests")
-        .insert([{
-          name,
-          email,
-          phone,
-          attending,
-          guests,
-          side,
-          message: message || null,
-          dietary_restrictions: dietaryRestrictions || null,
-          needs_accommodation: needsAccommodation
-        }])
+        .insert([
+          {
+            name,
+            email,
+            phone,
+            attending,
+            guests,
+            side,
+            message: message || null,
+            dietary_restrictions: dietaryRestrictions || null,
+            needs_accommodation: needsAccommodation,
+          },
+        ])
         .select()
         .single();
 
@@ -106,7 +110,7 @@ export const createGuest: RequestHandler = async (req, res) => {
         dietaryRestrictions: data.dietary_restrictions,
         needsAccommodation: data.needs_accommodation,
         createdAt: data.created_at,
-        updatedAt: data.updated_at
+        updatedAt: data.updated_at,
       };
 
       res.status(201).json(newGuest);
@@ -124,7 +128,7 @@ export const createGuest: RequestHandler = async (req, res) => {
         message,
         dietaryRestrictions,
         needsAccommodation,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
       res.status(201).json(newGuest);
     }
@@ -143,7 +147,7 @@ export const createGuest: RequestHandler = async (req, res) => {
       message: req.body.message,
       dietaryRestrictions: req.body.dietaryRestrictions,
       needsAccommodation: req.body.needsAccommodation,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     res.status(201).json(newGuest);
   }
@@ -162,7 +166,7 @@ export const updateGuest: RequestHandler = async (req, res) => {
       side,
       message,
       dietaryRestrictions,
-      needsAccommodation
+      needsAccommodation,
     } = req.body;
 
     if (supabase) {
@@ -178,7 +182,7 @@ export const updateGuest: RequestHandler = async (req, res) => {
           message: message || null,
           dietary_restrictions: dietaryRestrictions || null,
           needs_accommodation: needsAccommodation,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", id);
 
@@ -199,12 +203,9 @@ export const updateGuest: RequestHandler = async (req, res) => {
 export const deleteGuest: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (supabase) {
-      const { error } = await supabase
-        .from("guests")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("guests").delete().eq("id", id);
 
       if (error) {
         throw error;

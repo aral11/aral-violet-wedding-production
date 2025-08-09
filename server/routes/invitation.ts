@@ -14,7 +14,9 @@ if (supabaseUrl && supabaseKey) {
     console.warn("❌ Failed to initialize Supabase for invitations:", error);
   }
 } else {
-  console.warn("⚠️ Supabase credentials not found - invitation service will use fallback");
+  console.warn(
+    "⚠️ Supabase credentials not found - invitation service will use fallback",
+  );
 }
 
 // Get current invitation
@@ -28,7 +30,8 @@ export const getInvitation: RequestHandler = async (req, res) => {
         .limit(1)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 = no rows returned
         throw error;
       }
 
@@ -40,7 +43,7 @@ export const getInvitation: RequestHandler = async (req, res) => {
         id: data.id,
         pdfData: data.pdf_data,
         filename: data.filename,
-        uploadedAt: data.created_at
+        uploadedAt: data.created_at,
       });
     } else {
       // Fallback to localStorage check (though this won't work server-side)
@@ -68,10 +71,12 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
       // Insert new invitation
       const { data, error } = await supabase
         .from("invitations")
-        .insert([{
-          pdf_data: pdfData,
-          filename: filename || "wedding-invitation.pdf"
-        }])
+        .insert([
+          {
+            pdf_data: pdfData,
+            filename: filename || "wedding-invitation.pdf",
+          },
+        ])
         .select()
         .single();
 
@@ -83,7 +88,7 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
         id: data.id,
         pdfData: data.pdf_data,
         filename: data.filename,
-        uploadedAt: data.created_at
+        uploadedAt: data.created_at,
       });
     } else {
       // Fallback response
@@ -91,7 +96,7 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
         id: 1,
         pdfData: pdfData,
         filename: filename || "wedding-invitation.pdf",
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
       };
       res.status(201).json(newInvitation);
     }
@@ -102,7 +107,7 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
       id: 1,
       pdfData: req.body.pdfData,
       filename: req.body.filename || "wedding-invitation.pdf",
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     };
     res.status(201).json(newInvitation);
   }

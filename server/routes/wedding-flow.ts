@@ -14,7 +14,9 @@ if (supabaseUrl && supabaseKey) {
     console.warn("❌ Failed to initialize Supabase for wedding flow:", error);
   }
 } else {
-  console.warn("⚠️ Supabase credentials not found - wedding flow service will use fallback");
+  console.warn(
+    "⚠️ Supabase credentials not found - wedding flow service will use fallback",
+  );
 }
 
 // Get all wedding flow items
@@ -38,7 +40,7 @@ export const getWeddingFlow: RequestHandler = async (req, res) => {
         duration: row.duration,
         type: row.type,
         createdAt: row.created_at,
-        updatedAt: row.updated_at
+        updatedAt: row.updated_at,
       }));
 
       res.json(flowItems);
@@ -59,19 +61,23 @@ export const createFlowItem: RequestHandler = async (req, res) => {
     const { time, title, description, duration, type } = req.body;
 
     if (!time || !title || !type) {
-      return res.status(400).json({ error: "Time, title, and type are required" });
+      return res
+        .status(400)
+        .json({ error: "Time, title, and type are required" });
     }
 
     if (supabase) {
       const { data, error } = await supabase
         .from("wedding_flow")
-        .insert([{
-          time,
-          title,
-          description: description || "",
-          duration: duration || null,
-          type
-        }])
+        .insert([
+          {
+            time,
+            title,
+            description: description || "",
+            duration: duration || null,
+            type,
+          },
+        ])
         .select()
         .single();
 
@@ -87,7 +93,7 @@ export const createFlowItem: RequestHandler = async (req, res) => {
         duration: data.duration,
         type: data.type,
         createdAt: data.created_at,
-        updatedAt: data.updated_at
+        updatedAt: data.updated_at,
       };
 
       res.status(201).json(newFlowItem);
@@ -101,7 +107,7 @@ export const createFlowItem: RequestHandler = async (req, res) => {
         description: description || "",
         duration,
         type,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
       res.status(201).json(newFlowItem);
     }
@@ -116,7 +122,7 @@ export const createFlowItem: RequestHandler = async (req, res) => {
       description: req.body.description || "",
       duration: req.body.duration,
       type: req.body.type,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     res.status(201).json(newFlowItem);
   }
@@ -137,7 +143,7 @@ export const updateFlowItem: RequestHandler = async (req, res) => {
           description: description || "",
           duration: duration || null,
           type,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", id);
 
@@ -158,7 +164,7 @@ export const updateFlowItem: RequestHandler = async (req, res) => {
 export const deleteFlowItem: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (supabase) {
       const { error } = await supabase
         .from("wedding_flow")
