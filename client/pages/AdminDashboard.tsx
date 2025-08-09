@@ -217,10 +217,23 @@ export default function AdminDashboard() {
         }
       }
 
-      // Load invitation PDF
-      const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-      if (savedInvitation) {
-        setInvitationPDF(savedInvitation);
+      // Load invitation PDF using database service
+      try {
+        const invitation = await database.invitation.get();
+        if (invitation && invitation.pdf_data) {
+          setInvitationPDF(invitation.pdf_data);
+          const storageType = database.isUsingSupabase()
+            ? "Supabase"
+            : "localStorage";
+          console.log(`Invitation loaded from ${storageType}`);
+        }
+      } catch (error) {
+        console.log("Error loading invitation:", error);
+        // Fallback to localStorage
+        const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
+        if (savedInvitation) {
+          setInvitationPDF(savedInvitation);
+        }
       }
     };
 
