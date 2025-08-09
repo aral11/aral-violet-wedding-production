@@ -370,31 +370,38 @@ export default function Index() {
             rsvpForm.phone.replace(/\D/g, ""),
         );
 
-        // Show specific error messages for localStorage duplicates
-        if (duplicateByName) {
+        // Find any existing RSVP for editing in localStorage
+        const existingLocalGuest = duplicateByName || duplicateByEmail || duplicateByPhone;
+
+        if (existingLocalGuest && !isEditMode) {
+          // Switch to edit mode and populate form with existing data
+          setIsEditMode(true);
+          setEditingGuestId(existingLocalGuest.id);
+          setRsvpForm({
+            name: existingLocalGuest.name,
+            email: existingLocalGuest.email,
+            phone: existingLocalGuest.phone || "",
+            attending: existingLocalGuest.attending,
+            guests: existingLocalGuest.guests,
+            side: existingLocalGuest.side,
+            message: existingLocalGuest.message || "",
+            dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
+            needsAccommodation: existingLocalGuest.needsAccommodation,
+          });
+
           toast({
-            title: "Duplicate RSVP Found! ❌",
-            description: `An RSVP with the name "${rsvpForm.name}" already exists. If this is a different person, please use a slightly different name.`,
+            title: "Existing RSVP Found! ✏️",
+            description: `We found your previous RSVP. You can now edit your response. Name and email are locked for security.`,
             duration: 6000,
-            variant: "destructive",
           });
           return;
         }
 
-        if (duplicateByEmail) {
+        if (existingLocalGuest && isEditMode && existingLocalGuest.id !== editingGuestId) {
+          // Trying to edit but conflicting with a different guest
           toast({
-            title: "Email Already Used! ❌",
-            description: `An RSVP with the email "${rsvpForm.email}" already exists. Each email can only be used once.`,
-            duration: 6000,
-            variant: "destructive",
-          });
-          return;
-        }
-
-        if (duplicateByPhone) {
-          toast({
-            title: "Phone Number Already Used! ❌",
-            description: `An RSVP with the phone number "${rsvpForm.phone}" already exists. Each phone number can only be used once.`,
+            title: "Conflict Detected! ❌",
+            description: `The name, email, or phone number matches a different guest. Please use your original details.`,
             duration: 6000,
             variant: "destructive",
           });
@@ -660,7 +667,7 @@ Sunday, December 28, 2025
 RECEPTION
 Sai Radha Heritage Beach Resort, Kaup
 Sunday, December 28, 2025
-7:00 PM – 11:30 PM
+7:00 PM �� 11:30 PM
 
 WITH HEARTS FULL OF JOY AND BLESSINGS FROM ABOVE,
 WE INVITE YOU TO CELEBRATE OUR UNION.
