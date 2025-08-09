@@ -130,6 +130,19 @@ export default function Debug() {
     setSmsStatus(results);
   };
 
+  const debugSMSDetailed = async () => {
+    try {
+      const response = await fetch("/api/sms/debug");
+      const data = await response.json();
+      setSmsDebugStatus(data);
+    } catch (error: any) {
+      setSmsDebugStatus({
+        error: "Failed to fetch SMS debug info",
+        message: error.message,
+      });
+    }
+  };
+
   const testAPI = async () => {
     const results: any = {};
 
