@@ -133,37 +133,47 @@ function expressPlugin(): Plugin {
           } else if (url.includes("/sms")) {
             if (url.includes("/debug")) {
               res.statusCode = 200;
-              res.end(JSON.stringify({
-                environment: {
-                  hasSid: false,
-                  hasToken: false,
-                  hasPhone: false,
-                  sidPrefix: "Not set",
-                  phoneNumber: "Not set",
-                },
-                credentials: {
-                  clientInitialized: false,
-                  missingVars: ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_PHONE_NUMBER"]
-                },
-                twilioTest: {},
-                fallbackMode: true
-              }));
+              res.end(
+                JSON.stringify({
+                  environment: {
+                    hasSid: false,
+                    hasToken: false,
+                    hasPhone: false,
+                    sidPrefix: "Not set",
+                    phoneNumber: "Not set",
+                  },
+                  credentials: {
+                    clientInitialized: false,
+                    missingVars: [
+                      "TWILIO_ACCOUNT_SID",
+                      "TWILIO_AUTH_TOKEN",
+                      "TWILIO_PHONE_NUMBER",
+                    ],
+                  },
+                  twilioTest: {},
+                  fallbackMode: true,
+                }),
+              );
             } else if (url.includes("/test")) {
               res.statusCode = 200;
-              res.end(JSON.stringify({
-                success: true,
-                message: "SMS test logged (fallback mode)",
-                development: true,
-                fallbackMode: true
-              }));
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  message: "SMS test logged (fallback mode)",
+                  development: true,
+                  fallbackMode: true,
+                }),
+              );
             } else {
               res.statusCode = 200;
-              res.end(JSON.stringify({
-                success: true,
-                message: "SMS notification logged (fallback mode)",
-                development: true,
-                fallbackMode: true
-              }));
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  message: "SMS notification logged (fallback mode)",
+                  development: true,
+                  fallbackMode: true,
+                }),
+              );
             }
           } else if (url.includes("/ping")) {
             res.statusCode = 200;
