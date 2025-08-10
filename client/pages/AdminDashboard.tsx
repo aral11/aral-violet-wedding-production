@@ -808,7 +808,7 @@ export default function AdminDashboard() {
       accommodationNeeded.length > 0
         ? `
     <div class="section">
-        <div class="section-header">�� Accommodation Required (${accommodationNeeded.length})</div>
+        <div class="section-header">🏨 Accommodation Required (${accommodationNeeded.length})</div>
         <div class="guest-list">
             ${accommodationNeeded
               .map(
@@ -1769,12 +1769,22 @@ export default function AdminDashboard() {
               <TabsTrigger
                 value="photos"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
-                title="Photo Gallery"
+                title="Admin Photos"
               >
                 <Upload size={16} className="sm:hidden" />
                 <Upload size={14} className="hidden sm:inline" />
-                <span className="hidden sm:inline lg:hidden">Photos</span>
-                <span className="hidden lg:inline">Photo Gallery</span>
+                <span className="hidden sm:inline lg:hidden">Admin</span>
+                <span className="hidden lg:inline">Admin Photos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="guest-photos"
+                className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
+                title="Guest Photos"
+              >
+                <Camera size={16} className="sm:hidden" />
+                <Camera size={14} className="hidden sm:inline" />
+                <span className="hidden sm:inline lg:hidden">Guest</span>
+                <span className="hidden lg:inline">Guest Photos</span>
               </TabsTrigger>
               <TabsTrigger
                 value="flow"
@@ -2516,7 +2526,7 @@ export default function AdminDashboard() {
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
                             <li>• Guest experience overview</li>
-                            <li>�� Wedding day information</li>
+                            <li>• Wedding day information</li>
                           </ul>
                         </div>
                         <div>
