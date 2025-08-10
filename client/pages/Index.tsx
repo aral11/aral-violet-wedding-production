@@ -569,7 +569,7 @@ Date: Sunday, December 28, 2025
 Venue: Sai Radha Heritage Beach Resort, Kaup
 Generated on: ${currentDate}
 
-�� EVENT SCHEDULE
+📋 EVENT SCHEDULE
 
 ${scheduleContent}
 
@@ -624,40 +624,18 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-optimized download approach
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          // Use mobile-optimized download utility
+          const downloadSuccess = mobileOptimizedDownload(uploadedInvitation.pdf_data, {
+            filename: uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
+            mimeType: 'application/pdf'
+          });
 
-          if (isMobile) {
-            // For mobile devices, create a blob from base64 data for better compatibility
-            try {
-              const base64Data = uploadedInvitation.pdf_data.split(',')[1];
-              const byteCharacters = atob(base64Data);
-              const byteNumbers = new Array(byteCharacters.length);
-
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-
-              const byteArray = new Uint8Array(byteNumbers);
-              const blob = new Blob([byteArray], { type: 'application/pdf' });
-              const blobUrl = URL.createObjectURL(blob);
-
-              // Try to trigger download
-              link.href = blobUrl;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-
-              // Clean up blob URL after a delay
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-            } catch (blobError) {
-              console.warn('Blob creation failed, trying direct approach:', blobError);
-              // Fallback to original method
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          } else {
+          if (!downloadSuccess) {
+            // Fallback to original method
+            const link = document.createElement("a");
+            link.href = uploadedInvitation.pdf_data;
+            link.download = uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
+            link.target = "_blank";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
