@@ -225,12 +225,12 @@ export const photoService = {
         if (error) throw error;
 
         // Also save to localStorage
-        this.saveToLocalStorage(photoData);
+        this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
 
         return data;
       } catch (error) {
         console.warn("Supabase unavailable, saving to localStorage:", error);
-        this.saveToLocalStorage(photoData);
+        this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
         return {
           id: Date.now().toString(),
           photo_data: photoData,
@@ -241,7 +241,7 @@ export const photoService = {
       }
     }
 
-    this.saveToLocalStorage(photoData);
+    this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
     return {
       id: Date.now().toString(),
       photo_data: photoData,
