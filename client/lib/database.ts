@@ -171,17 +171,25 @@ export const photoService = {
           }));
 
           console.log(`📸 Converted ${photos.length} photos successfully`);
-          console.log("📸 First photo data check:", {
-            hasData: !!photos[0]?.photo_data,
-            isDataUrl: photos[0]?.photo_data?.startsWith('data:')
-          });
+
+          // Validate the photos have proper data
+          const validPhotos = photos.filter(p => p.photo_data && p.photo_data.startsWith('data:'));
+          console.log(`📸 ${validPhotos.length} photos have valid data URLs`);
+
+          if (validPhotos.length > 0) {
+            console.log("📸 Sample photo data:", {
+              id: validPhotos[0].id,
+              dataStart: validPhotos[0].photo_data.substring(0, 50),
+              dataLength: validPhotos[0].photo_data.length
+            });
+          }
 
           // Sync to localStorage for future use
           try {
-            const adminPhotos = photos
+            const adminPhotos = validPhotos
               .filter((p) => p.uploaded_by === "admin")
               .map((p) => p.photo_data);
-            const guestPhotos = photos
+            const guestPhotos = validPhotos
               .filter((p) => p.uploaded_by !== "admin")
               .map((p) => ({
                 photoData: p.photo_data,
@@ -197,7 +205,7 @@ export const photoService = {
             console.warn("📸 localStorage sync failed:", storageError);
           }
 
-          return photos;
+          return validPhotos;
         }
       }
 
