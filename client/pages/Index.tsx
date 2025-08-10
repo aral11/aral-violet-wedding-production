@@ -73,6 +73,10 @@ export default function Index() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
 
+  // Pagination state for photo gallery
+  const [currentPage, setCurrentPage] = useState(1);
+  const photosPerPage = 12; // Show 12 photos per page
+
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
 
   useEffect(() => {
@@ -597,7 +601,7 @@ export default function Index() {
 🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
-🎵 Traditional dance and music performances
+��� Traditional dance and music performances
 
 10:00 PM | Cake Cutting (15 min)
 ✨ Wedding cake cutting ceremony
@@ -1366,25 +1370,60 @@ Please RSVP at our wedding website
                 onClick={() => {
                   const loadPhotos = async () => {
                     try {
+                      console.log("📸 Manual gallery refresh requested...");
                       const photos = await database.photos.getAll();
                       if (photos && photos.length > 0) {
-                        setUploadedPhotos(
-                          photos.map((photo) => photo.photo_data),
+                        // Sort by creation date and extract photo data
+                        const sortedPhotos = photos.sort(
+                          (a, b) =>
+                            new Date(b.created_at || 0).getTime() -
+                            new Date(a.created_at || 0).getTime(),
                         );
+                        const photoData = sortedPhotos.map(
+                          (photo) => photo.photo_data,
+                        );
+                        setUploadedPhotos(photoData);
+
                         const storageType = database.isUsingSupabase()
                           ? "Supabase"
                           : "localStorage";
+                        const adminCount = sortedPhotos.filter(
+                          (p) => p.uploaded_by === "admin",
+                        ).length;
+                        const guestCount = sortedPhotos.filter(
+                          (p) => p.uploaded_by !== "admin",
+                        ).length;
+
                         console.log(
-                          `Photos refreshed from ${storageType}:`,
-                          photos.length,
+                          `📸 Photos refreshed from ${storageType}: ${photos.length} total (${adminCount} admin, ${guestCount} guest)`,
                         );
+
+                        toast({
+                          title: "Gallery Refreshed! 📸",
+                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? "s" : ""} from ${storageType}`,
+                          duration: 3000,
+                        });
                       } else {
-                        console.log("No photos found");
+                        console.log("No photos found during refresh");
                         setUploadedPhotos([]);
+                        toast({
+                          title: "No Photos Found",
+                          description:
+                            "No photos are currently stored in the database.",
+                          variant: "default",
+                          duration: 3000,
+                        });
                       }
                     } catch (error) {
                       console.log("Refresh failed:", error);
                       setUploadedPhotos([]);
+                      toast({
+                        title: "Refresh Failed",
+                        description:
+                          "Unable to refresh gallery. Please try again.",
+                        variant: "destructive",
+                        duration: 3000,
+                      });
                     }
                   };
                   loadPhotos();
@@ -1468,20 +1507,111 @@ Please RSVP at our wedding website
           </div>
 
           {uploadedPhotos.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {uploadedPhotos.map((photo, index) => (
-                <div
-                  key={index}
-                  className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <img
-                    src={photo}
-                    alt={`Wedding memory ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
+            <>
+              {/* Photo Grid with Pagination */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                {uploadedPhotos
+                  .slice(
+                    (currentPage - 1) * photosPerPage,
+                    currentPage * photosPerPage,
+                  )
+                  .map((photo, index) => {
+                    const actualIndex =
+                      (currentPage - 1) * photosPerPage + index;
+                    return (
+                      <div
+                        key={actualIndex}
+                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Wedding memory ${actualIndex + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Pagination Controls */}
+              {uploadedPhotos.length > photosPerPage && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <Button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="border-sage-300 text-sage-600 hover:bg-sage-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {[
+                      ...Array(
+                        Math.ceil(uploadedPhotos.length / photosPerPage),
+                      ),
+                    ].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <Button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          variant={
+                            currentPage === pageNum ? "default" : "outline"
+                          }
+                          size="sm"
+                          className={
+                            currentPage === pageNum
+                              ? "bg-olive-600 hover:bg-olive-700 text-white"
+                              : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                          }
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(
+                          prev + 1,
+                          Math.ceil(uploadedPhotos.length / photosPerPage),
+                        ),
+                      )
+                    }
+                    disabled={
+                      currentPage ===
+                      Math.ceil(uploadedPhotos.length / photosPerPage)
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="border-sage-300 text-sage-600 hover:bg-sage-50 disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Photo Count Info */}
+              <div className="text-center mt-4">
+                <p className="text-sm text-sage-500">
+                  Showing{" "}
+                  {Math.min(
+                    (currentPage - 1) * photosPerPage + 1,
+                    uploadedPhotos.length,
+                  )}
+                  -
+                  {Math.min(currentPage * photosPerPage, uploadedPhotos.length)}{" "}
+                  of {uploadedPhotos.length} photos
+                </p>
+              </div>
+            </>
           ) : (
             <Card className="bg-white/80 backdrop-blur-sm border-sage-200 shadow-lg">
               <CardContent className="p-12 text-center">

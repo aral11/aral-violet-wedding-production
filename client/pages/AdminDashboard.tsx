@@ -82,6 +82,10 @@ export default function AdminDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  // Pagination for admin photo gallery
+  const [currentPage, setCurrentPage] = useState(1);
+  const photosPerPage = 16; // Show 16 photos per page in admin (4x4 grid)
+
   // Load data using database service (Supabase + localStorage fallback)
   useEffect(() => {
     const loadAllData = async () => {
@@ -314,7 +318,7 @@ export default function AdminDashboard() {
               })),
             );
             console.log(
-              `📸 Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`,
+              `�� Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`,
             );
           } else {
             setGuestPhotos([]);
@@ -1035,7 +1039,7 @@ export default function AdminDashboard() {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images up to 25MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
           variant: "destructive",
           duration: 4000,
         });
@@ -1080,15 +1084,26 @@ export default function AdminDashboard() {
 
         while (saveAttempts < maxAttempts) {
           try {
-            await database.photos.create(base64String, "admin");
-            console.log(`Photo ${file.name} saved to database successfully`);
+            const savedPhoto = await database.photos.create(
+              base64String,
+              "admin",
+            );
+            console.log(
+              `📷 Admin photo ${file.name} saved to database successfully:`,
+              savedPhoto.id,
+            );
             return {
               success: true,
               fileName: file.name,
               photoData: base64String,
+              photoId: savedPhoto.id,
             };
           } catch (saveError) {
             saveAttempts++;
+            console.error(
+              `📷 Admin photo save attempt ${saveAttempts} failed:`,
+              saveError,
+            );
             if (saveAttempts >= maxAttempts) {
               throw saveError;
             }
@@ -1133,9 +1148,29 @@ export default function AdminDashboard() {
       if (successfulUploads.length > 0) {
         setUploadedPhotos((prev) => {
           const newPhotos = [...prev, ...successfulUploads];
-          console.log(`${successfulUploads.length} photos added to gallery`);
+          console.log(
+            `📷 ${successfulUploads.length} admin photos added to gallery`,
+          );
           return newPhotos;
         });
+
+        // Force refresh of gallery data from database
+        setTimeout(async () => {
+          try {
+            const refreshedPhotos = await database.photos.getAll();
+            if (refreshedPhotos && refreshedPhotos.length > 0) {
+              const photoData = refreshedPhotos.map(
+                (photo) => photo.photo_data,
+              );
+              setUploadedPhotos(photoData);
+              console.log(
+                `📷 Gallery refreshed with ${refreshedPhotos.length} total photos`,
+              );
+            }
+          } catch (error) {
+            console.log("Gallery refresh failed:", error);
+          }
+        }, 1000);
       }
 
       // Show final message
@@ -1144,9 +1179,9 @@ export default function AdminDashboard() {
           ? "Supabase database"
           : "local storage";
         toast({
-          title: "Photos Uploaded Successfully! 📷",
-          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
-          duration: 4000,
+          title: "Admin Photos Uploaded Successfully! 📷",
+          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType}. Refresh gallery to see updates!`,
+          duration: 5000,
         });
       }
 
@@ -1172,17 +1207,56 @@ export default function AdminDashboard() {
     e.target.value = "";
   };
 
-  const removePhoto = (index: number) => {
+  const removePhoto = async (index: number) => {
     if (
       confirm(
         "Are you sure you want to delete this photo? This action cannot be undone.",
       )
     ) {
-      const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
-      setUploadedPhotos(newPhotos);
-      // Immediately update localStorage
-      localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
-      console.log("Photo removed successfully");
+      try {
+        // Try to get the photo ID from database if available
+        const photos = await database.photos.getAll();
+        const photoToDelete = photos[index];
+
+        if (photoToDelete && photoToDelete.id) {
+          // Delete from database
+          await database.photos.delete(photoToDelete.id);
+          console.log(`📸 Photo ${photoToDelete.id} deleted from database`);
+        }
+
+        // Update local state
+        const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
+        setUploadedPhotos(newPhotos);
+
+        // Update localStorage as fallback
+        localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
+
+        // Adjust current page if we deleted the last photo on the current page
+        const totalPages = Math.ceil(newPhotos.length / photosPerPage);
+        if (currentPage > totalPages && totalPages > 0) {
+          setCurrentPage(totalPages);
+        }
+
+        toast({
+          title: "Photo Deleted ✅",
+          description: "Photo has been removed from the gallery.",
+          duration: 3000,
+        });
+
+        console.log("📸 Photo removed successfully");
+      } catch (error) {
+        console.error("Error deleting photo:", error);
+        // Fallback to local deletion
+        const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
+        setUploadedPhotos(newPhotos);
+        localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
+
+        toast({
+          title: "Photo Deleted ✅",
+          description: "Photo removed from local gallery.",
+          duration: 3000,
+        });
+      }
     }
   };
 
@@ -1653,7 +1727,7 @@ export default function AdminDashboard() {
 
     <div class="footer">
         <div class="logo">❤️ TheVIRALWedding</div>
-        <div style="font-size: 1.2em; margin: 10px 0;">Aral & Violet • December 28, 2025</div>
+        <div style="font-size: 1.2em; margin: 10px 0;">Aral & Violet �� December 28, 2025</div>
         <div style="color: #718096;">With hearts full of joy and blessings from above</div>
         <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
             © 2025 TheVIRALWedding. Made with love By Aral D'Souza.
@@ -2066,7 +2140,7 @@ export default function AdminDashboard() {
                         onChange={handlePhotoUpload}
                         className="hidden"
                       />
-                      <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4 mb-6">
                         <Button
                           onClick={() => {
                             console.log("Photo upload button clicked");
@@ -2077,6 +2151,14 @@ export default function AdminDashboard() {
                                 setTimeout(() => {
                                   photoInputRef.current?.focus();
                                 }, 100);
+                              } else {
+                                console.error("Photo input ref is null");
+                                toast({
+                                  title: "Upload Error",
+                                  description:
+                                    "File input not found. Please refresh the page.",
+                                  variant: "destructive",
+                                });
                               }
                             } catch (error) {
                               console.error(
@@ -2091,22 +2173,23 @@ export default function AdminDashboard() {
                               });
                             }
                           }}
-                          className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg shadow-lg relative z-10"
+                          className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-4 text-lg shadow-lg transition-all duration-200 hover:shadow-xl"
                           size="lg"
                         >
-                          <Upload className="mr-2" size={20} />
+                          <Upload className="mr-3" size={24} />
                           Select Photos (up to 25MB each)
                         </Button>
-                        <div className="text-center space-y-1">
-                          <p className="text-sm text-sage-600">
+                        <div className="text-center space-y-2 max-w-md">
+                          <p className="text-sm text-sage-600 font-medium">
                             Select multiple photos • Up to 25MB per photo
                             supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
                           </p>
-                          <div className="text-xs text-sage-400">
-                            📱 File selection only - camera capture disabled
+                          <div className="text-xs text-sage-400 italic">
+                            📱 File selection only - camera capture disabled for
+                            compatibility
                           </div>
                         </div>
                       </div>
@@ -2119,33 +2202,149 @@ export default function AdminDashboard() {
                     className="mt-4"
                   />
 
-                  {/* Photos Grid */}
+                  {/* Photos Grid with Pagination */}
                   {uploadedPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {uploadedPhotos.map((photo, index) => (
-                        <div key={index} className="relative group">
-                          <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
-                            <img
-                              src={photo}
-                              alt={`Wedding photo ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                        {uploadedPhotos
+                          .slice(
+                            (currentPage - 1) * photosPerPage,
+                            currentPage * photosPerPage,
+                          )
+                          .map((photo, index) => {
+                            const actualIndex =
+                              (currentPage - 1) * photosPerPage + index;
+                            return (
+                              <div key={actualIndex} className="relative group">
+                                <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
+                                  <img
+                                    src={photo}
+                                    alt={`Wedding photo ${actualIndex + 1}`}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => removePhoto(actualIndex)}
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Delete photo"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {/* Pagination Controls for Admin */}
+                      {uploadedPhotos.length > photosPerPage && (
+                        <div className="flex justify-center items-center gap-4 py-4 border-t border-sage-200">
                           <Button
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            disabled={currentPage === 1}
+                            variant="outline"
                             size="sm"
-                            variant="destructive"
-                            onClick={() => removePhoto(index)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="border-sage-300 text-sage-600 hover:bg-sage-50"
                           >
-                            <Trash2 size={14} />
+                            Previous
+                          </Button>
+
+                          <div className="flex items-center gap-2">
+                            {[
+                              ...Array(
+                                Math.ceil(
+                                  uploadedPhotos.length / photosPerPage,
+                                ),
+                              ),
+                            ].map((_, i) => {
+                              const pageNum = i + 1;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  variant={
+                                    currentPage === pageNum
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  size="sm"
+                                  className={
+                                    currentPage === pageNum
+                                      ? "bg-olive-600 hover:bg-olive-700 text-white"
+                                      : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                                  }
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+
+                          <Button
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(
+                                  prev + 1,
+                                  Math.ceil(
+                                    uploadedPhotos.length / photosPerPage,
+                                  ),
+                                ),
+                              )
+                            }
+                            disabled={
+                              currentPage ===
+                              Math.ceil(uploadedPhotos.length / photosPerPage)
+                            }
+                            variant="outline"
+                            size="sm"
+                            className="border-sage-300 text-sage-600 hover:bg-sage-50"
+                          >
+                            Next
                           </Button>
                         </div>
-                      ))}
-                    </div>
+                      )}
+
+                      {/* Photo Management Info */}
+                      <div className="text-center mt-4 p-4 bg-sage-50 rounded-lg">
+                        <p className="text-sm text-sage-600 mb-2">
+                          📷 <strong>{uploadedPhotos.length}</strong> total
+                          photos uploaded
+                        </p>
+                        {uploadedPhotos.length > photosPerPage && (
+                          <p className="text-xs text-sage-500">
+                            Showing{" "}
+                            {Math.min(
+                              (currentPage - 1) * photosPerPage + 1,
+                              uploadedPhotos.length,
+                            )}
+                            -
+                            {Math.min(
+                              currentPage * photosPerPage,
+                              uploadedPhotos.length,
+                            )}{" "}
+                            of {uploadedPhotos.length} photos
+                          </p>
+                        )}
+                        <p className="text-xs text-sage-400 mt-1">
+                          Hover over photos to reveal delete button
+                        </p>
+                      </div>
+                    </>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-sage-600">
-                        No photos uploaded yet. Upload some beautiful memories!
+                      <Camera
+                        className="mx-auto mb-4 text-sage-400"
+                        size={48}
+                      />
+                      <p className="text-sage-600 text-lg mb-2">
+                        No photos uploaded yet
+                      </p>
+                      <p className="text-sage-500 text-sm">
+                        Upload some beautiful wedding memories to get started!
                       </p>
                     </div>
                   )}
@@ -2929,7 +3128,7 @@ export default function AdminDashboard() {
                   <Card className="bg-sage-50 border-sage-200">
                     <CardContent className="p-6">
                       <h4 className="font-semibold text-sage-800 mb-3">
-                        📋 How it works:
+                        �� How it works:
                       </h4>
                       <ul className="space-y-2 text-sm text-sage-700">
                         <li>
