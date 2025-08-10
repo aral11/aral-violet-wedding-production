@@ -314,11 +314,26 @@ export const photoService = {
     return photos.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
   },
 
-  saveToLocalStorage(photoData: string): void {
-    const existing = localStorage.getItem("wedding_photos");
-    const photos = existing ? JSON.parse(existing) : [];
-    photos.push(photoData);
-    localStorage.setItem("wedding_photos", JSON.stringify(photos));
+  saveToLocalStorage(photoData: string, uploadedBy = "admin", guestName?: string): void {
+    if (uploadedBy === "admin") {
+      // Save admin photos to wedding_photos
+      const existing = localStorage.getItem("wedding_photos");
+      const photos = existing ? JSON.parse(existing) : [];
+      photos.push(photoData);
+      localStorage.setItem("wedding_photos", JSON.stringify(photos));
+    } else {
+      // Save guest photos to wedding_guest_photos with metadata
+      const existing = localStorage.getItem("wedding_guest_photos");
+      const guestPhotos = existing ? JSON.parse(existing) : [];
+      const guestPhoto = {
+        photoData,
+        uploadedBy,
+        guestName,
+        createdAt: new Date().toISOString(),
+      };
+      guestPhotos.push(guestPhoto);
+      localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+    }
   },
 
   removeFromLocalStorage(id: string): void {
