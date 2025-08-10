@@ -105,30 +105,40 @@ export default function Index() {
         console.log("📸 Starting photo load from database...");
 
         const photos = await database.photos.getAll();
-        console.log(
-          `📸 Retrieved ${photos.length} photos from database service`,
-        );
+        console.log(`📸 Retrieved ${photos.length} photos from database service`);
 
         if (photos && photos.length > 0) {
+          console.log("📸 Raw photos data:", photos.map(p => ({
+            id: p.id,
+            hasPhotoData: !!p.photo_data,
+            dataType: typeof p.photo_data,
+            startsWithData: p.photo_data?.startsWith?.('data:'),
+            length: p.photo_data?.length || 0
+          })));
+
           // Filter out any photos with invalid data
           const validPhotos = photos.filter(
             (photo) =>
               photo.photo_data && photo.photo_data.startsWith("data:image/"),
           );
 
+          console.log(`📸 Valid photos after filtering: ${validPhotos.length}`);
+
           if (validPhotos.length > 0) {
             const photoData = validPhotos.map((photo) => photo.photo_data);
+            console.log("📸 Setting uploadedPhotos with data:", photoData.map(d => `${d.substring(0, 30)}...`));
             setUploadedPhotos(photoData);
             console.log(`📸 Gallery loaded: ${validPhotos.length} photos`);
           } else {
+            console.log("📸 No valid photos found, setting empty array");
             setUploadedPhotos([]);
           }
         } else {
+          console.log("📸 No photos found in database, setting empty array");
           setUploadedPhotos([]);
-          console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.error("Error loading photos:", error);
+        console.error("📸 Error loading photos:", error);
         setUploadedPhotos([]);
       }
     };
@@ -588,7 +598,7 @@ export default function Index() {
 🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
-��� Traditional dance and music performances
+���� Traditional dance and music performances
 
 10:00 PM | Cake Cutting (15 min)
 ✨ Wedding cake cutting ceremony
