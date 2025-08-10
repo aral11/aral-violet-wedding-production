@@ -52,11 +52,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
 
 let supabase: any = null;
-// Temporarily disable Supabase connection to test fallback system
-// In production, this would be enabled and work properly on Netlify
-const useSupabase = false; // Set to true in production
-
-if (useSupabase && supabaseUrl && supabaseKey) {
+if (supabaseUrl && supabaseKey) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("✅ Supabase client initialized for photos service");
@@ -64,8 +60,8 @@ if (useSupabase && supabaseUrl && supabaseKey) {
     console.warn("❌ Failed to initialize Supabase for photos:", error);
   }
 } else {
-  console.log(
-    "📸 Using mock data system (Supabase disabled for testing - would work in production)",
+  console.warn(
+    "⚠️ Supabase credentials not found - photos service will use fallback mock data",
   );
 }
 
