@@ -569,7 +569,7 @@ Date: Sunday, December 28, 2025
 Venue: Sai Radha Heritage Beach Resort, Kaup
 Generated on: ${currentDate}
 
-📋 EVENT SCHEDULE
+�� EVENT SCHEDULE
 
 ${scheduleContent}
 
@@ -588,6 +588,10 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
+      // Mobile detection and utilities
+      const { isMobile } = detectMobile();
+      const downloadInstructions = getDownloadInstructions();
+
       // First priority: Check if there's a custom invitation PDF uploaded from admin
       console.log("🔍 Checking for uploaded invitation from admin...");
 
