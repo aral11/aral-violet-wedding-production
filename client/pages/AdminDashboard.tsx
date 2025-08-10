@@ -1711,7 +1711,7 @@ export default function AdminDashboard() {
 
           <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
             <CardContent className="p-6 text-center">
-              <Camera className="mx-auto mb-2 text-olive-600" size={32} />
+              <Upload className="mx-auto mb-2 text-olive-600" size={32} />
               <p className="text-2xl font-bold text-olive-700">
                 {uploadedPhotos.length}
               </p>
@@ -2409,7 +2409,7 @@ export default function AdminDashboard() {
                           <h4 className="font-semibold text-lg mb-2">
                             {invitationPDF
                               ? "✅ Custom Invitation Active"
-                              : "⚠�� Using Default Text Invitation"}
+                              : "⚠️ Using Default Text Invitation"}
                           </h4>
                           <p className="text-sm text-gray-600">
                             {invitationPDF
