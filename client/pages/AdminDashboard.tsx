@@ -2203,6 +2203,87 @@ export default function AdminDashboard() {
                                 "/guest-upload"}
                             </code>
                           </div>
+
+                          {/* Photo Download Section */}
+                          <div className="mt-6 pt-4 border-t border-sage-200">
+                            <h4 className="text-md font-semibold text-olive-700 mb-3">Download All Photos</h4>
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                onClick={() => {
+                                  if (uploadedPhotos.length === 0) {
+                                    toast({
+                                      title: "No Photos to Download",
+                                      description: "Upload some photos first to download them.",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
+                                  // Create a zip-like download of all photos
+                                  uploadedPhotos.forEach((photo, index) => {
+                                    const link = document.createElement("a");
+                                    link.href = photo;
+                                    link.download = `wedding-photo-${index + 1}.jpg`;
+                                    link.click();
+
+                                    // Small delay between downloads
+                                    setTimeout(() => {}, 500 * index);
+                                  });
+
+                                  toast({
+                                    title: "Photos Downloaded! 📷",
+                                    description: `${uploadedPhotos.length} photos are being downloaded.`,
+                                  });
+                                }}
+                                variant="outline"
+                                size="sm"
+                                disabled={uploadedPhotos.length === 0}
+                                className="border-olive-300 text-olive-600 hover:bg-olive-50"
+                              >
+                                <Download className="w-4 h-4 mr-1" />
+                                All Photos ({uploadedPhotos.length})
+                              </Button>
+
+                              <Button
+                                onClick={() => {
+                                  if (guestPhotos.length === 0) {
+                                    toast({
+                                      title: "No Guest Photos",
+                                      description: "No guest photos have been uploaded yet.",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
+                                  // Download guest photos
+                                  guestPhotos.forEach((photo, index) => {
+                                    const link = document.createElement("a");
+                                    link.href = photo.photoData;
+                                    link.download = `guest-photo-${photo.guestName || 'unknown'}-${index + 1}.jpg`;
+                                    link.click();
+
+                                    // Small delay between downloads
+                                    setTimeout(() => {}, 500 * index);
+                                  });
+
+                                  toast({
+                                    title: "Guest Photos Downloaded! 📸",
+                                    description: `${guestPhotos.length} guest photos are being downloaded.`,
+                                  });
+                                }}
+                                variant="outline"
+                                size="sm"
+                                disabled={guestPhotos.length === 0}
+                                className="border-sage-300 text-sage-600 hover:bg-sage-50"
+                              >
+                                <Download className="w-4 h-4 mr-1" />
+                                Guest Photos ({guestPhotos.length})
+                              </Button>
+                            </div>
+                            <p className="text-xs text-sage-500 mt-2">
+                              Photos will download individually. Check your downloads folder.
+                            </p>
+                          </div>
                         </div>
                         <div className="flex-shrink-0">
                           <div className="bg-white p-4 rounded-lg border-2 border-olive-200 text-center">
