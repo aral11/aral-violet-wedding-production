@@ -14,19 +14,61 @@ export default function TestPhotos() {
     setLoading(true);
     try {
       console.log("🔍 Testing direct Supabase connection...");
-      
+
+      // Check environment variables first
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      console.log("🔧 Environment check:", {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseKey,
+        urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'not set',
+        keyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'not set'
+      });
+
       if (!supabase) {
-        setConnectionStatus("No Supabase client");
+        setConnectionStatus("No Supabase client - check environment variables");
         toast({
           title: "No Supabase Client",
-          description: "Supabase client is not initialized",
+          description: "Supabase client is not initialized. Check environment variables.",
           variant: "destructive",
         });
         return;
       }
 
-      console.log("📱 Supabase client exists, querying photos...");
-      
+      console.log("📱 Supabase client exists, testing basic connectivity...");
+
+      // First test basic connectivity
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from("photos")
+          .select("count")
+          .limit(1);
+
+        console.log("🔌 Connectivity test result:", { testData, testError });
+
+        if (testError) {
+          setConnectionStatus(`Connectivity failed: ${testError.message}`);
+          toast({
+            title: "Connectivity Test Failed",
+            description: testError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch (connectError) {
+        console.error("🔌 Basic connectivity failed:", connectError);
+        setConnectionStatus(`Network error: ${connectError instanceof Error ? connectError.message : 'Unknown'}`);
+        toast({
+          title: "Network Error",
+          description: "Cannot reach Supabase. Check network connection.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("📱 Connectivity OK, querying photos...");
+
       const { data, error } = await supabase
         .from("photos")
         .select("*")
@@ -36,7 +78,7 @@ export default function TestPhotos() {
 
       if (error) {
         console.error("❌ Supabase query error:", error);
-        setConnectionStatus(`Error: ${error.message}`);
+        setConnectionStatus(`Query error: ${error.message}`);
         toast({
           title: "Query Failed",
           description: error.message,
@@ -46,7 +88,7 @@ export default function TestPhotos() {
         setPhotos(data || []);
         setConnectionStatus(`Success - Found ${data?.length || 0} photos`);
         console.log("✅ Direct Supabase query successful:", data?.length || 0, "photos");
-        
+
         toast({
           title: "Direct Query Success!",
           description: `Found ${data?.length || 0} photos in Supabase`,
@@ -55,10 +97,11 @@ export default function TestPhotos() {
       }
     } catch (err) {
       console.error("❌ Connection test failed:", err);
-      setConnectionStatus(`Exception: ${err instanceof Error ? err.message : String(err)}`);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setConnectionStatus(`Exception: ${errorMsg}`);
       toast({
         title: "Connection Failed",
-        description: `Error: ${err instanceof Error ? err.message : String(err)}`,
+        description: `Error: ${errorMsg}`,
         variant: "destructive",
       });
     } finally {
