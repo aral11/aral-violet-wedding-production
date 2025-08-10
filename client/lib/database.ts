@@ -544,6 +544,36 @@ export const photoService = {
     const photoData = filtered.map((p) => p.photo_data);
     localStorage.setItem("wedding_photos", JSON.stringify(photoData));
   },
+
+  syncSupabaseToLocalStorage(photos: SupabasePhoto[]): void {
+    try {
+      // Separate admin and guest photos for proper storage
+      const adminPhotos = photos
+        .filter((p) => p.uploaded_by === "admin")
+        .map((p) => p.photo_data);
+
+      const guestPhotos = photos
+        .filter((p) => p.uploaded_by !== "admin")
+        .map((p) => ({
+          photoData: p.photo_data,
+          uploadedBy: p.uploaded_by,
+          guestName: p.guest_name,
+          createdAt: p.created_at,
+        }));
+
+      if (adminPhotos.length > 0) {
+        localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
+      }
+
+      if (guestPhotos.length > 0) {
+        localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+      }
+
+      console.log(`📸 Synced ${photos.length} photos to localStorage`);
+    } catch (error) {
+      console.error("📸 Error syncing photos to localStorage:", error);
+    }
+  },
 };
 
 // Wedding Flow Database Service
