@@ -184,7 +184,10 @@ export const photoService = {
 
           // Validate the photos have proper data
           const validPhotos = photos.filter(
-            (p) => p.photo_data && (p.photo_data.startsWith("data:") || p.photo_data.startsWith("http")),
+            (p) =>
+              p.photo_data &&
+              (p.photo_data.startsWith("data:") ||
+                p.photo_data.startsWith("http")),
           );
           console.log(
             `📸 ${validPhotos.length} photos have valid URLs/data from Supabase`,
@@ -215,7 +218,6 @@ export const photoService = {
       console.log("📸 Returning photos from localStorage fallback");
       return localPhotos;
     }
-
 
     // Try API as backup (but handle fetch errors gracefully)
     try {
@@ -252,9 +254,14 @@ export const photoService = {
 
           // Validate the photos have proper data (data URLs or Supabase URLs)
           const validPhotos = photos.filter(
-            (p) => p.photo_data && (p.photo_data.startsWith("data:") || p.photo_data.startsWith("http")),
+            (p) =>
+              p.photo_data &&
+              (p.photo_data.startsWith("data:") ||
+                p.photo_data.startsWith("http")),
           );
-          console.log(`📸 ${validPhotos.length} photos have valid URLs from API`);
+          console.log(
+            `📸 ${validPhotos.length} photos have valid URLs from API`,
+          );
 
           if (validPhotos.length > 0) {
             console.log("📸 Returning valid photos from API");
@@ -272,7 +279,9 @@ export const photoService = {
     }
 
     // If everything fails, return diagnostic placeholder photos
-    console.log("📸 All connections failed, returning diagnostic placeholder photos...");
+    console.log(
+      "📸 All connections failed, returning diagnostic placeholder photos...",
+    );
     const diagnosticPhotos: SupabasePhoto[] = [
       {
         id: "diagnostic_1",

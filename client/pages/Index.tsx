@@ -110,14 +110,16 @@ export default function Index() {
             (photo) =>
               photo.photo_data &&
               (photo.photo_data.startsWith("data:image/") ||
-               photo.photo_data.startsWith("http") ||
-               photo.photo_data.startsWith("blob:")),
+                photo.photo_data.startsWith("http") ||
+                photo.photo_data.startsWith("blob:")),
           );
 
           if (validPhotos.length > 0) {
             const photoData = validPhotos.map((photo) => photo.photo_data);
             setUploadedPhotos(photoData);
-            console.log(`📸 Gallery loaded: ${validPhotos.length} real photos from Supabase`);
+            console.log(
+              `📸 Gallery loaded: ${validPhotos.length} real photos from Supabase`,
+            );
 
             // Log sample URLs for debugging
             if (validPhotos.length > 0) {
@@ -126,11 +128,13 @@ export default function Index() {
                 isDataURL: firstPhoto.photo_data.startsWith("data:"),
                 isHttpURL: firstPhoto.photo_data.startsWith("http"),
                 isBlobURL: firstPhoto.photo_data.startsWith("blob:"),
-                urlStart: firstPhoto.photo_data.substring(0, 50) + "..."
+                urlStart: firstPhoto.photo_data.substring(0, 50) + "...",
               });
             }
           } else {
-            console.log(`📸 No valid photos found - total: ${photos.length}, valid: 0`);
+            console.log(
+              `📸 No valid photos found - total: ${photos.length}, valid: 0`,
+            );
             setUploadedPhotos([]);
           }
         } else {
@@ -1358,10 +1362,13 @@ Please RSVP at our wedding website
             </p>
             {uploadedPhotos.length > 0 && (
               <p className="text-sm text-sage-500 mt-2">
-                {uploadedPhotos.some(photo => photo.includes("[FALLBACK]") || photo.includes("diagnostic"))
+                {uploadedPhotos.some(
+                  (photo) =>
+                    photo.includes("[FALLBACK]") ||
+                    photo.includes("diagnostic"),
+                )
                   ? `Showing ${uploadedPhotos.length} placeholder photos • Upload photos in admin panel to see real gallery`
-                  : `Gallery updates automatically • ${uploadedPhotos.length} photo${uploadedPhotos.length !== 1 ? "s" : ""}`
-                }
+                  : `Gallery updates automatically • ${uploadedPhotos.length} photo${uploadedPhotos.length !== 1 ? "s" : ""}`}
               </p>
             )}
           </div>
@@ -1437,25 +1444,40 @@ Please RSVP at our wedding website
           {uploadedPhotos.length > 0 ? (
             <>
               {/* Show configuration notice if displaying fallback photos */}
-              {uploadedPhotos.some(photo => photo.includes("[FALLBACK]") || photo.includes("diagnostic") || photo.includes("No Photos Found")) && (
+              {uploadedPhotos.some(
+                (photo) =>
+                  photo.includes("[FALLBACK]") ||
+                  photo.includes("diagnostic") ||
+                  photo.includes("No Photos Found"),
+              ) && (
                 <div className="mb-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-yellow-800 mb-2">
                       📸 Configure Supabase to Show Real Photos
                     </h3>
                     <p className="text-yellow-700 mb-4">
-                      The photos you see below are placeholders. To display your actual wedding photos from Supabase:
+                      The photos you see below are placeholders. To display your
+                      actual wedding photos from Supabase:
                     </p>
                     <div className="text-left max-w-md mx-auto space-y-2 text-sm text-yellow-700">
-                      <p>• Update your Supabase URL and API key in environment variables</p>
+                      <p>
+                        • Update your Supabase URL and API key in environment
+                        variables
+                      </p>
                       <p>• Restart the development server</p>
                       <p>• Upload photos through the admin panel</p>
                     </div>
                     <div className="mt-4 space-x-4">
-                      <a href="/test-photos" className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors">
+                      <a
+                        href="/test-photos"
+                        className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
                         Test Connection
                       </a>
-                      <a href="/login" className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded text-sm transition-colors">
+                      <a
+                        href="/login"
+                        className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
                         Admin Panel
                       </a>
                     </div>
@@ -1473,17 +1495,26 @@ Please RSVP at our wedding website
                   .map((photo, index) => {
                     const actualIndex =
                       (currentPage - 1) * photosPerPage + index;
-                    const isPlaceholder = photo.includes("[FALLBACK]") || photo.includes("diagnostic") || photo.includes("No Photos Found");
+                    const isPlaceholder =
+                      photo.includes("[FALLBACK]") ||
+                      photo.includes("diagnostic") ||
+                      photo.includes("No Photos Found");
                     return (
                       <div
                         key={actualIndex}
                         className={`aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
-                          isPlaceholder ? "border-2 border-dashed border-yellow-300" : ""
+                          isPlaceholder
+                            ? "border-2 border-dashed border-yellow-300"
+                            : ""
                         }`}
                       >
                         <img
                           src={photo}
-                          alt={isPlaceholder ? `Configuration needed ${actualIndex + 1}` : `Wedding memory ${actualIndex + 1}`}
+                          alt={
+                            isPlaceholder
+                              ? `Configuration needed ${actualIndex + 1}`
+                              : `Wedding memory ${actualIndex + 1}`
+                          }
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
@@ -1585,13 +1616,20 @@ Please RSVP at our wedding website
                 {/* Configuration notice for developers */}
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
                   <p className="text-sm text-blue-700 mb-2">
-                    🔧 <strong>For Developers:</strong> If you have photos in Supabase but they're not showing:
+                    🔧 <strong>For Developers:</strong> If you have photos in
+                    Supabase but they're not showing:
                   </p>
                   <div className="space-x-2">
-                    <a href="/test-photos" className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                    <a
+                      href="/test-photos"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                    >
                       Test Connection
                     </a>
-                    <a href="/login" className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                    <a
+                      href="/login"
+                      className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                    >
                       Admin Panel
                     </a>
                   </div>

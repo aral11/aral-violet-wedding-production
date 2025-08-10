@@ -48,11 +48,18 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
 };
 
 // Supabase configuration - check both server and client env vars
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+const supabaseUrl =
+  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const supabaseKey =
+  process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 
 let supabase: any = null;
-if (supabaseUrl && supabaseKey && supabaseUrl !== "YOUR_SUPABASE_URL" && supabaseKey !== "YOUR_SUPABASE_ANON_KEY") {
+if (
+  supabaseUrl &&
+  supabaseKey &&
+  supabaseUrl !== "YOUR_SUPABASE_URL" &&
+  supabaseKey !== "YOUR_SUPABASE_ANON_KEY"
+) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("✅ Supabase client initialized for photos service");
@@ -67,8 +74,10 @@ if (supabaseUrl && supabaseKey && supabaseUrl !== "YOUR_SUPABASE_URL" && supabas
   console.log("📋 Available env vars:", {
     VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ? "set" : "not set",
     SUPABASE_URL: process.env.SUPABASE_URL ? "set" : "not set",
-    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY ? "set" : "not set",
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set"
+    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
+      ? "set"
+      : "not set",
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
   });
 }
 
@@ -92,7 +101,10 @@ export const getPhotos: RequestHandler = async (req, res) => {
           throw testError;
         }
 
-        console.log("📸 Supabase connection successful, total photos:", testData?.length || 0);
+        console.log(
+          "📸 Supabase connection successful, total photos:",
+          testData?.length || 0,
+        );
       } catch (connectionError) {
         console.error("📸 Supabase connection failed:", connectionError);
         throw connectionError;
@@ -136,14 +148,19 @@ export const getPhotos: RequestHandler = async (req, res) => {
         console.log("📸 Sample photo data:", {
           id: firstPhoto.id,
           uploadedBy: firstPhoto.uploadedBy,
-          hasValidData: firstPhoto.photoData && firstPhoto.photoData.startsWith("data:"),
-          dataStart: firstPhoto.photoData ? firstPhoto.photoData.substring(0, 50) + "..." : "no data"
+          hasValidData:
+            firstPhoto.photoData && firstPhoto.photoData.startsWith("data:"),
+          dataStart: firstPhoto.photoData
+            ? firstPhoto.photoData.substring(0, 50) + "..."
+            : "no data",
         });
       }
 
       res.json(photos);
     } else {
-      console.log("📸 No Supabase client - returning enhanced mock data for testing");
+      console.log(
+        "📸 No Supabase client - returning enhanced mock data for testing",
+      );
       // Return enhanced mock data that shows we're in fallback mode
       const allMockPhotos = [
         {

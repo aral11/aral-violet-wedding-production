@@ -10,17 +10,20 @@ export default function TestPhotos() {
   const { toast } = useToast();
   const [supabaseUrl, setSupabaseUrl] = useState("");
   const [supabaseKey, setSupabaseKey] = useState("");
-  const [connectionStatus, setConnectionStatus] = useState<string>("Not tested");
+  const [connectionStatus, setConnectionStatus] =
+    useState<string>("Not tested");
   const [photos, setPhotos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const testSupabaseConnection = async () => {
     setIsLoading(true);
     setConnectionStatus("Testing...");
-    
+
     try {
       if (!supabase) {
-        setConnectionStatus("❌ Supabase client not initialized - check credentials");
+        setConnectionStatus(
+          "❌ Supabase client not initialized - check credentials",
+        );
         return;
       }
 
@@ -37,7 +40,7 @@ export default function TestPhotos() {
       }
 
       setConnectionStatus("✅ Connection successful");
-      
+
       // Try to fetch actual photos
       console.log("📸 Fetching photos from Supabase...");
       const { data: photosData, error: photosError } = await supabase
@@ -48,17 +51,22 @@ export default function TestPhotos() {
 
       if (photosError) {
         console.error("Photos fetch error:", photosError);
-        setConnectionStatus(`✅ Connected but photo fetch failed: ${photosError.message}`);
+        setConnectionStatus(
+          `✅ Connected but photo fetch failed: ${photosError.message}`,
+        );
         return;
       }
 
       console.log("Raw photos data from Supabase:", photosData);
       setPhotos(photosData || []);
-      setConnectionStatus(`✅ Connected and found ${photosData?.length || 0} photos`);
-
+      setConnectionStatus(
+        `✅ Connected and found ${photosData?.length || 0} photos`,
+      );
     } catch (error) {
       console.error("Test error:", error);
-      setConnectionStatus(`❌ Test failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setConnectionStatus(
+        `❌ Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -66,18 +74,18 @@ export default function TestPhotos() {
 
   const testDatabaseService = async () => {
     setIsLoading(true);
-    
+
     try {
       console.log("🔧 Testing database service...");
       const photos = await database.photos.getAll();
       console.log("Database service returned:", photos);
-      
+
       toast({
         title: "Database Service Test",
         description: `Found ${photos.length} photos via database service`,
         duration: 3000,
       });
-      
+
       setPhotos(photos);
     } catch (error) {
       console.error("Database service error:", error);
@@ -94,19 +102,19 @@ export default function TestPhotos() {
 
   const testApiEndpoint = async () => {
     setIsLoading(true);
-    
+
     try {
       console.log("🌐 Testing API endpoint...");
       const response = await fetch("/api/photos");
       const data = await response.json();
       console.log("API endpoint returned:", data);
-      
+
       toast({
         title: "API Endpoint Test",
         description: `API returned ${data.length} photos`,
         duration: 3000,
       });
-      
+
       setPhotos(data);
     } catch (error) {
       console.error("API test error:", error);
@@ -135,7 +143,8 @@ export default function TestPhotos() {
     // For now, just show instructions
     toast({
       title: "Credentials Updated",
-      description: "To apply new credentials, you'll need to restart the dev server with updated environment variables",
+      description:
+        "To apply new credentials, you'll need to restart the dev server with updated environment variables",
       duration: 5000,
     });
   };
@@ -151,7 +160,8 @@ export default function TestPhotos() {
             <div>
               <h3 className="text-lg font-semibold mb-2">Current Status</h3>
               <p className="text-sm text-gray-600">
-                Supabase Client: {supabase ? "✅ Initialized" : "❌ Not initialized"}
+                Supabase Client:{" "}
+                {supabase ? "✅ Initialized" : "❌ Not initialized"}
               </p>
               <p className="text-sm text-gray-600">
                 Connection: {connectionStatus}
@@ -178,7 +188,9 @@ export default function TestPhotos() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Supabase URL</label>
+              <label className="block text-sm font-medium mb-1">
+                Supabase URL
+              </label>
               <Input
                 type="text"
                 placeholder="https://yourproject.supabase.co"
@@ -187,7 +199,9 @@ export default function TestPhotos() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Supabase Anon Key</label>
+              <label className="block text-sm font-medium mb-1">
+                Supabase Anon Key
+              </label>
               <Input
                 type="password"
                 placeholder="Your anon key here"
@@ -198,12 +212,18 @@ export default function TestPhotos() {
             <Button onClick={updateSupabaseCredentials}>
               Update Credentials (Requires Restart)
             </Button>
-            
+
             <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
               <strong>To fix the photo issue:</strong>
               <ol className="list-decimal list-inside mt-2 space-y-1">
-                <li>Get your actual Supabase URL and API key from your Supabase project</li>
-                <li>Update the environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY</li>
+                <li>
+                  Get your actual Supabase URL and API key from your Supabase
+                  project
+                </li>
+                <li>
+                  Update the environment variables VITE_SUPABASE_URL and
+                  VITE_SUPABASE_ANON_KEY
+                </li>
                 <li>Restart the development server</li>
                 <li>Test the connection using the buttons above</li>
               </ol>
@@ -222,25 +242,40 @@ export default function TestPhotos() {
                   {photos.slice(0, 6).map((photo, index) => (
                     <div key={photo.id || index} className="border rounded p-3">
                       <div className="text-sm space-y-2">
-                        <p><strong>ID:</strong> {photo.id || "No ID"}</p>
-                        <p><strong>Uploaded by:</strong> {photo.uploaded_by || photo.uploadedBy || "Unknown"}</p>
-                        <p><strong>Guest:</strong> {photo.guest_name || photo.guestName || "N/A"}</p>
-                        <p><strong>Data type:</strong> {
-                          photo.photo_data || photo.photoData 
-                            ? (photo.photo_data || photo.photoData).startsWith("data:") 
-                              ? "Data URL" 
-                              : (photo.photo_data || photo.photoData).startsWith("http")
+                        <p>
+                          <strong>ID:</strong> {photo.id || "No ID"}
+                        </p>
+                        <p>
+                          <strong>Uploaded by:</strong>{" "}
+                          {photo.uploaded_by || photo.uploadedBy || "Unknown"}
+                        </p>
+                        <p>
+                          <strong>Guest:</strong>{" "}
+                          {photo.guest_name || photo.guestName || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Data type:</strong>{" "}
+                          {photo.photo_data || photo.photoData
+                            ? (photo.photo_data || photo.photoData).startsWith(
+                                "data:",
+                              )
+                              ? "Data URL"
+                              : (
+                                    photo.photo_data || photo.photoData
+                                  ).startsWith("http")
                                 ? "HTTP URL"
                                 : "Unknown format"
-                            : "No data"
-                        }</p>
+                            : "No data"}
+                        </p>
                         {(photo.photo_data || photo.photoData) && (
                           <div className="w-20 h-20 border">
-                            <img 
-                              src={photo.photo_data || photo.photoData} 
-                              alt="Photo preview" 
+                            <img
+                              src={photo.photo_data || photo.photoData}
+                              alt="Photo preview"
                               className="w-full h-full object-cover"
-                              onError={() => console.log("Failed to load image:", photo.id)}
+                              onError={() =>
+                                console.log("Failed to load image:", photo.id)
+                              }
                             />
                           </div>
                         )}
@@ -248,13 +283,17 @@ export default function TestPhotos() {
                     </div>
                   ))}
                 </div>
-                
+
                 {photos.length > 6 && (
-                  <p className="text-sm text-gray-500">... and {photos.length - 6} more photos</p>
+                  <p className="text-sm text-gray-500">
+                    ... and {photos.length - 6} more photos
+                  </p>
                 )}
               </div>
             ) : (
-              <p className="text-gray-500">No photos found. Try testing the connections above.</p>
+              <p className="text-gray-500">
+                No photos found. Try testing the connections above.
+              </p>
             )}
           </CardContent>
         </Card>
