@@ -159,6 +159,8 @@ export const photoService = {
         console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
 
         if (apiPhotos && apiPhotos.length > 0) {
+          console.log(`📸 API returned photos:`, apiPhotos.map(p => ({ id: p.id, hasData: !!p.photoData, dataStart: p.photoData?.substring(0, 20) })));
+
           // Convert API response to SupabasePhoto format
           const photos = apiPhotos.map((photo: any) => ({
             id: photo.id,
@@ -167,6 +169,8 @@ export const photoService = {
             guest_name: photo.guestName,
             created_at: photo.createdAt,
           }));
+
+          console.log(`📸 Converted photos:`, photos.map(p => ({ id: p.id, hasData: !!p.photo_data, dataStart: p.photo_data?.substring(0, 20) })));
 
           // Sync to localStorage for future use
           const adminPhotos = photos
