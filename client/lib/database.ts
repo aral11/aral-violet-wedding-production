@@ -11,6 +11,24 @@ const isSupabaseConfigured = () => {
   return supabase !== null && supabase !== undefined;
 };
 
+// Test if Supabase is actually reachable
+const testSupabaseConnection = async () => {
+  if (!isSupabaseConfigured()) return false;
+
+  try {
+    // Simple connectivity test
+    const { data, error } = await supabase
+      .from("photos")
+      .select("id")
+      .limit(1);
+
+    return !error; // Return true if no error
+  } catch (error) {
+    console.warn("Supabase connectivity test failed:", error);
+    return false;
+  }
+};
+
 // Guest Database Service
 export const guestService = {
   async getAll(): Promise<SupabaseGuest[]> {
