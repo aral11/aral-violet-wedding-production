@@ -37,6 +37,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/guest-upload" element={<GuestUpload />} />
             <Route path="/debug" element={<Debug />} />
+            <Route path="/test-photos" element={<TestPhotos />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
