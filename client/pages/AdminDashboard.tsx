@@ -1970,9 +1970,9 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   {/* Upload Section */}
                   <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
-                    <Camera className="mx-auto mb-4 text-olive-600" size={48} />
+                    <Upload className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Upload Wedding Photos
+                      Select Wedding Photos (25MB+ each)
                     </h3>
                     <div className="space-y-3">
                       <input
