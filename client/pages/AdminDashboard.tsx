@@ -82,6 +82,10 @@ export default function AdminDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  // Pagination for admin photo gallery
+  const [currentPage, setCurrentPage] = useState(1);
+  const photosPerPage = 16; // Show 16 photos per page in admin (4x4 grid)
+
   // Load data using database service (Supabase + localStorage fallback)
   useEffect(() => {
     const loadAllData = async () => {
@@ -2141,33 +2145,109 @@ export default function AdminDashboard() {
                     className="mt-4"
                   />
 
-                  {/* Photos Grid */}
+                  {/* Photos Grid with Pagination */}
                   {uploadedPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {uploadedPhotos.map((photo, index) => (
-                        <div key={index} className="relative group">
-                          <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
-                            <img
-                              src={photo}
-                              alt={`Wedding photo ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                        {uploadedPhotos
+                          .slice((currentPage - 1) * photosPerPage, currentPage * photosPerPage)
+                          .map((photo, index) => {
+                            const actualIndex = (currentPage - 1) * photosPerPage + index;
+                            return (
+                              <div key={actualIndex} className="relative group">
+                                <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
+                                  <img
+                                    src={photo}
+                                    alt={`Wedding photo ${actualIndex + 1}`}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => removePhoto(actualIndex)}
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Delete photo"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {/* Pagination Controls for Admin */}
+                      {uploadedPhotos.length > photosPerPage && (
+                        <div className="flex justify-center items-center gap-4 py-4 border-t border-sage-200">
                           <Button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            variant="outline"
                             size="sm"
-                            variant="destructive"
-                            onClick={() => removePhoto(index)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="border-sage-300 text-sage-600 hover:bg-sage-50"
                           >
-                            <Trash2 size={14} />
+                            Previous
+                          </Button>
+
+                          <div className="flex items-center gap-2">
+                            {[...Array(Math.ceil(uploadedPhotos.length / photosPerPage))].map((_, i) => {
+                              const pageNum = i + 1;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  variant={currentPage === pageNum ? "default" : "outline"}
+                                  size="sm"
+                                  className={currentPage === pageNum
+                                    ? "bg-olive-600 hover:bg-olive-700 text-white"
+                                    : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                                  }
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+
+                          <Button
+                            onClick={() => setCurrentPage(prev =>
+                              Math.min(prev + 1, Math.ceil(uploadedPhotos.length / photosPerPage))
+                            )}
+                            disabled={currentPage === Math.ceil(uploadedPhotos.length / photosPerPage)}
+                            variant="outline"
+                            size="sm"
+                            className="border-sage-300 text-sage-600 hover:bg-sage-50"
+                          >
+                            Next
                           </Button>
                         </div>
-                      ))}
-                    </div>
+                      )}
+
+                      {/* Photo Management Info */}
+                      <div className="text-center mt-4 p-4 bg-sage-50 rounded-lg">
+                        <p className="text-sm text-sage-600 mb-2">
+                          📷 <strong>{uploadedPhotos.length}</strong> total photos uploaded
+                        </p>
+                        {uploadedPhotos.length > photosPerPage && (
+                          <p className="text-xs text-sage-500">
+                            Showing {Math.min((currentPage - 1) * photosPerPage + 1, uploadedPhotos.length)}-
+                            {Math.min(currentPage * photosPerPage, uploadedPhotos.length)} of {uploadedPhotos.length} photos
+                          </p>
+                        )}
+                        <p className="text-xs text-sage-400 mt-1">
+                          Hover over photos to reveal delete button
+                        </p>
+                      </div>
+                    </>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-sage-600">
-                        No photos uploaded yet. Upload some beautiful memories!
+                      <Camera className="mx-auto mb-4 text-sage-400" size={48} />
+                      <p className="text-sage-600 text-lg mb-2">
+                        No photos uploaded yet
+                      </p>
+                      <p className="text-sage-500 text-sm">
+                        Upload some beautiful wedding memories to get started!
                       </p>
                     </div>
                   )}
