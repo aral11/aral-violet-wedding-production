@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
+import GuestUpload from "./pages/GuestUpload";
 import Debug from "./pages/Debug";
 import NotFound from "./pages/NotFound";
 
