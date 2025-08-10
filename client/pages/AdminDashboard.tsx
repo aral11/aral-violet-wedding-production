@@ -917,7 +917,7 @@ export default function AdminDashboard() {
     // Show initial processing message for better UX
     toast({
       title: "Processing Photos... ⏳",
-      description: `Uploading ${totalFiles} photo${totalFiles !== 1 ? 's' : ''}. Please wait...`,
+      description: `Uploading ${totalFiles} photo${totalFiles !== 1 ? "s" : ""}. Please wait...`,
       duration: 2000,
     });
 
@@ -928,7 +928,8 @@ export default function AdminDashboard() {
       );
 
       // Enhanced file type validation (including file extension check for mobile)
-      const isValidImage = file.type.startsWith("image/") ||
+      const isValidImage =
+        file.type.startsWith("image/") ||
         /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
 
       if (!isValidImage) {
@@ -981,7 +982,7 @@ export default function AdminDashboard() {
           const base64String = event.target.result as string;
 
           // Validate base64 data
-          if (!base64String.startsWith('data:image/')) {
+          if (!base64String.startsWith("data:image/")) {
             console.error(`Invalid base64 data for ${file.name}`);
             toast({
               title: "Upload Error",
@@ -1007,7 +1008,9 @@ export default function AdminDashboard() {
                   throw saveError; // Throw error after max attempts
                 }
                 // Wait before retry
-                await new Promise(resolve => setTimeout(resolve, 1000 * saveAttempts));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 1000 * saveAttempts),
+                );
               }
             }
 
@@ -1020,13 +1023,12 @@ export default function AdminDashboard() {
               return newPhotos;
             });
             successCount++;
-
           } catch (error) {
             console.error(`Error saving photo ${file.name}:`, error);
             errorCount++;
             toast({
               title: "Photo Upload Error",
-              description: `Error saving "${file.name}". ${error instanceof Error ? error.message : 'Please try again.'}`,
+              description: `Error saving "${file.name}". ${error instanceof Error ? error.message : "Please try again."}`,
               variant: "destructive",
               duration: 4000,
             });
@@ -1048,7 +1050,7 @@ export default function AdminDashboard() {
             if (errorCount > 0) {
               toast({
                 title: "Some uploads failed",
-                description: `${errorCount} photo${errorCount !== 1 ? 's' : ''} failed to upload. Please try again.`,
+                description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload. Please try again.`,
                 variant: "destructive",
                 duration: 4000,
               });
@@ -1962,7 +1964,7 @@ export default function AdminDashboard() {
                         ref={photoInputRef}
                         type="file"
                         multiple
-                        accept={getMobileFileAccept('image')}
+                        accept={getMobileFileAccept("image")}
                         onChange={handlePhotoUpload}
                         className="hidden"
                         capture="environment"
@@ -1974,7 +1976,7 @@ export default function AdminDashboard() {
                             // Enhanced mobile compatibility
                             if (photoInputRef.current) {
                               // Reset any previous value
-                              photoInputRef.current.value = '';
+                              photoInputRef.current.value = "";
 
                               // Trigger file picker
                               photoInputRef.current.click();
@@ -1985,10 +1987,14 @@ export default function AdminDashboard() {
                               }, 100);
                             }
                           } catch (error) {
-                            console.error('Error triggering file picker:', error);
+                            console.error(
+                              "Error triggering file picker:",
+                              error,
+                            );
                             toast({
                               title: "Upload Error",
-                              description: "Could not open file picker. Please try again.",
+                              description:
+                                "Could not open file picker. Please try again.",
                               variant: "destructive",
                             });
                           }
@@ -2028,7 +2034,8 @@ export default function AdminDashboard() {
                         Supports: JPG, PNG, GIF, WebP formats
                       </p>
                       <div className="text-xs text-sage-400 mt-2">
-                        📱 Mobile users: Use "Take/Upload Photo" for better compatibility
+                        📱 Mobile users: Use "Take/Upload Photo" for better
+                        compatibility
                       </div>
                     </div>
                   </div>
