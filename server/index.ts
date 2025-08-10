@@ -61,9 +61,12 @@ export async function createServer() {
 
   // Photos API
   app.get("/api/photos", getPhotos);
-  app.post("/api/photos", uploadPhoto);
-  app.post("/api/photos/bulk", bulkUploadPhotos);
+  app.post("/api/photos", validateGuestUpload, uploadPhoto);
+  app.post("/api/photos/bulk", validateGuestUpload, bulkUploadPhotos);
   app.delete("/api/photos/:id", deletePhoto);
+
+  // Guest upload QR code
+  app.get("/api/guest-upload-qr", generateGuestUploadQR);
 
   // Wedding Flow API
   app.get("/api/wedding-flow", getWeddingFlow);
