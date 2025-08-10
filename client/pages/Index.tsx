@@ -102,24 +102,51 @@ export default function Index() {
     // Load photos using new database service
     const loadPhotos = async () => {
       try {
+        console.log("📸 Starting photo load from database...");
+        console.log("📊 Storage status:", database.getStorageStatus());
+        console.log("📱 Using Supabase:", database.isUsingSupabase());
+
         const photos = await database.photos.getAll();
+        console.log("📸 Raw photos from database:", photos);
+
         if (photos && photos.length > 0) {
-          const photoData = photos.map((photo) => photo.photo_data);
-          setUploadedPhotos(photoData);
-          const storageType = database.isUsingSupabase()
-            ? "Supabase"
-            : "localStorage";
-          console.log(
-            `📸 Gallery updated: ${photos.length} photos loaded from ${storageType}`,
+          // Filter out any photos with invalid data
+          const validPhotos = photos.filter(photo =>
+            photo.photo_data &&
+            photo.photo_data.startsWith("data:image/")
           );
+
+          console.log(`📸 Filtered photos (${validPhotos.length}/${photos.length} valid):`, validPhotos);
+
+          if (validPhotos.length > 0) {
+            const photoData = validPhotos.map((photo) => photo.photo_data);
+            setUploadedPhotos(photoData);
+            const storageType = database.isUsingSupabase()
+              ? "Supabase"
+              : "localStorage";
+            console.log(
+              `📸 Gallery updated: ${validPhotos.length} photos loaded from ${storageType}`,
+            );
+
+            // Show a toast with the count
+            toast({
+              title: "Gallery Loaded! 📸",
+              description: `Found ${validPhotos.length} photo${validPhotos.length !== 1 ? 's' : ''} from ${storageType}`,
+              duration: 3000,
+            });
+          } else {
+            console.log("📸 No valid photos found - all photos have invalid data");
+            setUploadedPhotos([]);
+          }
         } else {
           setUploadedPhotos([]);
           console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.log("Error loading photos:", error);
+        console.error("❌ Error loading photos from database:", error);
         // Try to load from localStorage as fallback (both admin and guest photos)
         try {
+          console.log("🔄 Attempting localStorage fallback...");
           const adminPhotos = JSON.parse(
             localStorage.getItem("wedding_photos") || "[]",
           );
@@ -131,6 +158,8 @@ export default function Index() {
           );
 
           const allPhotos = [...adminPhotos, ...guestPhotos];
+          console.log(`📸 localStorage fallback - Admin: ${adminPhotos.length}, Guest: ${guestPhotos.length}, Total: ${allPhotos.length}`);
+
           if (allPhotos.length > 0) {
             setUploadedPhotos(allPhotos);
             console.log(
@@ -138,9 +167,10 @@ export default function Index() {
             );
           } else {
             setUploadedPhotos([]);
+            console.log("📸 No photos found in localStorage fallback either");
           }
         } catch (fallbackError) {
-          console.log("Fallback photo loading failed:", fallbackError);
+          console.error("❌ Fallback photo loading failed:", fallbackError);
           setUploadedPhotos([]);
         }
       }
