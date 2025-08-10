@@ -2005,59 +2005,63 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-6">
                   {/* Upload Section */}
-                  <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
-                    <Upload className="mx-auto mb-4 text-olive-600" size={48} />
-                    <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Upload Wedding Photos
-                    </h3>
-                    <p className="text-sage-600 mb-6">
-                      Upload high-quality photos (up to 25MB each) for the
-                      wedding gallery
-                    </p>
-                    <input
-                      ref={photoInputRef}
-                      type="file"
-                      multiple
-                      accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      onClick={() => {
-                        console.log("Photo upload button clicked");
-                        try {
-                          if (photoInputRef.current) {
-                            photoInputRef.current.value = "";
-                            photoInputRef.current.click();
-                            setTimeout(() => {
-                              photoInputRef.current?.focus();
-                            }, 100);
-                          }
-                        } catch (error) {
-                          console.error("Error triggering file picker:", error);
-                          toast({
-                            title: "Upload Error",
-                            description:
-                              "Could not open file picker. Please try again.",
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
-                      size="lg"
-                    >
-                      <Upload className="mr-2" size={20} />
-                      Select Photos (up to 25MB each)
-                    </Button>
-                    <div className="mt-4 space-y-1">
-                      <p className="text-sm text-sage-600">
-                        Select multiple photos • Up to 25MB per photo supported
+                  <div className="relative">
+                    <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors bg-white">
+                      <Upload className="mx-auto mb-4 text-olive-600" size={48} />
+                      <h3 className="text-xl font-serif text-olive-700 mb-4">
+                        Upload Wedding Photos
+                      </h3>
+                      <p className="text-sage-600 mb-6">
+                        Upload high-quality photos (up to 25MB each) for the
+                        wedding gallery
                       </p>
-                      <p className="text-xs text-sage-500">
-                        Supports: JPG, PNG, GIF, WebP, BMP formats
-                      </p>
-                      <div className="text-xs text-sage-400 mt-2">
-                        📱 File selection only - camera capture disabled
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                      <div className="flex flex-col items-center gap-4">
+                        <Button
+                          onClick={() => {
+                            console.log("Photo upload button clicked");
+                            try {
+                              if (photoInputRef.current) {
+                                photoInputRef.current.value = "";
+                                photoInputRef.current.click();
+                                setTimeout(() => {
+                                  photoInputRef.current?.focus();
+                                }, 100);
+                              }
+                            } catch (error) {
+                              console.error("Error triggering file picker:", error);
+                              toast({
+                                title: "Upload Error",
+                                description:
+                                  "Could not open file picker. Please try again.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg shadow-lg relative z-10"
+                          size="lg"
+                        >
+                          <Upload className="mr-2" size={20} />
+                          Select Photos (up to 25MB each)
+                        </Button>
+                        <div className="text-center space-y-1">
+                          <p className="text-sm text-sage-600">
+                            Select multiple photos • Up to 25MB per photo supported
+                          </p>
+                          <p className="text-xs text-sage-500">
+                            Supports: JPG, PNG, GIF, WebP, BMP formats
+                          </p>
+                          <div className="text-xs text-sage-400">
+                            📱 File selection only - camera capture disabled
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
