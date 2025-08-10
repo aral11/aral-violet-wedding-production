@@ -1084,17 +1084,26 @@ export default function AdminDashboard() {
 
         while (saveAttempts < maxAttempts) {
           try {
-            const savedPhoto = await database.photos.create(base64String, "admin");
-            console.log(`📷 Admin photo ${file.name} saved to database successfully:`, savedPhoto.id);
+            const savedPhoto = await database.photos.create(
+              base64String,
+              "admin",
+            );
+            console.log(
+              `📷 Admin photo ${file.name} saved to database successfully:`,
+              savedPhoto.id,
+            );
             return {
               success: true,
               fileName: file.name,
               photoData: base64String,
-              photoId: savedPhoto.id
+              photoId: savedPhoto.id,
             };
           } catch (saveError) {
             saveAttempts++;
-            console.error(`📷 Admin photo save attempt ${saveAttempts} failed:`, saveError);
+            console.error(
+              `📷 Admin photo save attempt ${saveAttempts} failed:`,
+              saveError,
+            );
             if (saveAttempts >= maxAttempts) {
               throw saveError;
             }
@@ -1139,7 +1148,9 @@ export default function AdminDashboard() {
       if (successfulUploads.length > 0) {
         setUploadedPhotos((prev) => {
           const newPhotos = [...prev, ...successfulUploads];
-          console.log(`📷 ${successfulUploads.length} admin photos added to gallery`);
+          console.log(
+            `📷 ${successfulUploads.length} admin photos added to gallery`,
+          );
           return newPhotos;
         });
 
@@ -1148,9 +1159,13 @@ export default function AdminDashboard() {
           try {
             const refreshedPhotos = await database.photos.getAll();
             if (refreshedPhotos && refreshedPhotos.length > 0) {
-              const photoData = refreshedPhotos.map((photo) => photo.photo_data);
+              const photoData = refreshedPhotos.map(
+                (photo) => photo.photo_data,
+              );
               setUploadedPhotos(photoData);
-              console.log(`📷 Gallery refreshed with ${refreshedPhotos.length} total photos`);
+              console.log(
+                `📷 Gallery refreshed with ${refreshedPhotos.length} total photos`,
+              );
             }
           } catch (error) {
             console.log("Gallery refresh failed:", error);
@@ -2140,7 +2155,8 @@ export default function AdminDashboard() {
                                 console.error("Photo input ref is null");
                                 toast({
                                   title: "Upload Error",
-                                  description: "File input not found. Please refresh the page.",
+                                  description:
+                                    "File input not found. Please refresh the page.",
                                   variant: "destructive",
                                 });
                               }
@@ -2165,13 +2181,15 @@ export default function AdminDashboard() {
                         </Button>
                         <div className="text-center space-y-2 max-w-md">
                           <p className="text-sm text-sage-600 font-medium">
-                            Select multiple photos • Up to 25MB per photo supported
+                            Select multiple photos • Up to 25MB per photo
+                            supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
                           </p>
                           <div className="text-xs text-sage-400 italic">
-                            📱 File selection only - camera capture disabled for compatibility
+                            📱 File selection only - camera capture disabled for
+                            compatibility
                           </div>
                         </div>
                       </div>
@@ -2189,9 +2207,13 @@ export default function AdminDashboard() {
                     <>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                         {uploadedPhotos
-                          .slice((currentPage - 1) * photosPerPage, currentPage * photosPerPage)
+                          .slice(
+                            (currentPage - 1) * photosPerPage,
+                            currentPage * photosPerPage,
+                          )
                           .map((photo, index) => {
-                            const actualIndex = (currentPage - 1) * photosPerPage + index;
+                            const actualIndex =
+                              (currentPage - 1) * photosPerPage + index;
                             return (
                               <div key={actualIndex} className="relative group">
                                 <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
@@ -2220,7 +2242,9 @@ export default function AdminDashboard() {
                       {uploadedPhotos.length > photosPerPage && (
                         <div className="flex justify-center items-center gap-4 py-4 border-t border-sage-200">
                           <Button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
                             disabled={currentPage === 1}
                             variant="outline"
                             size="sm"
@@ -2230,17 +2254,28 @@ export default function AdminDashboard() {
                           </Button>
 
                           <div className="flex items-center gap-2">
-                            {[...Array(Math.ceil(uploadedPhotos.length / photosPerPage))].map((_, i) => {
+                            {[
+                              ...Array(
+                                Math.ceil(
+                                  uploadedPhotos.length / photosPerPage,
+                                ),
+                              ),
+                            ].map((_, i) => {
                               const pageNum = i + 1;
                               return (
                                 <Button
                                   key={pageNum}
                                   onClick={() => setCurrentPage(pageNum)}
-                                  variant={currentPage === pageNum ? "default" : "outline"}
+                                  variant={
+                                    currentPage === pageNum
+                                      ? "default"
+                                      : "outline"
+                                  }
                                   size="sm"
-                                  className={currentPage === pageNum
-                                    ? "bg-olive-600 hover:bg-olive-700 text-white"
-                                    : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                                  className={
+                                    currentPage === pageNum
+                                      ? "bg-olive-600 hover:bg-olive-700 text-white"
+                                      : "border-sage-300 text-sage-600 hover:bg-sage-50"
                                   }
                                 >
                                   {pageNum}
@@ -2250,10 +2285,20 @@ export default function AdminDashboard() {
                           </div>
 
                           <Button
-                            onClick={() => setCurrentPage(prev =>
-                              Math.min(prev + 1, Math.ceil(uploadedPhotos.length / photosPerPage))
-                            )}
-                            disabled={currentPage === Math.ceil(uploadedPhotos.length / photosPerPage)}
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(
+                                  prev + 1,
+                                  Math.ceil(
+                                    uploadedPhotos.length / photosPerPage,
+                                  ),
+                                ),
+                              )
+                            }
+                            disabled={
+                              currentPage ===
+                              Math.ceil(uploadedPhotos.length / photosPerPage)
+                            }
                             variant="outline"
                             size="sm"
                             className="border-sage-300 text-sage-600 hover:bg-sage-50"
@@ -2266,12 +2311,22 @@ export default function AdminDashboard() {
                       {/* Photo Management Info */}
                       <div className="text-center mt-4 p-4 bg-sage-50 rounded-lg">
                         <p className="text-sm text-sage-600 mb-2">
-                          📷 <strong>{uploadedPhotos.length}</strong> total photos uploaded
+                          📷 <strong>{uploadedPhotos.length}</strong> total
+                          photos uploaded
                         </p>
                         {uploadedPhotos.length > photosPerPage && (
                           <p className="text-xs text-sage-500">
-                            Showing {Math.min((currentPage - 1) * photosPerPage + 1, uploadedPhotos.length)}-
-                            {Math.min(currentPage * photosPerPage, uploadedPhotos.length)} of {uploadedPhotos.length} photos
+                            Showing{" "}
+                            {Math.min(
+                              (currentPage - 1) * photosPerPage + 1,
+                              uploadedPhotos.length,
+                            )}
+                            -
+                            {Math.min(
+                              currentPage * photosPerPage,
+                              uploadedPhotos.length,
+                            )}{" "}
+                            of {uploadedPhotos.length} photos
                           </p>
                         )}
                         <p className="text-xs text-sage-400 mt-1">
@@ -2281,7 +2336,10 @@ export default function AdminDashboard() {
                     </>
                   ) : (
                     <div className="text-center py-12">
-                      <Camera className="mx-auto mb-4 text-sage-400" size={48} />
+                      <Camera
+                        className="mx-auto mb-4 text-sage-400"
+                        size={48}
+                      />
                       <p className="text-sage-600 text-lg mb-2">
                         No photos uploaded yet
                       </p>

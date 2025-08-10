@@ -1374,17 +1374,25 @@ Please RSVP at our wedding website
                       const photos = await database.photos.getAll();
                       if (photos && photos.length > 0) {
                         // Sort by creation date and extract photo data
-                        const sortedPhotos = photos.sort((a, b) =>
-                          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+                        const sortedPhotos = photos.sort(
+                          (a, b) =>
+                            new Date(b.created_at || 0).getTime() -
+                            new Date(a.created_at || 0).getTime(),
                         );
-                        const photoData = sortedPhotos.map((photo) => photo.photo_data);
+                        const photoData = sortedPhotos.map(
+                          (photo) => photo.photo_data,
+                        );
                         setUploadedPhotos(photoData);
 
                         const storageType = database.isUsingSupabase()
                           ? "Supabase"
                           : "localStorage";
-                        const adminCount = sortedPhotos.filter(p => p.uploaded_by === 'admin').length;
-                        const guestCount = sortedPhotos.filter(p => p.uploaded_by !== 'admin').length;
+                        const adminCount = sortedPhotos.filter(
+                          (p) => p.uploaded_by === "admin",
+                        ).length;
+                        const guestCount = sortedPhotos.filter(
+                          (p) => p.uploaded_by !== "admin",
+                        ).length;
 
                         console.log(
                           `📸 Photos refreshed from ${storageType}: ${photos.length} total (${adminCount} admin, ${guestCount} guest)`,
@@ -1392,7 +1400,7 @@ Please RSVP at our wedding website
 
                         toast({
                           title: "Gallery Refreshed! 📸",
-                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? 's' : ''} from ${storageType}`,
+                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? "s" : ""} from ${storageType}`,
                           duration: 3000,
                         });
                       } else {
@@ -1400,7 +1408,8 @@ Please RSVP at our wedding website
                         setUploadedPhotos([]);
                         toast({
                           title: "No Photos Found",
-                          description: "No photos are currently stored in the database.",
+                          description:
+                            "No photos are currently stored in the database.",
                           variant: "default",
                           duration: 3000,
                         });
@@ -1410,7 +1419,8 @@ Please RSVP at our wedding website
                       setUploadedPhotos([]);
                       toast({
                         title: "Refresh Failed",
-                        description: "Unable to refresh gallery. Please try again.",
+                        description:
+                          "Unable to refresh gallery. Please try again.",
                         variant: "destructive",
                         duration: 3000,
                       });
@@ -1501,9 +1511,13 @@ Please RSVP at our wedding website
               {/* Photo Grid with Pagination */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                 {uploadedPhotos
-                  .slice((currentPage - 1) * photosPerPage, currentPage * photosPerPage)
+                  .slice(
+                    (currentPage - 1) * photosPerPage,
+                    currentPage * photosPerPage,
+                  )
                   .map((photo, index) => {
-                    const actualIndex = (currentPage - 1) * photosPerPage + index;
+                    const actualIndex =
+                      (currentPage - 1) * photosPerPage + index;
                     return (
                       <div
                         key={actualIndex}
@@ -1524,7 +1538,9 @@ Please RSVP at our wedding website
               {uploadedPhotos.length > photosPerPage && (
                 <div className="flex justify-center items-center gap-4 mt-8">
                   <Button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
                     disabled={currentPage === 1}
                     variant="outline"
                     size="sm"
@@ -1534,17 +1550,24 @@ Please RSVP at our wedding website
                   </Button>
 
                   <div className="flex items-center gap-2">
-                    {[...Array(Math.ceil(uploadedPhotos.length / photosPerPage))].map((_, i) => {
+                    {[
+                      ...Array(
+                        Math.ceil(uploadedPhotos.length / photosPerPage),
+                      ),
+                    ].map((_, i) => {
                       const pageNum = i + 1;
                       return (
                         <Button
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
-                          variant={currentPage === pageNum ? "default" : "outline"}
+                          variant={
+                            currentPage === pageNum ? "default" : "outline"
+                          }
                           size="sm"
-                          className={currentPage === pageNum
-                            ? "bg-olive-600 hover:bg-olive-700 text-white"
-                            : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                          className={
+                            currentPage === pageNum
+                              ? "bg-olive-600 hover:bg-olive-700 text-white"
+                              : "border-sage-300 text-sage-600 hover:bg-sage-50"
                           }
                         >
                           {pageNum}
@@ -1554,10 +1577,18 @@ Please RSVP at our wedding website
                   </div>
 
                   <Button
-                    onClick={() => setCurrentPage(prev =>
-                      Math.min(prev + 1, Math.ceil(uploadedPhotos.length / photosPerPage))
-                    )}
-                    disabled={currentPage === Math.ceil(uploadedPhotos.length / photosPerPage)}
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(
+                          prev + 1,
+                          Math.ceil(uploadedPhotos.length / photosPerPage),
+                        ),
+                      )
+                    }
+                    disabled={
+                      currentPage ===
+                      Math.ceil(uploadedPhotos.length / photosPerPage)
+                    }
                     variant="outline"
                     size="sm"
                     className="border-sage-300 text-sage-600 hover:bg-sage-50 disabled:opacity-50"
@@ -1570,8 +1601,14 @@ Please RSVP at our wedding website
               {/* Photo Count Info */}
               <div className="text-center mt-4">
                 <p className="text-sm text-sage-500">
-                  Showing {Math.min((currentPage - 1) * photosPerPage + 1, uploadedPhotos.length)}-
-                  {Math.min(currentPage * photosPerPage, uploadedPhotos.length)} of {uploadedPhotos.length} photos
+                  Showing{" "}
+                  {Math.min(
+                    (currentPage - 1) * photosPerPage + 1,
+                    uploadedPhotos.length,
+                  )}
+                  -
+                  {Math.min(currentPage * photosPerPage, uploadedPhotos.length)}{" "}
+                  of {uploadedPhotos.length} photos
                 </p>
               </div>
             </>

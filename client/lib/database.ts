@@ -144,16 +144,23 @@ export const photoService = {
         // Sync to localStorage with proper structure
         if (data && data.length > 0) {
           // Separate admin and guest photos for localStorage sync
-          const adminPhotos = data.filter(p => p.uploaded_by === 'admin').map(p => p.photo_data);
-          const guestPhotos = data.filter(p => p.uploaded_by !== 'admin').map(p => ({
-            photoData: p.photo_data,
-            uploadedBy: p.uploaded_by,
-            guestName: p.guest_name,
-            createdAt: p.created_at
-          }));
+          const adminPhotos = data
+            .filter((p) => p.uploaded_by === "admin")
+            .map((p) => p.photo_data);
+          const guestPhotos = data
+            .filter((p) => p.uploaded_by !== "admin")
+            .map((p) => ({
+              photoData: p.photo_data,
+              uploadedBy: p.uploaded_by,
+              guestName: p.guest_name,
+              createdAt: p.created_at,
+            }));
 
           localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
-          localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+          localStorage.setItem(
+            "wedding_guest_photos",
+            JSON.stringify(guestPhotos),
+          );
         }
 
         return data || [];
@@ -355,7 +362,10 @@ export const photoService = {
           createdAt: new Date().toISOString(),
         };
         guestPhotos.push(guestPhoto);
-        localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+        localStorage.setItem(
+          "wedding_guest_photos",
+          JSON.stringify(guestPhotos),
+        );
         console.log(`📸 Guest photo from ${guestName} saved to localStorage`);
       }
     } catch (error) {
