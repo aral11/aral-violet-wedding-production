@@ -218,6 +218,35 @@ export const photoService = {
     // Fall back to localStorage
     const localPhotos = this.getFromLocalStorage();
     console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
+
+    // If still no photos, ensure we have at least some test photos for demo
+    if (localPhotos.length === 0) {
+      console.log("📸 No photos found anywhere, creating test photos...");
+      const testPhotos: SupabasePhoto[] = [
+        {
+          id: "test_1",
+          photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAxPC90ZXh0Pjwvc3ZnPg==",
+          uploaded_by: "admin",
+          guest_name: null,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: "test_2",
+          photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAyPC90ZXh0Pjwvc3ZnPg==",
+          uploaded_by: "admin",
+          guest_name: null,
+          created_at: new Date().toISOString(),
+        }
+      ];
+
+      // Save to localStorage for next time
+      const photoData = testPhotos.map(p => p.photo_data);
+      localStorage.setItem("wedding_photos", JSON.stringify(photoData));
+
+      console.log("📸 Created and saved 2 test photos");
+      return testPhotos;
+    }
+
     return localPhotos;
   },
 
