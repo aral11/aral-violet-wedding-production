@@ -137,7 +137,14 @@ export default function Debug() {
   };
 
   useEffect(() => {
-    testPhotoRetrieval();
+    // Run tests immediately when page loads
+    const runInitialTests = async () => {
+      console.log("🔍 Debug page loaded, running initial tests...");
+      await testPhotoRetrieval();
+      await testSupabaseConnection();
+    };
+
+    runInitialTests();
   }, []);
 
   return (
