@@ -177,10 +177,10 @@ export const photoService = {
           // Convert API response to SupabasePhoto format
           const photos = apiPhotos.map((photo: any) => ({
             id: photo.id,
-            photo_data: photo.photoData,
-            uploaded_by: photo.uploadedBy || "admin",
-            guest_name: photo.guestName || null,
-            created_at: photo.createdAt || new Date().toISOString(),
+            photo_data: photo.photoData || photo.photo_data,
+            uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
+            guest_name: photo.guestName || photo.guest_name || null,
+            created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
           }));
 
           // Validate the photos have proper data
