@@ -389,7 +389,7 @@ export default function Index() {
           ? "RSVP Updated Successfully! ��️"
           : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
-          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
+          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " �� Synced across all devices!" : ""}`
           : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
@@ -1547,10 +1547,25 @@ Please RSVP at our wedding website
                 <h3 className="text-2xl font-serif text-sage-600 mb-4">
                   Photo Gallery
                 </h3>
-                <p className="text-sage-500">
+                <p className="text-sage-500 mb-6">
                   We're still preparing our photo gallery. Check back soon to
                   see our beautiful memories!
                 </p>
+
+                {/* Configuration notice for developers */}
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
+                  <p className="text-sm text-blue-700 mb-2">
+                    🔧 <strong>For Developers:</strong> If you have photos in Supabase but they're not showing:
+                  </p>
+                  <div className="space-x-2">
+                    <a href="/test-photos" className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                      Test Connection
+                    </a>
+                    <a href="/login" className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-3 py-1 rounded text-xs transition-colors">
+                      Admin Panel
+                    </a>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
