@@ -2186,7 +2186,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="mt-4 p-3 bg-cream-100 rounded border-l-4 border-olive-500">
                         <p className="text-sm text-olive-700">
-                          <strong>💡 Pro Tip:</strong> Print this QR code and place it on guest tables, or display it on screens around the venue for easy access!
+                          <strong>💡 Pro Tip:</strong> The QR code is already visible on your home page! You can also print additional copies and place them on guest tables or display on screens around the venue for easy access!
                         </p>
                       </div>
                     </CardContent>
