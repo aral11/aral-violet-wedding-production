@@ -1786,8 +1786,8 @@ export default function AdminDashboard() {
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
                 title="Photo Gallery"
               >
-                <Camera size={16} className="sm:hidden" />
-                <Camera size={14} className="hidden sm:inline" />
+                <Upload size={16} className="sm:hidden" />
+                <Upload size={14} className="hidden sm:inline" />
                 <span className="hidden sm:inline lg:hidden">Photos</span>
                 <span className="hidden lg:inline">Photo Gallery</span>
               </TabsTrigger>
@@ -2409,7 +2409,7 @@ export default function AdminDashboard() {
                           <h4 className="font-semibold text-lg mb-2">
                             {invitationPDF
                               ? "✅ Custom Invitation Active"
-                              : "⚠️ Using Default Text Invitation"}
+                              : "⚠�� Using Default Text Invitation"}
                           </h4>
                           <p className="text-sm text-gray-600">
                             {invitationPDF
