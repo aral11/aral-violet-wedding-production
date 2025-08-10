@@ -149,8 +149,8 @@ export default function Debug() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <Button 
+              <div className="flex gap-4 flex-wrap">
+                <Button
                   onClick={testPhotoRetrieval}
                   disabled={loading}
                 >
@@ -161,6 +161,29 @@ export default function Debug() {
                 </Button>
                 <Button onClick={checkLocalStorage}>
                   Check LocalStorage
+                </Button>
+                <Button onClick={async () => {
+                  try {
+                    console.log("🔍 Testing API endpoint...");
+                    const response = await fetch('/api/photos');
+                    const data = await response.json();
+                    console.log("📡 API response:", data);
+                    toast({
+                      title: "API Test",
+                      description: `API returned ${Array.isArray(data) ? data.length : 'non-array'} items`,
+                      duration: 5000,
+                    });
+                  } catch (err) {
+                    console.error("❌ API test failed:", err);
+                    toast({
+                      title: "API Test Failed",
+                      description: `Error: ${err instanceof Error ? err.message : String(err)}`,
+                      variant: "destructive",
+                      duration: 5000,
+                    });
+                  }
+                }}>
+                  Test API Endpoint
                 </Button>
               </div>
               
