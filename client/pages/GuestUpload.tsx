@@ -197,10 +197,10 @@ export default function GuestUpload() {
               <Camera className="w-8 h-8 text-white" />
             </div>
             <CardTitle className="text-3xl font-serif text-olive-700 mb-2">
-              Share Your Wedding Photos
+              Share Your Couple Photos
             </CardTitle>
             <p className="text-sage-600 text-lg">
-              Help us capture every beautiful moment from Aral & Violet's special day!
+              Did you take photos of Aral & Violet during the wedding? Share them with us for our memories!
             </p>
           </CardHeader>
           
@@ -278,7 +278,7 @@ export default function GuestUpload() {
               <h4 className="font-medium text-sage-700 mb-2">Quick Tips:</h4>
               <ul className="text-sm text-sage-600 space-y-1">
                 <li>• Make sure to enter your name before uploading</li>
-                <li>• You can select multiple photos at once</li>
+                <li>��� You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>
                 <li>• High-quality photos are welcome (up to 25MB each)</li>
               </ul>
