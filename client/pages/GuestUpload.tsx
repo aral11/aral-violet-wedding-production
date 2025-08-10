@@ -40,7 +40,8 @@ export default function GuestUpload() {
       description: `Processing ${totalFiles} photo${totalFiles !== 1 ? "s" : ""}...`,
     });
 
-    for (const file of Array.from(files)) {
+    // Process files with proper async handling
+    const uploadPromises = Array.from(files).map(async (file) => {
       // Validate file type
       const isValidImage =
         file.type.startsWith("image/") ||
@@ -52,8 +53,7 @@ export default function GuestUpload() {
           description: `"${file.name}" is not a valid image file.`,
           variant: "destructive",
         });
-        errorCount++;
-        continue;
+        throw new Error(`Invalid file type: ${file.name}`);
       }
 
       // Check file size (25MB max)
@@ -65,8 +65,7 @@ export default function GuestUpload() {
           description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
           variant: "destructive",
         });
-        errorCount++;
-        continue;
+        throw new Error(`File too large: ${file.name}`);
       }
 
       try {
@@ -84,14 +83,27 @@ export default function GuestUpload() {
           reader.readAsDataURL(file);
         });
 
-        // Upload to database
+        // Upload to database with proper guest metadata
         await database.photos.create(base64String, "guest", guestName.trim());
-        successCount++;
+        return { success: true, fileName: file.name };
       } catch (error) {
         console.error(`Error uploading ${file.name}:`, error);
-        errorCount++;
+        throw new Error(`Upload failed: ${file.name}`);
       }
-    }
+    });
+
+    // Wait for all uploads to complete
+    const results = await Promise.allSettled(uploadPromises);
+
+    // Count successes and failures
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        successCount++;
+      } else {
+        errorCount++;
+        console.error("Upload error:", result.reason);
+      }
+    });
 
     setIsUploading(false);
     setUploadedCount(successCount);
