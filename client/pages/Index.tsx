@@ -643,9 +643,10 @@ Made with love ❤️ By Aral D'Souza
 
           toast({
             title: "Invitation downloaded Successfully! 💌",
-            description:
+            description: isMobile ?
+              `Your custom wedding invitation has been downloaded. ${downloadInstructions}` :
               "Your custom uploaded wedding invitation has been downloaded successfully.",
-            duration: 3000,
+            duration: isMobile ? 5000 : 3000,
           });
 
           console.log(
