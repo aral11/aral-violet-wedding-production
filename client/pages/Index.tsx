@@ -1406,7 +1406,7 @@ Please RSVP at our wedding website
                         className="w-40 h-40 mb-3 rounded-lg"
                       />
                       <p className="text-sm font-medium text-olive-700">
-                        📸 Scan to Upload Photos
+                        📸 Scan to Upload Couple Photos
                       </p>
                       <p className="text-xs text-sage-500">
                         Point your camera here
