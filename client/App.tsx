@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import GuestUpload from "./pages/GuestUpload";
 import Debug from "./pages/Debug";
+import TestPhotos from "./pages/TestPhotos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
