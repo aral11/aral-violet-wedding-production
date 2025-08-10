@@ -1521,6 +1521,25 @@ Please RSVP at our wedding website
                 >
                   Add Test Photos
                 </Button>
+
+                <Button
+                  onClick={() => {
+                    localStorage.removeItem("wedding_photos");
+                    localStorage.removeItem("wedding_guest_photos");
+                    setUploadedPhotos([]);
+
+                    toast({
+                      title: "LocalStorage Cleared",
+                      description: "Removed all photos from localStorage",
+                      duration: 3000,
+                    });
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  Clear Local Photos
+                </Button>
               </div>
 
               <div className="text-xs text-sage-500">
