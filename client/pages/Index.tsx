@@ -105,7 +105,9 @@ export default function Index() {
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
-          console.log(`📸 Gallery updated: ${photos.length} photos loaded from ${storageType}`);
+          console.log(
+            `📸 Gallery updated: ${photos.length} photos loaded from ${storageType}`,
+          );
         } else {
           setUploadedPhotos([]);
           console.log("📸 No photos found in database");
@@ -114,14 +116,22 @@ export default function Index() {
         console.log("Error loading photos:", error);
         // Try to load from localStorage as fallback (both admin and guest photos)
         try {
-          const adminPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
-          const guestPhotosData = JSON.parse(localStorage.getItem("wedding_guest_photos") || "[]");
-          const guestPhotos = guestPhotosData.map((photo: any) => photo.photoData || photo.photo_data);
+          const adminPhotos = JSON.parse(
+            localStorage.getItem("wedding_photos") || "[]",
+          );
+          const guestPhotosData = JSON.parse(
+            localStorage.getItem("wedding_guest_photos") || "[]",
+          );
+          const guestPhotos = guestPhotosData.map(
+            (photo: any) => photo.photoData || photo.photo_data,
+          );
 
           const allPhotos = [...adminPhotos, ...guestPhotos];
           if (allPhotos.length > 0) {
             setUploadedPhotos(allPhotos);
-            console.log(`📸 Gallery fallback: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos from localStorage`);
+            console.log(
+              `📸 Gallery fallback: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos from localStorage`,
+            );
           } else {
             setUploadedPhotos([]);
           }

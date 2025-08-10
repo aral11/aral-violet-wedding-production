@@ -97,11 +97,11 @@ export default function GuestUpload() {
 
     // Count successes and failures
     results.forEach((result) => {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         successCount++;
       } else {
         errorCount++;
-        console.error('Upload error:', result.reason);
+        console.error("Upload error:", result.reason);
       }
     });
 

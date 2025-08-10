@@ -301,9 +301,13 @@ export const photoService = {
         const guestPhotos = guestPhotoData.map((photo: any, index: number) => ({
           id: `guest_${index}`,
           photo_data: photo.photoData || photo.photo_data,
-          uploaded_by: photo.uploadedBy || photo.uploaded_by || `guest_${photo.guestName}_${Date.now()}`,
+          uploaded_by:
+            photo.uploadedBy ||
+            photo.uploaded_by ||
+            `guest_${photo.guestName}_${Date.now()}`,
           guest_name: photo.guestName || photo.guest_name,
-          created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
+          created_at:
+            photo.createdAt || photo.created_at || new Date().toISOString(),
         }));
         photos.push(...guestPhotos);
       } catch (error) {
@@ -311,10 +315,18 @@ export const photoService = {
       }
     }
 
-    return photos.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    return photos.sort(
+      (a, b) =>
+        new Date(b.created_at || 0).getTime() -
+        new Date(a.created_at || 0).getTime(),
+    );
   },
 
-  saveToLocalStorage(photoData: string, uploadedBy = "admin", guestName?: string): void {
+  saveToLocalStorage(
+    photoData: string,
+    uploadedBy = "admin",
+    guestName?: string,
+  ): void {
     if (uploadedBy === "admin") {
       // Save admin photos to wedding_photos
       const existing = localStorage.getItem("wedding_photos");

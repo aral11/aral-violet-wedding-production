@@ -123,7 +123,9 @@ export default function AdminDashboard() {
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
-          console.log(`📷 Admin gallery: ${photos.length} photos loaded from ${storageType}`);
+          console.log(
+            `📷 Admin gallery: ${photos.length} photos loaded from ${storageType}`,
+          );
         } else {
           setUploadedPhotos([]);
           console.log("📷 No photos found in admin database");
@@ -132,10 +134,14 @@ export default function AdminDashboard() {
         console.log("Error loading photos:", error);
         // Try localStorage fallback
         try {
-          const fallbackPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+          const fallbackPhotos = JSON.parse(
+            localStorage.getItem("wedding_photos") || "[]",
+          );
           if (fallbackPhotos.length > 0) {
             setUploadedPhotos(fallbackPhotos);
-            console.log(`📷 Admin fallback: ${fallbackPhotos.length} photos from localStorage`);
+            console.log(
+              `📷 Admin fallback: ${fallbackPhotos.length} photos from localStorage`,
+            );
           } else {
             setUploadedPhotos([]);
           }
@@ -291,7 +297,9 @@ export default function AdminDashboard() {
         console.log("Error loading guest photos:", error);
         // Try localStorage fallback for guest photos
         try {
-          const guestPhotosFromStorage = JSON.parse(localStorage.getItem("wedding_guest_photos") || "[]");
+          const guestPhotosFromStorage = JSON.parse(
+            localStorage.getItem("wedding_guest_photos") || "[]",
+          );
           if (guestPhotosFromStorage.length > 0) {
             setGuestPhotos(
               guestPhotosFromStorage.map((photo: any, index: number) => ({
@@ -299,10 +307,15 @@ export default function AdminDashboard() {
                 photoData: photo.photoData || photo.photo_data,
                 guestName: photo.guestName || photo.guest_name,
                 uploadedBy: photo.uploadedBy || photo.uploaded_by,
-                createdAt: photo.createdAt || photo.created_at || new Date().toISOString(),
+                createdAt:
+                  photo.createdAt ||
+                  photo.created_at ||
+                  new Date().toISOString(),
               })),
             );
-            console.log(`📸 Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`);
+            console.log(
+              `📸 Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`,
+            );
           } else {
             setGuestPhotos([]);
           }
@@ -1069,7 +1082,11 @@ export default function AdminDashboard() {
           try {
             await database.photos.create(base64String, "admin");
             console.log(`Photo ${file.name} saved to database successfully`);
-            return { success: true, fileName: file.name, photoData: base64String };
+            return {
+              success: true,
+              fileName: file.name,
+              photoData: base64String,
+            };
           } catch (saveError) {
             saveAttempts++;
             if (saveAttempts >= maxAttempts) {
@@ -1103,12 +1120,12 @@ export default function AdminDashboard() {
       const successfulUploads: string[] = [];
 
       results.forEach((result) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           successCount++;
           successfulUploads.push(result.value.photoData);
         } else {
           errorCount++;
-          console.error('Upload error:', result.reason);
+          console.error("Upload error:", result.reason);
         }
       });
 
@@ -1142,7 +1159,7 @@ export default function AdminDashboard() {
         });
       }
     } catch (error) {
-      console.error('Upload process failed:', error);
+      console.error("Upload process failed:", error);
       toast({
         title: "Upload Failed",
         description: "Failed to upload photos. Please try again.",
@@ -2030,7 +2047,10 @@ export default function AdminDashboard() {
                   {/* Upload Section */}
                   <div className="relative">
                     <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors bg-white">
-                      <Upload className="mx-auto mb-4 text-olive-600" size={48} />
+                      <Upload
+                        className="mx-auto mb-4 text-olive-600"
+                        size={48}
+                      />
                       <h3 className="text-xl font-serif text-olive-700 mb-4">
                         Upload Wedding Photos
                       </h3>
@@ -2059,7 +2079,10 @@ export default function AdminDashboard() {
                                 }, 100);
                               }
                             } catch (error) {
-                              console.error("Error triggering file picker:", error);
+                              console.error(
+                                "Error triggering file picker:",
+                                error,
+                              );
                               toast({
                                 title: "Upload Error",
                                 description:
@@ -2076,7 +2099,8 @@ export default function AdminDashboard() {
                         </Button>
                         <div className="text-center space-y-1">
                           <p className="text-sm text-sage-600">
-                            Select multiple photos • Up to 25MB per photo supported
+                            Select multiple photos • Up to 25MB per photo
+                            supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
@@ -2229,14 +2253,17 @@ export default function AdminDashboard() {
 
                           {/* Photo Download Section */}
                           <div className="mt-6 pt-4 border-t border-sage-200">
-                            <h4 className="text-md font-semibold text-olive-700 mb-3">Download All Photos</h4>
+                            <h4 className="text-md font-semibold text-olive-700 mb-3">
+                              Download All Photos
+                            </h4>
                             <div className="flex flex-wrap gap-2">
                               <Button
                                 onClick={() => {
                                   if (uploadedPhotos.length === 0) {
                                     toast({
                                       title: "No Photos to Download",
-                                      description: "Upload some photos first to download them.",
+                                      description:
+                                        "Upload some photos first to download them.",
                                       variant: "destructive",
                                     });
                                     return;
@@ -2272,7 +2299,8 @@ export default function AdminDashboard() {
                                   if (guestPhotos.length === 0) {
                                     toast({
                                       title: "No Guest Photos",
-                                      description: "No guest photos have been uploaded yet.",
+                                      description:
+                                        "No guest photos have been uploaded yet.",
                                       variant: "destructive",
                                     });
                                     return;
@@ -2282,7 +2310,7 @@ export default function AdminDashboard() {
                                   guestPhotos.forEach((photo, index) => {
                                     const link = document.createElement("a");
                                     link.href = photo.photoData;
-                                    link.download = `guest-photo-${photo.guestName || 'unknown'}-${index + 1}.jpg`;
+                                    link.download = `guest-photo-${photo.guestName || "unknown"}-${index + 1}.jpg`;
                                     link.click();
 
                                     // Small delay between downloads
@@ -2304,7 +2332,8 @@ export default function AdminDashboard() {
                               </Button>
                             </div>
                             <p className="text-xs text-sage-500 mt-2">
-                              Photos will download individually. Check your downloads folder.
+                              Photos will download individually. Check your
+                              downloads folder.
                             </p>
                           </div>
                         </div>
