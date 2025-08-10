@@ -118,15 +118,31 @@ export default function AdminDashboard() {
       try {
         const photos = await database.photos.getAll();
         if (photos && photos.length > 0) {
-          setUploadedPhotos(photos.map((photo) => photo.photo_data));
+          const photoData = photos.map((photo) => photo.photo_data);
+          setUploadedPhotos(photoData);
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
-          console.log(`Photos loaded from ${storageType}:`, photos.length);
+          console.log(`📷 Admin gallery: ${photos.length} photos loaded from ${storageType}`);
+        } else {
+          setUploadedPhotos([]);
+          console.log("📷 No photos found in admin database");
         }
       } catch (error) {
         console.log("Error loading photos:", error);
-        setUploadedPhotos([]);
+        // Try localStorage fallback
+        try {
+          const fallbackPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+          if (fallbackPhotos.length > 0) {
+            setUploadedPhotos(fallbackPhotos);
+            console.log(`📷 Admin fallback: ${fallbackPhotos.length} photos from localStorage`);
+          } else {
+            setUploadedPhotos([]);
+          }
+        } catch (fallbackError) {
+          console.log("Admin fallback photo loading failed:", fallbackError);
+          setUploadedPhotos([]);
+        }
       }
 
       // Load wedding flow using database service
