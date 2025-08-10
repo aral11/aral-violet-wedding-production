@@ -450,7 +450,7 @@ export default function Index() {
 
         toast({
           title: isEditMode
-            ? "RSVP Updated Successfully! ✏️"
+            ? "RSVP Updated Successfully! ✏��"
             : "RSVP Submitted Successfully! 🎉",
           description: isEditMode
             ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
@@ -619,15 +619,35 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // For mobile browsers that might not support download attribute
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            // On mobile, open in new tab/window instead of direct download
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(
-              navigator.userAgent,
-            );
-            if (isMobile) {
-              window.open(uploadedInvitation.pdf_data, "_blank");
-            } else {
+          // Mobile-optimized download approach
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+          if (isMobile) {
+            // For mobile devices, create a blob from base64 data for better compatibility
+            try {
+              const base64Data = uploadedInvitation.pdf_data.split(',')[1];
+              const byteCharacters = atob(base64Data);
+              const byteNumbers = new Array(byteCharacters.length);
+
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: 'application/pdf' });
+              const blobUrl = URL.createObjectURL(blob);
+
+              // Try to trigger download
+              link.href = blobUrl;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              // Clean up blob URL after a delay
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            } catch (blobError) {
+              console.warn('Blob creation failed, trying direct approach:', blobError);
+              // Fallback to original method
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
@@ -675,10 +695,33 @@ Made with love ❤️ By Aral D'Souza
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.target = "_blank";
 
-        // Mobile-friendly download
-        if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-          // On mobile, open in new tab/window
-          window.open(url, "_blank");
+        // Mobile-optimized download
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          // For mobile, use a more reliable download approach
+          try {
+            // Add download attribute for modern mobile browsers
+            link.setAttribute('download', 'Aral-Violet-Wedding-Invitation.pdf');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+
+            // Trigger click event
+            const clickEvent = new MouseEvent('click', {
+              view: window,
+              bubbles: true,
+              cancelable: false
+            });
+            link.dispatchEvent(clickEvent);
+
+            document.body.removeChild(link);
+          } catch (mobileError) {
+            console.warn('Mobile download failed, trying fallback:', mobileError);
+            // Fallback to standard approach
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
         } else {
           document.body.appendChild(link);
           link.click();
@@ -713,9 +756,42 @@ Made with love ❤️ By Aral D'Souza
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-friendly download
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(pdfData, "_blank");
+          // Mobile-optimized download
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+          if (isMobile) {
+            // Create blob for mobile compatibility
+            try {
+              if (pdfData.startsWith('data:')) {
+                const base64Data = pdfData.split(',')[1];
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+
+                for (let i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                link.href = blobUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+              } else {
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }
+            } catch (error) {
+              console.warn('Mobile blob creation failed:', error);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
           } else {
             document.body.appendChild(link);
             link.click();
@@ -751,9 +827,36 @@ Made with love ❤️ By Aral D'Souza
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-friendly download
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(savedInvitation, "_blank");
+          // Mobile-optimized download
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+          if (isMobile && savedInvitation.startsWith('data:')) {
+            // Create blob for mobile compatibility
+            try {
+              const base64Data = savedInvitation.split(',')[1];
+              const byteCharacters = atob(base64Data);
+              const byteNumbers = new Array(byteCharacters.length);
+
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: 'application/pdf' });
+              const blobUrl = URL.createObjectURL(blob);
+
+              link.href = blobUrl;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            } catch (error) {
+              console.warn('Mobile blob creation failed:', error);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
           } else {
             document.body.appendChild(link);
             link.click();
