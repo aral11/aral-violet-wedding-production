@@ -2041,14 +2041,13 @@ export default function AdminDashboard() {
                     </div>
                     <div className="mt-4 space-y-1">
                       <p className="text-sm text-sage-600">
-                        Select multiple photos • Maximum 5MB per photo
+                        Select multiple photos • Minimum 25MB per photo required
                       </p>
                       <p className="text-xs text-sage-500">
-                        Supports: JPG, PNG, GIF, WebP formats
+                        Supports: JPG, PNG, GIF, WebP, BMP formats
                       </p>
                       <div className="text-xs text-sage-400 mt-2">
-                        📱 Mobile users: Use "Take/Upload Photo" for better
-                        compatibility
+                        📱 File selection only - camera capture disabled
                       </div>
                     </div>
                   </div>
