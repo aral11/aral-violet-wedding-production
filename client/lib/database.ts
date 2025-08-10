@@ -168,13 +168,12 @@ export const photoService = {
         });
 
         if (error) {
-          console.error("📸 Direct Supabase query error details:", {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code,
-            fullError: error
-          });
+          console.error("📸 Direct Supabase query error details:");
+          console.error("- Message:", error.message || 'No message');
+          console.error("- Details:", error.details || 'No details');
+          console.error("- Hint:", error.hint || 'No hint');
+          console.error("- Code:", error.code || 'No code');
+          console.error("- Full error:", JSON.stringify(error, null, 2));
           throw new Error(`Supabase query failed: ${error.message || 'Unknown error'}`);
         }
 
