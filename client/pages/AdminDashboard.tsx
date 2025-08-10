@@ -910,43 +910,104 @@ export default function AdminDashboard() {
     console.log(`Processing ${files.length} files`);
     let successCount = 0;
     let errorCount = 0;
+    const totalFiles = files.length;
 
-    // Process each file
+    // Show initial processing message for better UX
+    toast({
+      title: "Processing Photos... ⏳",
+      description: `Uploading ${totalFiles} photo${totalFiles !== 1 ? 's' : ''}. Please wait...`,
+      duration: 2000,
+    });
+
+    // Process each file with improved mobile handling
     Array.from(files).forEach((file, index) => {
       console.log(
         `Processing file ${index + 1}: ${file.name}, Type: ${file.type}, Size: ${file.size}`,
       );
 
-      // Check file type
-      if (!file.type.startsWith("image/")) {
+      // Enhanced file type validation (including file extension check for mobile)
+      const isValidImage = file.type.startsWith("image/") ||
+        /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
+
+      if (!isValidImage) {
         console.error(`File ${file.name} is not an image`);
-        alert(
-          `"${file.name}" is not an image file. Please upload only image files.`,
-        );
+        toast({
+          title: "Invalid File Type",
+          description: `"${file.name}" is not a valid image file. Please upload JPG, PNG, GIF, or WebP files.`,
+          variant: "destructive",
+          duration: 4000,
+        });
         errorCount++;
         return;
       }
 
-      // Check file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // More reasonable file size limit for mobile devices (5MB instead of 10MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
-        alert(
-          `"${file.name}" is too large. Please upload images smaller than 10MB.`,
-        );
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        toast({
+          title: "File Too Large",
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 5MB.`,
+          variant: "destructive",
+          duration: 4000,
+        });
         errorCount++;
         return;
       }
 
-      // Convert to base64 for persistent storage
+      // Convert to base64 with improved error handling
       const reader = new FileReader();
+
+      // Add timeout for mobile devices that might struggle with large files
+      const timeout = setTimeout(() => {
+        console.error(`Timeout reading file ${file.name}`);
+        toast({
+          title: "Upload Timeout",
+          description: `Timeout uploading "${file.name}". Please try a smaller file.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+        errorCount++;
+      }, 30000); // 30 second timeout
+
       reader.onload = async (event) => {
+        clearTimeout(timeout);
         console.log(`File ${file.name} read successfully`);
+
         if (event.target?.result) {
           const base64String = event.target.result as string;
 
+          // Validate base64 data
+          if (!base64String.startsWith('data:image/')) {
+            console.error(`Invalid base64 data for ${file.name}`);
+            toast({
+              title: "Upload Error",
+              description: `Invalid image data for "${file.name}". Please try again.`,
+              variant: "destructive",
+            });
+            errorCount++;
+            return;
+          }
+
           try {
-            // Save photo using database service (Supabase + localStorage fallback)
-            await database.photos.create(base64String, "admin");
+            // Save photo using database service with retry logic
+            let saveAttempts = 0;
+            const maxAttempts = 3;
+
+            while (saveAttempts < maxAttempts) {
+              try {
+                await database.photos.create(base64String, "admin");
+                break; // Success, break out of retry loop
+              } catch (saveError) {
+                saveAttempts++;
+                if (saveAttempts >= maxAttempts) {
+                  throw saveError; // Throw error after max attempts
+                }
+                // Wait before retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * saveAttempts));
+              }
+            }
 
             // Update local state
             setUploadedPhotos((prev) => {
@@ -957,18 +1018,20 @@ export default function AdminDashboard() {
               return newPhotos;
             });
             successCount++;
+
           } catch (error) {
             console.error(`Error saving photo ${file.name}:`, error);
             errorCount++;
             toast({
               title: "Photo Upload Error",
-              description: `Error saving "${file.name}". Please try again.`,
+              description: `Error saving "${file.name}". ${error instanceof Error ? error.message : 'Please try again.'}`,
               variant: "destructive",
+              duration: 4000,
             });
           }
 
-          // Show success message after processing all files
-          if (successCount + errorCount === files.length) {
+          // Show final message after processing all files
+          if (successCount + errorCount === totalFiles) {
             if (successCount > 0) {
               const storageType = database.isUsingSupabase()
                 ? "Supabase database"
@@ -976,23 +1039,48 @@ export default function AdminDashboard() {
               toast({
                 title: "Photos Uploaded Successfully! 📷",
                 description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
-                duration: 3000,
+                duration: 4000,
+              });
+            }
+
+            if (errorCount > 0) {
+              toast({
+                title: "Some uploads failed",
+                description: `${errorCount} photo${errorCount !== 1 ? 's' : ''} failed to upload. Please try again.`,
+                variant: "destructive",
+                duration: 4000,
               });
             }
           }
         }
       };
+
       reader.onerror = (error) => {
+        clearTimeout(timeout);
         console.error(`Error reading file ${file.name}:`, error);
         toast({
-          title: "Photo Upload Error",
-          description: `Error reading "${file.name}". Please try again.`,
+          title: "Photo Read Error",
+          description: `Error reading "${file.name}". Please try again or use a different file.`,
           variant: "destructive",
-          duration: 3000,
+          duration: 4000,
         });
         errorCount++;
       };
-      reader.readAsDataURL(file);
+
+      // Use readAsDataURL with error handling
+      try {
+        reader.readAsDataURL(file);
+      } catch (readError) {
+        clearTimeout(timeout);
+        console.error(`Error starting to read file ${file.name}:`, readError);
+        toast({
+          title: "Photo Read Error",
+          description: `Cannot read "${file.name}". File may be corrupted.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+        errorCount++;
+      }
     });
 
     // Clear the input so the same files can be uploaded again if needed
