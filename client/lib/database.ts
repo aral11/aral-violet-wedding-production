@@ -274,16 +274,44 @@ export const photoService = {
 
   getFromLocalStorage(): SupabasePhoto[] {
     const saved = localStorage.getItem("wedding_photos");
+    const guestSaved = localStorage.getItem("wedding_guest_photos");
+    const photos: SupabasePhoto[] = [];
+
+    // Load admin photos
     if (saved) {
-      const photoData = JSON.parse(saved);
-      return photoData.map((data: string, index: number) => ({
-        id: index.toString(),
-        photo_data: data,
-        uploaded_by: "admin",
-        created_at: new Date().toISOString(),
-      }));
+      try {
+        const photoData = JSON.parse(saved);
+        const adminPhotos = photoData.map((data: string, index: number) => ({
+          id: `admin_${index}`,
+          photo_data: data,
+          uploaded_by: "admin",
+          guest_name: null,
+          created_at: new Date().toISOString(),
+        }));
+        photos.push(...adminPhotos);
+      } catch (error) {
+        console.warn("Error parsing admin photos from localStorage:", error);
+      }
     }
-    return [];
+
+    // Load guest photos
+    if (guestSaved) {
+      try {
+        const guestPhotoData = JSON.parse(guestSaved);
+        const guestPhotos = guestPhotoData.map((photo: any, index: number) => ({
+          id: `guest_${index}`,
+          photo_data: photo.photoData || photo.photo_data,
+          uploaded_by: photo.uploadedBy || photo.uploaded_by || `guest_${photo.guestName}_${Date.now()}`,
+          guest_name: photo.guestName || photo.guest_name,
+          created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
+        }));
+        photos.push(...guestPhotos);
+      } catch (error) {
+        console.warn("Error parsing guest photos from localStorage:", error);
+      }
+    }
+
+    return photos.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
   },
 
   saveToLocalStorage(photoData: string): void {
