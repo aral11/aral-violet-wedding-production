@@ -977,17 +977,17 @@ export default function AdminDashboard() {
       // Convert to base64 with improved error handling
       const reader = new FileReader();
 
-      // Add timeout for mobile devices that might struggle with large files
+      // Add timeout for large files (25MB+ requires more time)
       const timeout = setTimeout(() => {
         console.error(`Timeout reading file ${file.name}`);
         toast({
           title: "Upload Timeout",
-          description: `Timeout uploading "${file.name}". Please try a smaller file.`,
+          description: `Timeout uploading "${file.name}". File too large or connection issue.`,
           variant: "destructive",
           duration: 4000,
         });
         errorCount++;
-      }, 30000); // 30 second timeout
+      }, 120000); // 2 minute timeout for large files
 
       reader.onload = async (event) => {
         clearTimeout(timeout);
