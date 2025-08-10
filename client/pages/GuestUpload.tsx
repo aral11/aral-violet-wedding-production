@@ -277,6 +277,7 @@ export default function GuestUpload() {
             <div className="bg-sage-50 rounded-lg p-4">
               <h4 className="font-medium text-sage-700 mb-2">Quick Tips:</h4>
               <ul className="text-sm text-sage-600 space-y-1">
+                <li>• Upload photos you took of the couple during the wedding</li>
                 <li>• Make sure to enter your name before uploading</li>
                 <li>• You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>
