@@ -149,118 +149,34 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Try API first, then fall back to localStorage
-    try {
-      console.log("📸 Attempting API connection...");
-
-      // Add timeout and better error handling for fetch
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch("/api/photos", {
-        signal: controller.signal,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-      console.log("📸 API response status:", response.status, response.statusText);
-
-      if (response.ok) {
-        const apiPhotos = await response.json();
-        console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
-        console.log("📸 Raw API response sample:", apiPhotos.slice(0, 2));
-
-        if (apiPhotos && apiPhotos.length > 0) {
-          // Convert API response to SupabasePhoto format
-          const photos = apiPhotos.map((photo: any) => ({
-            id: photo.id,
-            photo_data: photo.photoData,
-            uploaded_by: photo.uploadedBy || 'admin',
-            guest_name: photo.guestName || null,
-            created_at: photo.createdAt || new Date().toISOString(),
-          }));
-
-          console.log(`📸 Converted ${photos.length} photos successfully`);
-
-          // Validate the photos have proper data
-          const validPhotos = photos.filter(p => p.photo_data && p.photo_data.startsWith('data:'));
-          console.log(`📸 ${validPhotos.length} photos have valid data URLs`);
-
-          if (validPhotos.length > 0) {
-            console.log("📸 Sample photo data:", {
-              id: validPhotos[0].id,
-              dataStart: validPhotos[0].photo_data.substring(0, 50),
-              dataLength: validPhotos[0].photo_data.length
-            });
-          }
-
-          // Sync to localStorage for future use
-          try {
-            const adminPhotos = validPhotos
-              .filter((p) => p.uploaded_by === "admin")
-              .map((p) => p.photo_data);
-            const guestPhotos = validPhotos
-              .filter((p) => p.uploaded_by !== "admin")
-              .map((p) => ({
-                photoData: p.photo_data,
-                uploadedBy: p.uploaded_by,
-                guestName: p.guest_name,
-                createdAt: p.created_at,
-              }));
-
-            localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
-            localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
-            console.log("📸 Synced to localStorage");
-          } catch (storageError) {
-            console.warn("📸 localStorage sync failed:", storageError);
-          }
-
-          return validPhotos;
-        }
+    // For debugging - create immediate test photos to verify display works
+    console.log("📸 Creating test photos for debugging...");
+    const testPhotos: SupabasePhoto[] = [
+      {
+        id: "debug_1",
+        photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAxPC90ZXh0Pjwvc3ZnPg==",
+        uploaded_by: "admin",
+        guest_name: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "debug_2",
+        photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAyPC90ZXh0Pjwvc3ZnPg==",
+        uploaded_by: "admin",
+        guest_name: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "debug_3",
+        photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAzPC90ZXh0Pjwvc3ZnPg==",
+        uploaded_by: "guest_john_doe_123",
+        guest_name: "John Doe",
+        created_at: new Date().toISOString(),
       }
+    ];
 
-      console.log("📸 API request failed or empty, checking localStorage...");
-    } catch (apiError) {
-      console.error("📸 API connection failed:", apiError);
-      console.log("📸 Falling back to localStorage...");
-    }
-
-    // Fall back to localStorage
-    const localPhotos = this.getFromLocalStorage();
-    console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
-
-    // If still no photos, ensure we have at least some test photos for demo
-    if (localPhotos.length === 0) {
-      console.log("📸 No photos found anywhere, creating test photos...");
-      const testPhotos: SupabasePhoto[] = [
-        {
-          id: "test_1",
-          photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAxPC90ZXh0Pjwvc3ZnPg==",
-          uploaded_by: "admin",
-          guest_name: null,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: "test_2",
-          photo_data: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90byAyPC90ZXh0Pjwvc3ZnPg==",
-          uploaded_by: "admin",
-          guest_name: null,
-          created_at: new Date().toISOString(),
-        }
-      ];
-
-      // Save to localStorage for next time
-      const photoData = testPhotos.map(p => p.photo_data);
-      localStorage.setItem("wedding_photos", JSON.stringify(photoData));
-
-      console.log("📸 Created and saved 2 test photos");
-      return testPhotos;
-    }
-
-    return localPhotos;
+    console.log(`📸 Returning ${testPhotos.length} debug photos directly`);
+    return testPhotos;
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
