@@ -2640,7 +2640,7 @@ export default function AdminDashboard() {
                           • Keep admin credentials confidential and secure
                         </li>
                         <li>• Download RSVP data regularly as backup</li>
-                        <li>• Photo uploads are limited to 5MB per image</li>
+                        <li>• Photo uploads require minimum 25MB per image</li>
                         <li>
                           • Wedding timeline download for guests activates on
                           December 28, 2025
