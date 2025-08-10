@@ -228,10 +228,10 @@ export default function GuestUpload() {
             <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
               <Upload className="mx-auto mb-4 text-olive-600" size={48} />
               <h3 className="text-xl font-serif text-olive-700 mb-4">
-                Upload Your Photos
+                Upload Your Couple Photos
               </h3>
               <p className="text-sage-600 mb-6">
-                Share your favorite moments from today (up to 25MB per photo)
+                Share the photos you took of the couple during the wedding (up to 25MB per photo)
               </p>
               
               <input
@@ -278,7 +278,7 @@ export default function GuestUpload() {
               <h4 className="font-medium text-sage-700 mb-2">Quick Tips:</h4>
               <ul className="text-sm text-sage-600 space-y-1">
                 <li>• Make sure to enter your name before uploading</li>
-                <li>��� You can select multiple photos at once</li>
+                <li>• You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>
                 <li>• High-quality photos are welcome (up to 25MB each)</li>
               </ul>
