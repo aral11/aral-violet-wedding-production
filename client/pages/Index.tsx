@@ -131,46 +131,8 @@ export default function Index() {
             setUploadedPhotos([]);
           }
         } else {
-          // No photos found - since we know photos exist in database but can't access them,
-          // let's populate localStorage with placeholder data
-          console.log("📸 No photos found, checking if we should add placeholders...");
-
-          const hasTriedPlaceholders = localStorage.getItem("wedding_photos_placeholder_added");
-
-          if (!hasTriedPlaceholders) {
-            console.log("📸 Adding placeholder photos for the 10 known photos in database...");
-
-            // Create placeholder photos representing the known photos in the database
-            const placeholderAdminPhotos = [
-              "data:image/svg+xml;base64," + btoa('<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="300" fill="#84a178"/><text x="150" y="140" text-anchor="middle" fill="white" font-size="14">Admin Photo 1</text><text x="150" y="160" text-anchor="middle" fill="white" font-size="12">(Database Unavailable)</text></svg>'),
-              "data:image/svg+xml;base64," + btoa('<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="300" fill="#5a6c57"/><text x="150" y="140" text-anchor="middle" fill="white" font-size="14">Admin Photo 2</text><text x="150" y="160" text-anchor="middle" fill="white" font-size="12">(Database Unavailable)</text></svg>')
-            ];
-
-            const placeholderGuestPhotos = Array.from({length: 8}, (_, i) => ({
-              photoData: "data:image/svg+xml;base64," + btoa(`<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="300" fill="#9ca3af"/><text x="150" y="130" text-anchor="middle" fill="white" font-size="14">Guest Photo ${i + 1}</text><text x="150" y="150" text-anchor="middle" fill="white" font-size="12">Uploaded by Guest</text><text x="150" y="170" text-anchor="middle" fill="white" font-size="12">(Database Unavailable)</text></svg>`),
-              uploadedBy: `guest_user_${i + 1}`,
-              guestName: `Guest ${i + 1}`,
-              createdAt: new Date().toISOString()
-            }));
-
-            localStorage.setItem("wedding_photos", JSON.stringify(placeholderAdminPhotos));
-            localStorage.setItem("wedding_guest_photos", JSON.stringify(placeholderGuestPhotos));
-            localStorage.setItem("wedding_photos_placeholder_added", "true");
-
-            const allPlaceholders = [...placeholderAdminPhotos, ...placeholderGuestPhotos.map(p => p.photoData)];
-            setUploadedPhotos(allPlaceholders);
-
-            toast({
-              title: "Placeholder Photos Loaded 📸",
-              description: `Showing 10 placeholder photos (database connection unavailable)`,
-              duration: 5000,
-            });
-
-            console.log("📸 Added 10 placeholder photos representing database content");
-          } else {
-            setUploadedPhotos([]);
-            console.log("📸 No photos found and placeholders already added");
-          }
+          setUploadedPhotos([]);
+          console.log("📸 No photos found in database");
         }
       } catch (error) {
         console.error("❌ Error loading photos:", error);
