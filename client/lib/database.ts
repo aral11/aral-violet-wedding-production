@@ -152,80 +152,57 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Try direct Supabase connection first (client-side)
+    // Check localStorage first for immediate results
+    const localPhotos = this.getFromLocalStorage();
+    if (localPhotos.length > 0) {
+      console.log(`📸 Found ${localPhotos.length} photos in localStorage, returning immediately`);
+      return localPhotos;
+    }
+
+    // Only try Supabase if localStorage is empty
     if (isSupabaseConfigured()) {
       try {
-        console.log("📸 Attempting direct Supabase connection from client...");
+        console.log("📸 localStorage empty, attempting Supabase connection...");
         const { data, error } = await supabase
           .from("photos")
           .select("*")
           .order("created_at", { ascending: false });
 
-        console.log("📸 Direct Supabase query result:", {
-          success: !error,
-          error: error ? JSON.stringify(error) : null,
-          count: data?.length
-        });
-
         if (error) {
-          console.error("📸 Direct Supabase query error details:");
-          console.error("- Message:", error.message || 'No message');
-          console.error("- Details:", error.details || 'No details');
-          console.error("- Hint:", error.hint || 'No hint');
-          console.error("- Code:", error.code || 'No code');
-          console.error("- Full error:", JSON.stringify(error, null, 2));
-          throw new Error(`Supabase query failed: ${error.message || 'Unknown error'}`);
+          console.error("📸 Supabase query error:", error.message);
+          throw new Error(`Supabase query failed: ${error.message}`);
         }
 
         if (data && data.length > 0) {
-          console.log(`📸 SUCCESS: Found ${data.length} photos via direct Supabase connection`);
+          console.log(`📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`);
 
-          // Sync to localStorage for offline access
-          try {
-            const adminPhotos = data
-              .filter((p) => p.uploaded_by === "admin")
-              .map((p) => p.photo_data);
-            const guestPhotos = data
-              .filter((p) => p.uploaded_by !== "admin")
-              .map((p) => ({
-                photoData: p.photo_data,
-                uploadedBy: p.uploaded_by,
-                guestName: p.guest_name,
-                createdAt: p.created_at,
-              }));
+          // Sync to localStorage for future use
+          const adminPhotos = data
+            .filter((p) => p.uploaded_by === "admin")
+            .map((p) => p.photo_data);
+          const guestPhotos = data
+            .filter((p) => p.uploaded_by !== "admin")
+            .map((p) => ({
+              photoData: p.photo_data,
+              uploadedBy: p.uploaded_by,
+              guestName: p.guest_name,
+              createdAt: p.created_at,
+            }));
 
-            localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
-            localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
-
-            console.log(`📸 Synced to localStorage: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos`);
-          } catch (syncError) {
-            console.warn("📸 Failed to sync to localStorage, but direct connection worked:", syncError);
-          }
+          localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
+          localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
 
           return data;
-        } else {
-          console.log("📸 Direct Supabase connection successful but no photos found");
-          return [];
         }
       } catch (directError) {
-        console.error("📸 Direct Supabase connection failed:");
-        if (directError instanceof Error) {
-          console.error("- Error message:", directError.message);
-          console.error("- Error name:", directError.name);
-          console.error("- Error stack:", directError.stack);
-        } else {
-          console.error("- Non-Error object:", JSON.stringify(directError, null, 2));
-        }
-        console.log("📸 Will attempt localStorage fallback...");
-        // Fall through to localStorage fallback
+        console.error("📸 Supabase connection failed, network issue detected");
+        console.log("📸 This appears to be a network connectivity problem with Supabase");
       }
-    } else {
-      console.log("📸 Supabase not configured, will use localStorage");
     }
 
-    // Fallback to localStorage
-    console.log("📸 Using localStorage fallback...");
-    return this.getFromLocalStorage();
+    // Return empty array if both localStorage and Supabase fail
+    console.log("📸 No photos found in localStorage or Supabase");
+    return [];
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
