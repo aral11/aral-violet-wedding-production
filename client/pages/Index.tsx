@@ -1388,7 +1388,7 @@ Please RSVP at our wedding website
                         className="bg-olive-600 hover:bg-olive-700 text-white"
                       >
                         <Upload className="mr-2 w-4 h-4" />
-                        Upload Photos Directly
+                        Upload Couple Photos
                       </Button>
                     </div>
                   </div>
