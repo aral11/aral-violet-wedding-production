@@ -153,22 +153,35 @@ export const photosApi = {
     return apiCall<WeddingPhoto[]>("/photos");
   },
 
-  async upload(photoData: string, uploadedBy = "admin"): Promise<WeddingPhoto> {
+  async getAdmin(): Promise<WeddingPhoto[]> {
+    return apiCall<WeddingPhoto[]>("/photos?type=admin");
+  },
+
+  async getGuest(): Promise<WeddingPhoto[]> {
+    return apiCall<WeddingPhoto[]>("/photos?type=guest");
+  },
+
+  async upload(
+    photoData: string,
+    uploadedBy = "admin",
+    guestName?: string,
+  ): Promise<WeddingPhoto> {
     return apiCall<WeddingPhoto>("/photos", {
       method: "POST",
-      body: JSON.stringify({ photoData, uploadedBy }),
+      body: JSON.stringify({ photoData, uploadedBy, guestName }),
     });
   },
 
   async bulkUpload(
     photos: string[],
     uploadedBy = "admin",
+    guestName?: string,
   ): Promise<{ message: string; photos: WeddingPhoto[] }> {
     return apiCall<{ message: string; photos: WeddingPhoto[] }>(
       "/photos/bulk",
       {
         method: "POST",
-        body: JSON.stringify({ photos, uploadedBy }),
+        body: JSON.stringify({ photos, uploadedBy, guestName }),
       },
     );
   },

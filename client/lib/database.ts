@@ -149,39 +149,30 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Check localStorage first for immediate results
-    const localPhotos = this.getFromLocalStorage();
-    if (localPhotos.length > 0) {
-      console.log(
-        `📸 Found ${localPhotos.length} photos in localStorage, returning immediately`,
-      );
-      return localPhotos;
-    }
+    // Try API first, then fall back to localStorage
+    try {
+      console.log("📸 Attempting API connection...");
+      const response = await fetch("/api/photos");
 
-    // Only try Supabase if localStorage is empty
-    if (isSupabaseConfigured()) {
-      try {
-        console.log("📸 localStorage empty, attempting Supabase connection...");
-        const { data, error } = await supabase
-          .from("photos")
-          .select("*")
-          .order("created_at", { ascending: false });
+      if (response.ok) {
+        const apiPhotos = await response.json();
+        console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
 
-        if (error) {
-          console.error("📸 Supabase query error:", error.message);
-          throw new Error(`Supabase query failed: ${error.message}`);
-        }
-
-        if (data && data.length > 0) {
-          console.log(
-            `📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`,
-          );
+        if (apiPhotos && apiPhotos.length > 0) {
+          // Convert API response to SupabasePhoto format
+          const photos = apiPhotos.map((photo: any) => ({
+            id: photo.id,
+            photo_data: photo.photoData,
+            uploaded_by: photo.uploadedBy,
+            guest_name: photo.guestName,
+            created_at: photo.createdAt,
+          }));
 
           // Sync to localStorage for future use
-          const adminPhotos = data
+          const adminPhotos = photos
             .filter((p) => p.uploaded_by === "admin")
             .map((p) => p.photo_data);
-          const guestPhotos = data
+          const guestPhotos = photos
             .filter((p) => p.uploaded_by !== "admin")
             .map((p) => ({
               photoData: p.photo_data,
@@ -196,18 +187,25 @@ export const photoService = {
             JSON.stringify(guestPhotos),
           );
 
-          return data;
+          return photos;
         }
-      } catch (directError) {
-        console.error("📸 Supabase connection failed, network issue detected");
-        console.log(
-          "📸 This appears to be a network connectivity problem with Supabase",
-        );
       }
+
+      console.log("📸 API request failed or empty, checking localStorage...");
+    } catch (apiError) {
+      console.error("📸 API connection failed:", apiError);
+      console.log("📸 Falling back to localStorage...");
     }
 
-    // Return empty array if both localStorage and Supabase fail
-    console.log("📸 No photos found in localStorage or Supabase");
+    // Fall back to localStorage
+    const localPhotos = this.getFromLocalStorage();
+    if (localPhotos.length > 0) {
+      console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
+      return localPhotos;
+    }
+
+    // Return empty array if both API and localStorage fail
+    console.log("📸 No photos found in API or localStorage");
     return [];
   },
 
@@ -338,6 +336,37 @@ export const photoService = {
       guestPhotos: guestSaved ? "found" : "not found",
     });
 
+    // Add some test photos if none exist (for development/testing)
+    if (!saved && !guestSaved && typeof window !== "undefined") {
+      console.log("📸 Adding test photos for development...");
+      const testAdminPhotos = [
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
+      ];
+      const testGuestPhotos = [
+        {
+          photoData:
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
+          uploadedBy: "guest_john_doe_1234567890",
+          guestName: "John Doe",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          photoData:
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2FjY2Y5OSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
+          uploadedBy: "guest_jane_smith_1234567891",
+          guestName: "Jane Smith",
+          createdAt: new Date().toISOString(),
+        },
+      ];
+      localStorage.setItem("wedding_photos", JSON.stringify(testAdminPhotos));
+      localStorage.setItem(
+        "wedding_guest_photos",
+        JSON.stringify(testGuestPhotos),
+      );
+      console.log("📸 Test photos added to localStorage");
+    }
+
     // Load admin photos
     if (saved) {
       try {
@@ -358,7 +387,10 @@ export const photoService = {
         photos.push(...adminPhotos);
         console.log(`📸 Loaded ${adminPhotos.length} valid admin photos`);
       } catch (error) {
-        console.warn("📸 Error parsing admin photos from localStorage:", error);
+        console.warn(
+          "��� Error parsing admin photos from localStorage:",
+          error,
+        );
       }
     }
 
