@@ -169,10 +169,12 @@ export const photoService = {
         return data || [];
       } catch (error) {
         console.warn("Supabase unavailable, filtering localStorage:", error);
-        return this.getFromLocalStorage().filter(p => p.uploaded_by === "admin");
+        return this.getFromLocalStorage().filter(
+          (p) => p.uploaded_by === "admin",
+        );
       }
     }
-    return this.getFromLocalStorage().filter(p => p.uploaded_by === "admin");
+    return this.getFromLocalStorage().filter((p) => p.uploaded_by === "admin");
   },
 
   async getGuestPhotos(): Promise<SupabasePhoto[]> {
@@ -188,10 +190,12 @@ export const photoService = {
         return data || [];
       } catch (error) {
         console.warn("Supabase unavailable, filtering localStorage:", error);
-        return this.getFromLocalStorage().filter(p => p.uploaded_by !== "admin");
+        return this.getFromLocalStorage().filter(
+          (p) => p.uploaded_by !== "admin",
+        );
       }
     }
-    return this.getFromLocalStorage().filter(p => p.uploaded_by !== "admin");
+    return this.getFromLocalStorage().filter((p) => p.uploaded_by !== "admin");
   },
 
   async create(
@@ -199,19 +203,22 @@ export const photoService = {
     uploadedBy = "admin",
     guestName?: string,
   ): Promise<SupabasePhoto> {
-    const actualUploadedBy = uploadedBy === 'guest'
-      ? `guest_${guestName || 'anonymous'}_${Date.now()}`
-      : uploadedBy;
+    const actualUploadedBy =
+      uploadedBy === "guest"
+        ? `guest_${guestName || "anonymous"}_${Date.now()}`
+        : uploadedBy;
 
     if (isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase
           .from("photos")
-          .insert([{
-            photo_data: photoData,
-            uploaded_by: actualUploadedBy,
-            guest_name: guestName || null
-          }])
+          .insert([
+            {
+              photo_data: photoData,
+              uploaded_by: actualUploadedBy,
+              guest_name: guestName || null,
+            },
+          ])
           .select()
           .single();
 

@@ -141,8 +141,9 @@ export default function GuestUpload() {
               Thank You, {guestName}!
             </h2>
             <p className="text-sage-600 mb-6">
-              Your {uploadedCount} photo{uploadedCount !== 1 ? "s have" : " has"} been 
-              successfully added to Aral & Violet's wedding gallery.
+              Your {uploadedCount} photo
+              {uploadedCount !== 1 ? "s have" : " has"} been successfully added
+              to Aral & Violet's wedding gallery.
             </p>
             <div className="space-y-3">
               <Button
@@ -200,10 +201,11 @@ export default function GuestUpload() {
               Share Your Couple Photos
             </CardTitle>
             <p className="text-sage-600 text-lg">
-              Did you take photos of Aral & Violet during the wedding? Share them with us for our memories!
+              Did you take photos of Aral & Violet during the wedding? Share
+              them with us for our memories!
             </p>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Guest Name Input */}
             <div className="space-y-2">
@@ -231,9 +233,10 @@ export default function GuestUpload() {
                 Upload Your Couple Photos
               </h3>
               <p className="text-sage-600 mb-6">
-                Share the photos you took of the couple during the wedding (up to 25MB per photo)
+                Share the photos you took of the couple during the wedding (up
+                to 25MB per photo)
               </p>
-              
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -243,7 +246,7 @@ export default function GuestUpload() {
                 className="hidden"
                 disabled={isUploading}
               />
-              
+
               <Button
                 onClick={handleUploadClick}
                 disabled={isUploading || !guestName.trim()}
@@ -262,7 +265,7 @@ export default function GuestUpload() {
                   </>
                 )}
               </Button>
-              
+
               <div className="mt-4 space-y-1">
                 <p className="text-sm text-sage-600">
                   Select multiple photos • Up to 25MB per photo supported
@@ -277,7 +280,9 @@ export default function GuestUpload() {
             <div className="bg-sage-50 rounded-lg p-4">
               <h4 className="font-medium text-sage-700 mb-2">Quick Tips:</h4>
               <ul className="text-sm text-sage-600 space-y-1">
-                <li>• Upload photos you took of the couple during the wedding</li>
+                <li>
+                  • Upload photos you took of the couple during the wedding
+                </li>
                 <li>• Make sure to enter your name before uploading</li>
                 <li>• You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>

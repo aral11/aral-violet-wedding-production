@@ -5,19 +5,22 @@ import { z } from "zod";
 // Guest upload validation schema
 const guestUploadSchema = z.object({
   photoData: z.string().min(1, "Photo data is required"),
-  guestName: z.string().min(1, "Guest name is required").max(100, "Name too long"),
-  uploadedBy: z.literal('guest')
+  guestName: z
+    .string()
+    .min(1, "Guest name is required")
+    .max(100, "Name too long"),
+  uploadedBy: z.literal("guest"),
 });
 
 // Generate QR code data for guest upload
 export const generateGuestUploadQR: RequestHandler = async (req, res) => {
   try {
-    const baseUrl = req.protocol + '://' + req.get('host');
+    const baseUrl = req.protocol + "://" + req.get("host");
     const guestUploadUrl = `${baseUrl}/guest-upload`;
 
     res.json({
       qrCodeUrl: guestUploadUrl,
-      message: "QR code URL generated for guest photo uploads"
+      message: "QR code URL generated for guest photo uploads",
     });
   } catch (error) {
     console.error("Error generating QR code:", error);
@@ -28,7 +31,7 @@ export const generateGuestUploadQR: RequestHandler = async (req, res) => {
 // Validate guest upload
 export const validateGuestUpload: RequestHandler = async (req, res, next) => {
   try {
-    if (req.body.uploadedBy === 'guest') {
+    if (req.body.uploadedBy === "guest") {
       const validated = guestUploadSchema.parse(req.body);
       req.body = validated;
     }
@@ -37,7 +40,7 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: "Invalid guest upload data",
-        details: error.errors
+        details: error.errors,
       });
     }
     next(error);
@@ -76,10 +79,10 @@ export const getPhotos: RequestHandler = async (req, res) => {
         .order("created_at", { ascending: false });
 
       // Filter by uploader type if specified
-      if (type === 'admin') {
-        query = query.eq('uploaded_by', 'admin');
-      } else if (type === 'guest') {
-        query = query.neq('uploaded_by', 'admin');
+      if (type === "admin") {
+        query = query.eq("uploaded_by", "admin");
+      } else if (type === "guest") {
+        query = query.neq("uploaded_by", "admin");
       }
 
       const { data, error } = await query;
@@ -97,7 +100,9 @@ export const getPhotos: RequestHandler = async (req, res) => {
         createdAt: row.created_at,
       }));
 
-      console.log(`📸 Returning ${photos.length} photos from Supabase (type: ${type || 'all'})`);
+      console.log(
+        `📸 Returning ${photos.length} photos from Supabase (type: ${type || "all"})`,
+      );
       res.json(photos);
     } else {
       console.log("📸 No Supabase client - returning empty array");
@@ -121,9 +126,10 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
     }
 
     // Generate a unique identifier for guest uploads
-    const actualUploadedBy = uploadedBy === 'guest'
-      ? `guest_${guestName || 'anonymous'}_${Date.now()}`
-      : uploadedBy;
+    const actualUploadedBy =
+      uploadedBy === "guest"
+        ? `guest_${guestName || "anonymous"}_${Date.now()}`
+        : uploadedBy;
 
     if (supabase) {
       const { data, error } = await supabase
@@ -150,7 +156,9 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
         createdAt: data.created_at,
       };
 
-      console.log(`📸 Photo uploaded by ${uploadedBy === 'guest' ? `guest: ${guestName}` : 'admin'}`);
+      console.log(
+        `📸 Photo uploaded by ${uploadedBy === "guest" ? `guest: ${guestName}` : "admin"}`,
+      );
       res.status(201).json(newPhoto);
     } else {
       // Fallback response
@@ -168,9 +176,10 @@ export const uploadPhoto: RequestHandler = async (req, res) => {
     console.error("Error uploading photo:", error);
     // Return success response for graceful fallback
     const id = Date.now().toString();
-    const actualUploadedBy = req.body.uploadedBy === 'guest'
-      ? `guest_${req.body.guestName || 'anonymous'}_${Date.now()}`
-      : req.body.uploadedBy || "admin";
+    const actualUploadedBy =
+      req.body.uploadedBy === "guest"
+        ? `guest_${req.body.guestName || "anonymous"}_${Date.now()}`
+        : req.body.uploadedBy || "admin";
     const newPhoto = {
       id,
       photoData: req.body.photoData,
@@ -213,9 +222,10 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
     }
 
     // Generate a unique identifier for guest uploads
-    const actualUploadedBy = uploadedBy === 'guest'
-      ? `guest_${guestName || 'anonymous'}_${Date.now()}`
-      : uploadedBy;
+    const actualUploadedBy =
+      uploadedBy === "guest"
+        ? `guest_${guestName || "anonymous"}_${Date.now()}`
+        : uploadedBy;
 
     if (supabase) {
       const photosToInsert = photos.map((photoData: string) => ({
@@ -241,7 +251,9 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
         createdAt: row.created_at,
       }));
 
-      console.log(`📸 Bulk uploaded ${uploadedPhotos.length} photos by ${uploadedBy === 'guest' ? `guest: ${guestName}` : 'admin'}`);
+      console.log(
+        `📸 Bulk uploaded ${uploadedPhotos.length} photos by ${uploadedBy === "guest" ? `guest: ${guestName}` : "admin"}`,
+      );
       res.status(201).json({
         message: `Successfully uploaded ${uploadedPhotos.length} photos`,
         photos: uploadedPhotos,
@@ -263,9 +275,10 @@ export const bulkUploadPhotos: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error bulk uploading photos:", error);
     // Return success response for graceful fallback
-    const actualUploadedBy = req.body.uploadedBy === 'guest'
-      ? `guest_${req.body.guestName || 'anonymous'}_${Date.now()}`
-      : req.body.uploadedBy || "admin";
+    const actualUploadedBy =
+      req.body.uploadedBy === "guest"
+        ? `guest_${req.body.guestName || "anonymous"}_${Date.now()}`
+        : req.body.uploadedBy || "admin";
     const uploadedPhotos = req.body.photos.map(
       (photoData: string, index: number) => ({
         id: (Date.now() + index).toString(),

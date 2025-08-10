@@ -60,7 +60,15 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
-  const [guestPhotos, setGuestPhotos] = useState<Array<{id: string, photoData: string, guestName: string | null, uploadedBy: string, createdAt: string}>>([]);
+  const [guestPhotos, setGuestPhotos] = useState<
+    Array<{
+      id: string;
+      photoData: string;
+      guestName: string | null;
+      uploadedBy: string;
+      createdAt: string;
+    }>
+  >([]);
   const [weddingFlow, setWeddingFlow] = useState<WeddingFlowItem[]>([]);
   const [invitationPDF, setInvitationPDF] = useState<string | null>(null);
   const [newFlowItem, setNewFlowItem] = useState<Omit<WeddingFlowItem, "id">>({
@@ -243,17 +251,22 @@ export default function AdminDashboard() {
       try {
         const guestPhotosData = await database.photos.getGuestPhotos();
         if (guestPhotosData && guestPhotosData.length > 0) {
-          setGuestPhotos(guestPhotosData.map((photo) => ({
-            id: photo.id || Date.now().toString(),
-            photoData: photo.photo_data,
-            guestName: photo.guest_name,
-            uploadedBy: photo.uploaded_by,
-            createdAt: photo.created_at || new Date().toISOString(),
-          })));
+          setGuestPhotos(
+            guestPhotosData.map((photo) => ({
+              id: photo.id || Date.now().toString(),
+              photoData: photo.photo_data,
+              guestName: photo.guest_name,
+              uploadedBy: photo.uploaded_by,
+              createdAt: photo.created_at || new Date().toISOString(),
+            })),
+          );
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
-          console.log(`Guest photos loaded from ${storageType}:`, guestPhotosData.length);
+          console.log(
+            `Guest photos loaded from ${storageType}:`,
+            guestPhotosData.length,
+          );
         }
       } catch (error) {
         console.log("Error loading guest photos:", error);
@@ -1992,7 +2005,8 @@ export default function AdminDashboard() {
                       Upload Wedding Photos
                     </h3>
                     <p className="text-sage-600 mb-6">
-                      Upload high-quality photos (up to 25MB each) for the wedding gallery
+                      Upload high-quality photos (up to 25MB each) for the
+                      wedding gallery
                     </p>
                     <input
                       ref={photoInputRef}
@@ -2014,10 +2028,7 @@ export default function AdminDashboard() {
                             }, 100);
                           }
                         } catch (error) {
-                          console.error(
-                            "Error triggering file picker:",
-                            error,
-                          );
+                          console.error("Error triggering file picker:", error);
                           toast({
                             title: "Upload Error",
                             description:
@@ -2109,14 +2120,19 @@ export default function AdminDashboard() {
                         <div className="flex gap-2">
                           <Button
                             onClick={() => {
-                              const currentUrl = window.location.origin + (import.meta.env.PROD &&
-                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                              const currentUrl =
+                                window.location.origin +
+                                (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                  "netlify"
                                   ? "/aral-violet-wedding"
-                                  : "") + "/guest-upload";
+                                  : "") +
+                                "/guest-upload";
                               navigator.clipboard.writeText(currentUrl);
                               toast({
                                 title: "Link Copied!",
-                                description: "Guest upload link copied to clipboard.",
+                                description:
+                                  "Guest upload link copied to clipboard.",
                               });
                             }}
                             variant="outline"
@@ -2127,18 +2143,23 @@ export default function AdminDashboard() {
                           <Button
                             onClick={() => {
                               const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
-                                window.location.origin + (import.meta.env.PROD &&
-                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                window.location.origin +
+                                  (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                    "netlify"
                                     ? "/aral-violet-wedding"
-                                    : "") + "/guest-upload"
+                                    : "") +
+                                  "/guest-upload",
                               )}`;
-                              const link = document.createElement('a');
+                              const link = document.createElement("a");
                               link.href = qrUrl;
-                              link.download = 'wedding-guest-photo-upload-qr.png';
+                              link.download =
+                                "wedding-guest-photo-upload-qr.png";
                               link.click();
                               toast({
                                 title: "QR Code Downloaded!",
-                                description: "High-quality QR code saved for printing.",
+                                description:
+                                  "High-quality QR code saved for printing.",
                               });
                             }}
                             variant="outline"
@@ -2154,17 +2175,22 @@ export default function AdminDashboard() {
                       <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="flex-1">
                           <p className="text-sage-700 mb-4">
-                            This QR code is already displayed on your home page for guests to see! You can also download and print additional copies for venue placement.
+                            This QR code is already displayed on your home page
+                            for guests to see! You can also download and print
+                            additional copies for venue placement.
                           </p>
                           <div className="space-y-2">
                             <p className="text-sm text-sage-600">
                               <strong>Guest Upload URL:</strong>
                             </p>
                             <code className="text-xs bg-white p-2 rounded border block break-all">
-                              {window.location.origin + (import.meta.env.PROD &&
-                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                              {window.location.origin +
+                                (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                  "netlify"
                                   ? "/aral-violet-wedding"
-                                  : "") + "/guest-upload"}
+                                  : "") +
+                                "/guest-upload"}
                             </code>
                           </div>
                         </div>
@@ -2172,21 +2198,29 @@ export default function AdminDashboard() {
                           <div className="bg-white p-4 rounded-lg border-2 border-olive-200 text-center">
                             <img
                               src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(
-                                window.location.origin + (import.meta.env.PROD &&
-                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                window.location.origin +
+                                  (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                    "netlify"
                                     ? "/aral-violet-wedding"
-                                    : "") + "/guest-upload"
+                                    : "") +
+                                  "/guest-upload",
                               )}`}
                               alt="QR Code for Guest Photo Upload"
                               className="w-32 h-32 mb-2 rounded"
                             />
-                            <p className="text-xs text-sage-600">Scan to upload photos</p>
+                            <p className="text-xs text-sage-600">
+                              Scan to upload photos
+                            </p>
                           </div>
                         </div>
                       </div>
                       <div className="mt-4 p-3 bg-cream-100 rounded border-l-4 border-olive-500">
                         <p className="text-sm text-olive-700">
-                          <strong>💡 Pro Tip:</strong> The QR code is already visible on your home page! You can also print additional copies and place them on guest tables or display on screens around the venue for easy access!
+                          <strong>💡 Pro Tip:</strong> The QR code is already
+                          visible on your home page! You can also print
+                          additional copies and place them on guest tables or
+                          display on screens around the venue for easy access!
                         </p>
                       </div>
                     </CardContent>
@@ -2195,34 +2229,54 @@ export default function AdminDashboard() {
                   {/* Guest Photos Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card className="p-4 text-center">
-                      <Camera className="mx-auto mb-2 text-olive-600" size={32} />
+                      <Camera
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
                       <p className="text-2xl font-bold text-olive-700">
                         {guestPhotos.length}
                       </p>
                       <p className="text-sm text-sage-600">Guest Photos</p>
                     </Card>
                     <Card className="p-4 text-center">
-                      <Users className="mx-auto mb-2 text-olive-600" size={32} />
+                      <Users
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
                       <p className="text-2xl font-bold text-olive-700">
-                        {new Set(guestPhotos.map(p => p.guestName)).size}
+                        {new Set(guestPhotos.map((p) => p.guestName)).size}
                       </p>
                       <p className="text-sm text-sage-600">Contributors</p>
                     </Card>
                     <Card className="p-4 text-center">
-                      <Heart className="mx-auto mb-2 text-olive-600" size={32} />
+                      <Heart
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
                       <p className="text-2xl font-bold text-olive-700">
-                        {guestPhotos.filter(p => p.createdAt && new Date(p.createdAt).toDateString() === new Date().toDateString()).length}
+                        {
+                          guestPhotos.filter(
+                            (p) =>
+                              p.createdAt &&
+                              new Date(p.createdAt).toDateString() ===
+                                new Date().toDateString(),
+                          ).length
+                        }
                       </p>
                       <p className="text-sm text-sage-600">Today</p>
                     </Card>
                     <Card className="p-4 text-center">
-                      <Download className="mx-auto mb-2 text-olive-600" size={32} />
+                      <Download
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
                       <Button
                         onClick={() => {
                           // Download all guest photos as ZIP
                           toast({
                             title: "Download Started",
-                            description: "Preparing guest photos for download...",
+                            description:
+                              "Preparing guest photos for download...",
                           });
                         }}
                         className="bg-olive-600 hover:bg-olive-700 text-white text-xs px-2 py-1"
@@ -2243,17 +2297,23 @@ export default function AdminDashboard() {
                         <Button
                           onClick={async () => {
                             try {
-                              const guestPhotosData = await database.photos.getGuestPhotos();
-                              setGuestPhotos(guestPhotosData.map((photo) => ({
-                                id: photo.id || Date.now().toString(),
-                                photoData: photo.photo_data,
-                                guestName: photo.guest_name,
-                                uploadedBy: photo.uploaded_by,
-                                createdAt: photo.created_at || new Date().toISOString(),
-                              })));
+                              const guestPhotosData =
+                                await database.photos.getGuestPhotos();
+                              setGuestPhotos(
+                                guestPhotosData.map((photo) => ({
+                                  id: photo.id || Date.now().toString(),
+                                  photoData: photo.photo_data,
+                                  guestName: photo.guest_name,
+                                  uploadedBy: photo.uploaded_by,
+                                  createdAt:
+                                    photo.created_at ||
+                                    new Date().toISOString(),
+                                })),
+                              );
                               toast({
                                 title: "Guest Photos Refreshed",
-                                description: "Latest guest uploads loaded successfully!",
+                                description:
+                                  "Latest guest uploads loaded successfully!",
                               });
                             } catch (error) {
                               toast({
@@ -2276,7 +2336,7 @@ export default function AdminDashboard() {
                             <div className="aspect-square relative">
                               <img
                                 src={photo.photoData}
-                                alt={`Photo by ${photo.guestName || 'Guest'}`}
+                                alt={`Photo by ${photo.guestName || "Guest"}`}
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -2284,22 +2344,24 @@ export default function AdminDashboard() {
                               <div className="flex justify-between items-start mb-2">
                                 <div>
                                   <p className="font-medium text-olive-700">
-                                    {photo.guestName || 'Anonymous Guest'}
+                                    {photo.guestName || "Anonymous Guest"}
                                   </p>
                                   <p className="text-xs text-sage-500">
-                                    {new Date(photo.createdAt).toLocaleDateString('en-US', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
+                                    {new Date(
+                                      photo.createdAt,
+                                    ).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
                                     })}
                                   </p>
                                 </div>
                                 <Button
                                   onClick={() => {
-                                    const link = document.createElement('a');
+                                    const link = document.createElement("a");
                                     link.href = photo.photoData;
-                                    link.download = `${photo.guestName || 'guest'}_${photo.id}.jpg`;
+                                    link.download = `${photo.guestName || "guest"}_${photo.id}.jpg`;
                                     link.click();
                                   }}
                                   variant="outline"
@@ -2316,12 +2378,16 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Camera className="mx-auto mb-4 text-sage-400" size={64} />
+                      <Camera
+                        className="mx-auto mb-4 text-sage-400"
+                        size={64}
+                      />
                       <h3 className="text-xl font-serif text-sage-600 mb-2">
                         No Guest Photos Yet
                       </h3>
                       <p className="text-sage-500 mb-4">
-                        Share the QR code with guests during the wedding to start collecting photos!
+                        Share the QR code with guests during the wedding to
+                        start collecting photos!
                       </p>
                     </div>
                   )}

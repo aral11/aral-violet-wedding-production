@@ -1369,8 +1369,10 @@ Please RSVP at our wedding website
                       Capture Us During the Wedding!
                     </h3>
                     <p className="text-sage-700 mb-4 text-lg">
-                      During the wedding ceremony and reception, please take photos of us (the couple) and share them for our memories!
-                      Scan the QR code to upload your couple photos directly to our wedding gallery.
+                      During the wedding ceremony and reception, please take
+                      photos of us (the couple) and share them for our memories!
+                      Scan the QR code to upload your couple photos directly to
+                      our wedding gallery.
                     </p>
                     <div className="space-y-2">
                       <p className="text-sm text-sage-600">
@@ -1379,12 +1381,15 @@ Please RSVP at our wedding website
                       <ol className="text-sm text-sage-600 space-y-1 list-decimal list-inside">
                         <li>Take photos of the couple during the wedding</li>
                         <li>Scan the QR code with your phone camera</li>
-                        <li>Enter your name and upload - they'll appear here automatically!</li>
+                        <li>
+                          Enter your name and upload - they'll appear here
+                          automatically!
+                        </li>
                       </ol>
                     </div>
                     <div className="mt-4">
                       <Button
-                        onClick={() => window.open('/guest-upload', '_blank')}
+                        onClick={() => window.open("/guest-upload", "_blank")}
                         className="bg-olive-600 hover:bg-olive-700 text-white"
                       >
                         <Upload className="mr-2 w-4 h-4" />
@@ -1397,10 +1402,13 @@ Please RSVP at our wedding website
                     <div className="bg-white p-6 rounded-xl border-2 border-olive-300 shadow-lg text-center">
                       <img
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                          window.location.origin + (import.meta.env.PROD &&
-                            import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                          window.location.origin +
+                            (import.meta.env.PROD &&
+                            import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                              "netlify"
                               ? "/aral-violet-wedding"
-                              : "") + "/guest-upload"
+                              : "") +
+                            "/guest-upload",
                         )}`}
                         alt="QR Code for Guest Photo Upload"
                         className="w-40 h-40 mb-3 rounded-lg"
