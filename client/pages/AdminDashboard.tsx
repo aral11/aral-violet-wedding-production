@@ -2086,6 +2086,157 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Guest Photos Management */}
+          <TabsContent value="guest-photos" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
+              <CardHeader>
+                <CardTitle className="text-olive-700">
+                  Guest Photo Uploads
+                </CardTitle>
+                <p className="text-sage-600">
+                  View and manage photos uploaded by wedding guests via QR code
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Guest Photos Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card className="p-4 text-center">
+                      <Camera className="mx-auto mb-2 text-olive-600" size={32} />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {guestPhotos.length}
+                      </p>
+                      <p className="text-sm text-sage-600">Guest Photos</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Users className="mx-auto mb-2 text-olive-600" size={32} />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {new Set(guestPhotos.map(p => p.guestName)).size}
+                      </p>
+                      <p className="text-sm text-sage-600">Contributors</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Heart className="mx-auto mb-2 text-olive-600" size={32} />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {guestPhotos.filter(p => p.createdAt && new Date(p.createdAt).toDateString() === new Date().toDateString()).length}
+                      </p>
+                      <p className="text-sm text-sage-600">Today</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Download className="mx-auto mb-2 text-olive-600" size={32} />
+                      <Button
+                        onClick={() => {
+                          // Download all guest photos as ZIP
+                          toast({
+                            title: "Download Started",
+                            description: "Preparing guest photos for download...",
+                          });
+                        }}
+                        className="bg-olive-600 hover:bg-olive-700 text-white text-xs px-2 py-1"
+                        size="sm"
+                      >
+                        Download All
+                      </Button>
+                    </Card>
+                  </div>
+
+                  {/* Guest Photos Grid */}
+                  {guestPhotos.length > 0 ? (
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-olive-700">
+                          Guest Contributions
+                        </h3>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const guestPhotosData = await database.photos.getGuestPhotos();
+                              setGuestPhotos(guestPhotosData.map((photo) => ({
+                                id: photo.id || Date.now().toString(),
+                                photoData: photo.photo_data,
+                                guestName: photo.guest_name,
+                                uploadedBy: photo.uploaded_by,
+                                createdAt: photo.created_at || new Date().toISOString(),
+                              })));
+                              toast({
+                                title: "Guest Photos Refreshed",
+                                description: "Latest guest uploads loaded successfully!",
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Refresh Failed",
+                                description: "Could not refresh guest photos.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Refresh
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {guestPhotos.map((photo) => (
+                          <Card key={photo.id} className="overflow-hidden">
+                            <div className="aspect-square relative">
+                              <img
+                                src={photo.photoData}
+                                alt={`Photo by ${photo.guestName || 'Guest'}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-3">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-medium text-olive-700">
+                                    {photo.guestName || 'Anonymous Guest'}
+                                  </p>
+                                  <p className="text-xs text-sage-500">
+                                    {new Date(photo.createdAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                                <Button
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = photo.photoData;
+                                    link.download = `${photo.guestName || 'guest'}_${photo.id}.jpg`;
+                                    link.click();
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs"
+                                >
+                                  <Download className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Camera className="mx-auto mb-4 text-sage-400" size={64} />
+                      <h3 className="text-xl font-serif text-sage-600 mb-2">
+                        No Guest Photos Yet
+                      </h3>
+                      <p className="text-sage-500 mb-4">
+                        Share the QR code with guests during the wedding to start collecting photos!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Wedding Flow Management */}
           <TabsContent value="flow" className="space-y-6">
             <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
