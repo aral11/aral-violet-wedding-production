@@ -149,7 +149,16 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Try client-side Supabase first (this is where uploads go)
+    // Try localStorage first (fastest and most reliable)
+    const localPhotos = this.getFromLocalStorage();
+    console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
+
+    if (localPhotos.length > 0) {
+      console.log("📸 Returning photos from localStorage");
+      return localPhotos;
+    }
+
+    // Try client-side Supabase if localStorage is empty
     if (supabase) {
       try {
         console.log("📸 Attempting direct Supabase connection from client...");
@@ -177,6 +186,8 @@ export const photoService = {
 
           if (validPhotos.length > 0) {
             console.log("📸 Returning photos from direct Supabase connection");
+            // Save to localStorage for next time
+            this.syncSupabaseToLocalStorage(validPhotos);
             return validPhotos;
           }
         } else if (error) {
@@ -187,9 +198,12 @@ export const photoService = {
       }
     }
 
-    // Try API as backup
+    // Try API as backup (but handle fetch errors gracefully)
     try {
       console.log("📸 Attempting API connection...");
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const response = await fetch("/api/photos", {
         method: "GET",
@@ -197,20 +211,14 @@ export const photoService = {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        // Add a reasonable timeout
-        signal: AbortSignal.timeout(5000),
+        signal: controller.signal,
       });
 
-      console.log(
-        "📸 API response status:",
-        response.status,
-        response.statusText,
-      );
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const apiPhotos = await response.json();
         console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
-        console.log("📸 Raw API response sample:", apiPhotos[0]);
 
         if (apiPhotos && apiPhotos.length > 0) {
           // Convert API response to SupabasePhoto format
@@ -222,8 +230,6 @@ export const photoService = {
             created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
           }));
 
-          console.log("📸 Converted photo sample:", photos[0]);
-
           // Validate the photos have proper data
           const validPhotos = photos.filter(
             (p) => p.photo_data && p.photo_data.startsWith("data:"),
@@ -231,57 +237,45 @@ export const photoService = {
           console.log(`📸 ${validPhotos.length} photos have valid data URLs`);
 
           if (validPhotos.length > 0) {
-            console.log("📸 Returning valid photos to client");
+            console.log("📸 Returning valid photos from API");
             return validPhotos;
           }
         }
       }
-
-      console.log(
-        "📸 API request failed or empty, falling back to localStorage...",
-      );
     } catch (apiError) {
-      console.error("📸 API connection failed:", apiError);
-      console.log("📸 Falling back to localStorage...");
+      console.log("📸 API connection failed (this is expected if network is limited):", apiError.message);
     }
 
-    // Fall back to localStorage or create test photos
-    const localPhotos = this.getFromLocalStorage();
-    console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
+    // If everything fails, return placeholder photos
+    console.log("📸 All connections failed, returning placeholder photos...");
+    const testPhotos: SupabasePhoto[] = [
+      {
+        id: "placeholder_1",
+        photo_data:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+U2FtcGxlIFBob3RvIDEgPC90ZXh0Pjwvc3ZnPg==",
+        uploaded_by: "admin",
+        guest_name: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "placeholder_2",
+        photo_data:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+U2FtcGxlIFBob3RvIDI8L3RleHQ+PC9zdmc+",
+        uploaded_by: "admin",
+        guest_name: null,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: "placeholder_3",
+        photo_data:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+U2FtcGxlIFBob3RvIDM8L3RleHQ+PC9zdmc+",
+        uploaded_by: "guest_sample",
+        guest_name: "Sample Guest",
+        created_at: new Date().toISOString(),
+      },
+    ];
 
-    if (localPhotos.length === 0) {
-      console.log("📸 No photos found, creating fallback test photos...");
-      const testPhotos: SupabasePhoto[] = [
-        {
-          id: "fallback_1",
-          photo_data:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+V2VkZGluZyBQaG90byAxPC90ZXh0Pjwvc3ZnPg==",
-          uploaded_by: "admin",
-          guest_name: null,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: "fallback_2",
-          photo_data:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+V2VkZGluZyBQaG90byAyPC90ZXh0Pjwvc3ZnPg==",
-          uploaded_by: "admin",
-          guest_name: null,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: "fallback_3",
-          photo_data:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG88L3RleHQ+PC9zdmc+",
-          uploaded_by: "guest_123",
-          guest_name: "Wedding Guest",
-          created_at: new Date().toISOString(),
-        },
-      ];
-
-      return testPhotos;
-    }
-
-    return localPhotos;
+    return testPhotos;
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
