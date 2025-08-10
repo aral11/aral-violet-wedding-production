@@ -501,7 +501,7 @@ export default function AdminDashboard() {
     </div>
 
     <div class="footer">
-        <div class="logo">❤️ TheVIRALWedding</div>
+        <div class="logo">❤�� TheVIRALWedding</div>
         <div style="font-size: 1.2em; margin: 10px 0;">A&V • 12.28.2025</div>
         <div style="color: #718096;">With hearts full of joy and blessings from above</div>
         <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
@@ -1950,34 +1950,85 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-6">
                   {/* Upload Section */}
-                  <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg">
+                  <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
                     <Camera className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
                       Upload Wedding Photos
                     </h3>
-                    <div>
+                    <div className="space-y-3">
                       <input
                         ref={photoInputRef}
                         type="file"
                         multiple
-                        accept="image/*"
+                        accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp"
                         onChange={handlePhotoUpload}
                         className="hidden"
+                        capture="environment"
                       />
                       <Button
                         onClick={() => {
                           console.log("Photo upload button clicked");
-                          photoInputRef.current?.click();
+                          try {
+                            // Enhanced mobile compatibility
+                            if (photoInputRef.current) {
+                              // Reset any previous value
+                              photoInputRef.current.value = '';
+
+                              // Trigger file picker
+                              photoInputRef.current.click();
+
+                              // For some mobile browsers, also trigger focus
+                              setTimeout(() => {
+                                photoInputRef.current?.focus();
+                              }, 100);
+                            }
+                          } catch (error) {
+                            console.error('Error triggering file picker:', error);
+                            toast({
+                              title: "Upload Error",
+                              description: "Could not open file picker. Please try again.",
+                              variant: "destructive",
+                            });
+                          }
                         }}
-                        className="bg-olive-600 hover:bg-olive-700 text-white"
+                        className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
+                        size="lg"
                       >
-                        <Upload className="mr-2" size={16} />
+                        <Upload className="mr-2" size={20} />
                         Choose Photos
                       </Button>
+
+                      {/* Alternative mobile-friendly upload button */}
+                      <div className="sm:hidden">
+                        <label
+                          htmlFor="mobile-photo-upload"
+                          className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
+                        >
+                          <Camera className="mr-2" size={16} />
+                          Take/Upload Photo
+                        </label>
+                        <input
+                          id="mobile-photo-upload"
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                          capture="environment"
+                        />
+                      </div>
                     </div>
-                    <p className="text-xs text-sage-500 mt-2">
-                      Select multiple photos • Maximum 5MB per photo
-                    </p>
+                    <div className="mt-4 space-y-1">
+                      <p className="text-sm text-sage-600">
+                        Select multiple photos • Maximum 5MB per photo
+                      </p>
+                      <p className="text-xs text-sage-500">
+                        Supports: JPG, PNG, GIF, WebP formats
+                      </p>
+                      <div className="text-xs text-sage-400 mt-2">
+                        📱 Mobile users: Use "Take/Upload Photo" for better compatibility
+                      </div>
+                    </div>
                   </div>
 
                   {/* Photos Grid */}
