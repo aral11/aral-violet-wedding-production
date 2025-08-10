@@ -615,7 +615,7 @@ export default function Index() {
             )
             .join("\n\n")
         : `7:00 PM | Welcome & Cocktails (30 min)
-�� Guests arrive and enjoy welcome drinks and appetizers
+🎉 Guests arrive and enjoy welcome drinks and appetizers
 
 7:30 PM | Grand Entrance (10 min)
 💒 Introduction of the newly married couple
@@ -1388,7 +1388,7 @@ Please RSVP at our wedding website
                 {uploadedPhotos.length !== 1 ? "s" : ""}
               </p>
             )}
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
               <Button
                 onClick={() => {
                   const loadPhotos = async () => {
@@ -1396,8 +1396,12 @@ Please RSVP at our wedding website
                       console.log("📸 Manual gallery refresh requested...");
                       const photos = await database.photos.getAll();
                       if (photos && photos.length > 0) {
-                        // Sort by creation date and extract photo data
-                        const sortedPhotos = photos.sort(
+                        // Filter valid photos and sort by creation date
+                        const validPhotos = photos.filter(photo =>
+                          photo.photo_data &&
+                          photo.photo_data.startsWith("data:image/")
+                        );
+                        const sortedPhotos = validPhotos.sort(
                           (a, b) =>
                             new Date(b.created_at || 0).getTime() -
                             new Date(a.created_at || 0).getTime(),
@@ -1418,13 +1422,13 @@ Please RSVP at our wedding website
                         ).length;
 
                         console.log(
-                          `📸 Photos refreshed from ${storageType}: ${photos.length} total (${adminCount} admin, ${guestCount} guest)`,
+                          `📸 Photos refreshed from ${storageType}: ${validPhotos.length} total (${adminCount} admin, ${guestCount} guest)`,
                         );
 
                         toast({
                           title: "Gallery Refreshed! 📸",
-                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? "s" : ""} from ${storageType}`,
-                          duration: 3000,
+                          description: `Loaded ${validPhotos.length} photo${validPhotos.length !== 1 ? "s" : ""} from ${storageType} (${adminCount} admin, ${guestCount} guest)`,
+                          duration: 5000,
                         });
                       } else {
                         console.log("No photos found during refresh");
@@ -1458,6 +1462,11 @@ Please RSVP at our wedding website
                 <Camera className="mr-2" size={16} />
                 Refresh Gallery
               </Button>
+
+              <div className="text-xs text-sage-500">
+                Storage: {database.isUsingSupabase() ? "Supabase" : "LocalStorage"} |
+                Currently showing {uploadedPhotos.length} photos
+              </div>
             </div>
           </div>
 
