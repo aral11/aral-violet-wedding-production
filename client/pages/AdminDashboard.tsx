@@ -2099,6 +2099,71 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
+                  {/* QR Code for Guest Uploads */}
+                  <Card className="bg-sage-50 border-sage-200">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-olive-700">
+                          QR Code for Guest Photo Uploads
+                        </CardTitle>
+                        <Button
+                          onClick={() => {
+                            const currentUrl = window.location.origin + (import.meta.env.PROD &&
+                              import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                ? "/aral-violet-wedding"
+                                : "") + "/guest-upload";
+                            navigator.clipboard.writeText(currentUrl);
+                            toast({
+                              title: "Link Copied!",
+                              description: "Guest upload link copied to clipboard.",
+                            });
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Copy Link
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="flex-1">
+                          <p className="text-sage-700 mb-4">
+                            Share this QR code with guests during the wedding day. They can scan it to upload photos directly to your gallery!
+                          </p>
+                          <div className="space-y-2">
+                            <p className="text-sm text-sage-600">
+                              <strong>Guest Upload URL:</strong>
+                            </p>
+                            <code className="text-xs bg-white p-2 rounded border block break-all">
+                              {window.location.origin + (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                  ? "/aral-violet-wedding"
+                                  : "") + "/guest-upload"}
+                            </code>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <div className="bg-white p-4 rounded-lg border-2 border-olive-200 text-center">
+                            <div className="w-32 h-32 bg-sage-100 border-2 border-dashed border-sage-300 rounded flex items-center justify-center mb-2">
+                              <div className="text-center">
+                                <Camera className="mx-auto mb-1 text-sage-500" size={24} />
+                                <p className="text-xs text-sage-500">QR Code</p>
+                                <p className="text-xs text-sage-400">Would appear here</p>
+                              </div>
+                            </div>
+                            <p className="text-xs text-sage-600">Scan to upload photos</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4 p-3 bg-cream-100 rounded border-l-4 border-olive-500">
+                        <p className="text-sm text-olive-700">
+                          <strong>💡 Pro Tip:</strong> Print this QR code and place it on guest tables, or display it on screens around the venue for easy access!
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Guest Photos Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card className="p-4 text-center">
