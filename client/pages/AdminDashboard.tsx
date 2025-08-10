@@ -280,13 +280,36 @@ export default function AdminDashboard() {
             ? "Supabase"
             : "localStorage";
           console.log(
-            `Guest photos loaded from ${storageType}:`,
+            `📸 Guest photos loaded from ${storageType}:`,
             guestPhotosData.length,
           );
+        } else {
+          setGuestPhotos([]);
+          console.log("📸 No guest photos found");
         }
       } catch (error) {
         console.log("Error loading guest photos:", error);
-        setGuestPhotos([]);
+        // Try localStorage fallback for guest photos
+        try {
+          const guestPhotosFromStorage = JSON.parse(localStorage.getItem("wedding_guest_photos") || "[]");
+          if (guestPhotosFromStorage.length > 0) {
+            setGuestPhotos(
+              guestPhotosFromStorage.map((photo: any, index: number) => ({
+                id: `guest_fallback_${index}`,
+                photoData: photo.photoData || photo.photo_data,
+                guestName: photo.guestName || photo.guest_name,
+                uploadedBy: photo.uploadedBy || photo.uploaded_by,
+                createdAt: photo.createdAt || photo.created_at || new Date().toISOString(),
+              })),
+            );
+            console.log(`📸 Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`);
+          } else {
+            setGuestPhotos([]);
+          }
+        } catch (fallbackError) {
+          console.log("Guest photos fallback failed:", fallbackError);
+          setGuestPhotos([]);
+        }
       }
     };
 
