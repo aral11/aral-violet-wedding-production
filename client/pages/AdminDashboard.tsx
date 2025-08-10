@@ -1035,7 +1035,7 @@ export default function AdminDashboard() {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images up to 25MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
           variant: "destructive",
           duration: 4000,
         });
@@ -1080,15 +1080,17 @@ export default function AdminDashboard() {
 
         while (saveAttempts < maxAttempts) {
           try {
-            await database.photos.create(base64String, "admin");
-            console.log(`Photo ${file.name} saved to database successfully`);
+            const savedPhoto = await database.photos.create(base64String, "admin");
+            console.log(`📷 Admin photo ${file.name} saved to database successfully:`, savedPhoto.id);
             return {
               success: true,
               fileName: file.name,
               photoData: base64String,
+              photoId: savedPhoto.id
             };
           } catch (saveError) {
             saveAttempts++;
+            console.error(`📷 Admin photo save attempt ${saveAttempts} failed:`, saveError);
             if (saveAttempts >= maxAttempts) {
               throw saveError;
             }
@@ -1133,9 +1135,23 @@ export default function AdminDashboard() {
       if (successfulUploads.length > 0) {
         setUploadedPhotos((prev) => {
           const newPhotos = [...prev, ...successfulUploads];
-          console.log(`${successfulUploads.length} photos added to gallery`);
+          console.log(`📷 ${successfulUploads.length} admin photos added to gallery`);
           return newPhotos;
         });
+
+        // Force refresh of gallery data from database
+        setTimeout(async () => {
+          try {
+            const refreshedPhotos = await database.photos.getAll();
+            if (refreshedPhotos && refreshedPhotos.length > 0) {
+              const photoData = refreshedPhotos.map((photo) => photo.photo_data);
+              setUploadedPhotos(photoData);
+              console.log(`📷 Gallery refreshed with ${refreshedPhotos.length} total photos`);
+            }
+          } catch (error) {
+            console.log("Gallery refresh failed:", error);
+          }
+        }, 1000);
       }
 
       // Show final message
@@ -1144,9 +1160,9 @@ export default function AdminDashboard() {
           ? "Supabase database"
           : "local storage";
         toast({
-          title: "Photos Uploaded Successfully! 📷",
-          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
-          duration: 4000,
+          title: "Admin Photos Uploaded Successfully! 📷",
+          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType}. Refresh gallery to see updates!`,
+          duration: 5000,
         });
       }
 
