@@ -102,12 +102,7 @@ export default function Index() {
     // Load photos using new database service
     const loadPhotos = async () => {
       try {
-        console.log("📸 Starting photo load from database...");
-
         const photos = await database.photos.getAll();
-        console.log(
-          `📸 Retrieved ${photos.length} photos from database service`,
-        );
 
         if (photos && photos.length > 0) {
           // Filter out any photos with invalid data
@@ -125,10 +120,9 @@ export default function Index() {
           }
         } else {
           setUploadedPhotos([]);
-          console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.error("Error loading photos:", error);
+        console.error("📸 Error loading photos:", error);
         setUploadedPhotos([]);
       }
     };
@@ -588,7 +582,7 @@ export default function Index() {
 🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
-��� Traditional dance and music performances
+���� Traditional dance and music performances
 
 10:00 PM | Cake Cutting (15 min)
 ✨ Wedding cake cutting ceremony
