@@ -105,13 +105,15 @@ export default function Index() {
         console.log("📸 Starting photo load from database...");
 
         const photos = await database.photos.getAll();
-        console.log(`📸 Retrieved ${photos.length} photos from database service`);
+        console.log(
+          `📸 Retrieved ${photos.length} photos from database service`,
+        );
 
         if (photos && photos.length > 0) {
           // Filter out any photos with invalid data
-          const validPhotos = photos.filter(photo =>
-            photo.photo_data &&
-            photo.photo_data.startsWith("data:image/")
+          const validPhotos = photos.filter(
+            (photo) =>
+              photo.photo_data && photo.photo_data.startsWith("data:image/"),
           );
 
           if (validPhotos.length > 0) {

@@ -22,15 +22,20 @@ export default function TestPhotos() {
       console.log("🔧 Environment check:", {
         hasUrl: !!supabaseUrl,
         hasKey: !!supabaseKey,
-        urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'not set',
-        keyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'not set'
+        urlPreview: supabaseUrl
+          ? supabaseUrl.substring(0, 30) + "..."
+          : "not set",
+        keyPreview: supabaseKey
+          ? supabaseKey.substring(0, 20) + "..."
+          : "not set",
       });
 
       if (!supabase) {
         setConnectionStatus("No Supabase client - check environment variables");
         toast({
           title: "No Supabase Client",
-          description: "Supabase client is not initialized. Check environment variables.",
+          description:
+            "Supabase client is not initialized. Check environment variables.",
           variant: "destructive",
         });
         return;
@@ -58,7 +63,9 @@ export default function TestPhotos() {
         }
       } catch (connectError) {
         console.error("🔌 Basic connectivity failed:", connectError);
-        setConnectionStatus(`Network error: ${connectError instanceof Error ? connectError.message : 'Unknown'}`);
+        setConnectionStatus(
+          `Network error: ${connectError instanceof Error ? connectError.message : "Unknown"}`,
+        );
         toast({
           title: "Network Error",
           description: "Cannot reach Supabase. Check network connection.",
@@ -87,7 +94,11 @@ export default function TestPhotos() {
       } else {
         setPhotos(data || []);
         setConnectionStatus(`Success - Found ${data?.length || 0} photos`);
-        console.log("✅ Direct Supabase query successful:", data?.length || 0, "photos");
+        console.log(
+          "✅ Direct Supabase query successful:",
+          data?.length || 0,
+          "photos",
+        );
 
         toast({
           title: "Direct Query Success!",
@@ -123,20 +134,21 @@ export default function TestPhotos() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex gap-4">
-                <Button 
+                <Button
                   onClick={testDirectSupabaseConnection}
                   disabled={loading}
                 >
                   {loading ? "Testing..." : "Test Direct Connection"}
                 </Button>
               </div>
-              
+
               <div className="p-4 bg-gray-100 rounded">
                 <strong>Connection Status:</strong> {connectionStatus}
               </div>
-              
+
               <div className="p-4 bg-blue-100 rounded">
-                <strong>Supabase Client:</strong> {supabase ? "✅ Initialized" : "❌ Not initialized"}
+                <strong>Supabase Client:</strong>{" "}
+                {supabase ? "✅ Initialized" : "❌ Not initialized"}
               </div>
             </div>
           </CardContent>
@@ -153,17 +165,33 @@ export default function TestPhotos() {
                   <div key={photo.id || index} className="border p-4 rounded">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <div><strong>ID:</strong> {photo.id}</div>
-                        <div><strong>Uploaded by:</strong> {photo.uploaded_by}</div>
-                        <div><strong>Guest name:</strong> {photo.guest_name || "N/A"}</div>
-                        <div><strong>Created:</strong> {photo.created_at}</div>
-                        <div><strong>Data length:</strong> {photo.photo_data?.length || 0} chars</div>
-                        <div><strong>Data type:</strong> {photo.photo_data?.substring(0, 30) || "No data"}</div>
+                        <div>
+                          <strong>ID:</strong> {photo.id}
+                        </div>
+                        <div>
+                          <strong>Uploaded by:</strong> {photo.uploaded_by}
+                        </div>
+                        <div>
+                          <strong>Guest name:</strong>{" "}
+                          {photo.guest_name || "N/A"}
+                        </div>
+                        <div>
+                          <strong>Created:</strong> {photo.created_at}
+                        </div>
+                        <div>
+                          <strong>Data length:</strong>{" "}
+                          {photo.photo_data?.length || 0} chars
+                        </div>
+                        <div>
+                          <strong>Data type:</strong>{" "}
+                          {photo.photo_data?.substring(0, 30) || "No data"}
+                        </div>
                       </div>
                       <div>
-                        {photo.photo_data && photo.photo_data.startsWith("data:image/") ? (
-                          <img 
-                            src={photo.photo_data} 
+                        {photo.photo_data &&
+                        photo.photo_data.startsWith("data:image/") ? (
+                          <img
+                            src={photo.photo_data}
                             alt={`Photo ${index + 1}`}
                             className="w-32 h-32 object-cover rounded"
                           />

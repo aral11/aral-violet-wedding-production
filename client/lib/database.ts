@@ -17,10 +17,7 @@ const testSupabaseConnection = async () => {
 
   try {
     // Simple connectivity test
-    const { data, error } = await supabase
-      .from("photos")
-      .select("id")
-      .limit(1);
+    const { data, error } = await supabase.from("photos").select("id").limit(1);
 
     return !error; // Return true if no error
   } catch (error) {
@@ -155,7 +152,9 @@ export const photoService = {
     // Check localStorage first for immediate results
     const localPhotos = this.getFromLocalStorage();
     if (localPhotos.length > 0) {
-      console.log(`📸 Found ${localPhotos.length} photos in localStorage, returning immediately`);
+      console.log(
+        `📸 Found ${localPhotos.length} photos in localStorage, returning immediately`,
+      );
       return localPhotos;
     }
 
@@ -174,7 +173,9 @@ export const photoService = {
         }
 
         if (data && data.length > 0) {
-          console.log(`📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`);
+          console.log(
+            `📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`,
+          );
 
           // Sync to localStorage for future use
           const adminPhotos = data
@@ -190,13 +191,18 @@ export const photoService = {
             }));
 
           localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
-          localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+          localStorage.setItem(
+            "wedding_guest_photos",
+            JSON.stringify(guestPhotos),
+          );
 
           return data;
         }
       } catch (directError) {
         console.error("📸 Supabase connection failed, network issue detected");
-        console.log("📸 This appears to be a network connectivity problem with Supabase");
+        console.log(
+          "📸 This appears to be a network connectivity problem with Supabase",
+        );
       }
     }
 
@@ -329,14 +335,16 @@ export const photoService = {
 
     console.log("📸 localStorage check:", {
       adminPhotos: saved ? "found" : "not found",
-      guestPhotos: guestSaved ? "found" : "not found"
+      guestPhotos: guestSaved ? "found" : "not found",
     });
 
     // Load admin photos
     if (saved) {
       try {
         const photoData = JSON.parse(saved);
-        console.log(`📸 Found ${photoData.length} admin photos in localStorage`);
+        console.log(
+          `📸 Found ${photoData.length} admin photos in localStorage`,
+        );
 
         const adminPhotos = photoData
           .filter((data: string) => data && data.startsWith("data:image/"))
@@ -358,10 +366,14 @@ export const photoService = {
     if (guestSaved) {
       try {
         const guestPhotoData = JSON.parse(guestSaved);
-        console.log(`📸 Found ${guestPhotoData.length} guest photos in localStorage`);
+        console.log(
+          `📸 Found ${guestPhotoData.length} guest photos in localStorage`,
+        );
 
         const guestPhotos = guestPhotoData
-          .filter((photo: any) => photo && (photo.photoData || photo.photo_data))
+          .filter(
+            (photo: any) => photo && (photo.photoData || photo.photo_data),
+          )
           .map((photo: any, index: number) => ({
             id: `guest_${index}`,
             photo_data: photo.photoData || photo.photo_data,

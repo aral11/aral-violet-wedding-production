@@ -128,12 +128,15 @@ export default function AdminDashboard() {
 
         if (photos && photos.length > 0) {
           // Filter for valid photos only
-          const validPhotos = photos.filter(photo =>
-            photo.photo_data &&
-            photo.photo_data.startsWith("data:image/")
+          const validPhotos = photos.filter(
+            (photo) =>
+              photo.photo_data && photo.photo_data.startsWith("data:image/"),
           );
 
-          console.log(`📷 Admin filtered photos (${validPhotos.length}/${photos.length} valid):`, validPhotos);
+          console.log(
+            `📷 Admin filtered photos (${validPhotos.length}/${photos.length} valid):`,
+            validPhotos,
+          );
 
           const photoData = validPhotos.map((photo) => photo.photo_data);
           setUploadedPhotos(photoData);
