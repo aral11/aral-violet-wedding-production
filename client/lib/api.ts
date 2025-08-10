@@ -161,7 +161,11 @@ export const photosApi = {
     return apiCall<WeddingPhoto[]>("/photos?type=guest");
   },
 
-  async upload(photoData: string, uploadedBy = "admin", guestName?: string): Promise<WeddingPhoto> {
+  async upload(
+    photoData: string,
+    uploadedBy = "admin",
+    guestName?: string,
+  ): Promise<WeddingPhoto> {
     return apiCall<WeddingPhoto>("/photos", {
       method: "POST",
       body: JSON.stringify({ photoData, uploadedBy, guestName }),
