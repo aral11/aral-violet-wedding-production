@@ -152,7 +152,20 @@ export const photoService = {
     // Try API first, then fall back to localStorage
     try {
       console.log("📸 Attempting API connection...");
-      const response = await fetch("/api/photos");
+
+      // Add timeout and better error handling for fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const response = await fetch("/api/photos", {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
       console.log("📸 API response status:", response.status, response.statusText);
 
       if (response.ok) {
