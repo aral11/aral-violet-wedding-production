@@ -60,6 +60,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [guestPhotos, setGuestPhotos] = useState<Array<{id: string, photoData: string, guestName: string | null, uploadedBy: string, createdAt: string}>>([]);
   const [weddingFlow, setWeddingFlow] = useState<WeddingFlowItem[]>([]);
   const [invitationPDF, setInvitationPDF] = useState<string | null>(null);
   const [newFlowItem, setNewFlowItem] = useState<Omit<WeddingFlowItem, "id">>({
