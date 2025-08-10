@@ -172,6 +172,7 @@ export const photoService = {
       if (response.ok) {
         const apiPhotos = await response.json();
         console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
+        console.log("📸 Raw API response sample:", apiPhotos[0]);
 
         if (apiPhotos && apiPhotos.length > 0) {
           // Convert API response to SupabasePhoto format
@@ -183,6 +184,8 @@ export const photoService = {
             created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
           }));
 
+          console.log("📸 Converted photo sample:", photos[0]);
+
           // Validate the photos have proper data
           const validPhotos = photos.filter(
             (p) => p.photo_data && p.photo_data.startsWith("data:"),
@@ -190,6 +193,7 @@ export const photoService = {
           console.log(`📸 ${validPhotos.length} photos have valid data URLs`);
 
           if (validPhotos.length > 0) {
+            console.log("📸 Returning valid photos to client");
             return validPhotos;
           }
         }
