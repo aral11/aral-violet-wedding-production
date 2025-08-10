@@ -117,17 +117,8 @@ export default function Index() {
           if (validPhotos.length > 0) {
             const photoData = validPhotos.map((photo) => photo.photo_data);
             setUploadedPhotos(photoData);
-
-            const storageType = database.isUsingSupabase() ? "Supabase" : "localStorage";
-            console.log(`📸 Gallery updated: ${validPhotos.length} photos loaded from ${storageType}`);
-
-            toast({
-              title: "Photos Loaded! 📸",
-              description: `Found ${validPhotos.length} photos from ${storageType}`,
-              duration: 3000,
-            });
+            console.log(`📸 Gallery loaded: ${validPhotos.length} photos`);
           } else {
-            console.log("📸 No valid photos found");
             setUploadedPhotos([]);
           }
         } else {
