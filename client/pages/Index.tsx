@@ -93,47 +93,74 @@ export default function Index() {
     return () => clearInterval(timer);
   }, []);
 
-  // Load photos - prioritize localStorage to avoid fetch errors
+  // Load photos - prioritize database with real-time updates
   useEffect(() => {
     // Load photos using new database service
     const loadPhotos = async () => {
       try {
         const photos = await database.photos.getAll();
         if (photos && photos.length > 0) {
-          setUploadedPhotos(photos.map((photo) => photo.photo_data));
+          const photoData = photos.map((photo) => photo.photo_data);
+          setUploadedPhotos(photoData);
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
-          console.log(`Photos loaded from ${storageType}:`, photos.length);
+          console.log(`📸 Gallery updated: ${photos.length} photos loaded from ${storageType}`);
+        } else {
+          setUploadedPhotos([]);
+          console.log("📸 No photos found in database");
         }
       } catch (error) {
         console.log("Error loading photos:", error);
-        setUploadedPhotos([]);
+        // Try to load from localStorage as fallback
+        try {
+          const fallbackPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+          if (fallbackPhotos.length > 0) {
+            setUploadedPhotos(fallbackPhotos);
+            console.log(`📸 Gallery fallback: ${fallbackPhotos.length} photos from localStorage`);
+          } else {
+            setUploadedPhotos([]);
+          }
+        } catch (fallbackError) {
+          console.log("Fallback photo loading failed:", fallbackError);
+          setUploadedPhotos([]);
+        }
       }
     };
 
     // Load photos immediately
     loadPhotos();
 
-    // Check for new photos every 30 seconds when the page is focused (for real-time updates)
+    // Check for new photos every 15 seconds when the page is focused (for real-time updates)
     const interval = setInterval(() => {
       if (!document.hidden) {
         loadPhotos();
       }
-    }, 30000);
+    }, 15000); // Reduced to 15 seconds for faster updates
 
     // Also check when the page becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        console.log("📸 Page became visible, refreshing gallery...");
         loadPhotos();
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    // Listen for storage changes (when photos are added from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "wedding_photos") {
+        console.log("📸 Storage change detected, refreshing gallery...");
+        loadPhotos();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
     // Cleanup
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
