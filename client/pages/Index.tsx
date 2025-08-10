@@ -102,47 +102,34 @@ export default function Index() {
     // Load photos using new database service
     const loadPhotos = async () => {
       try {
+        console.log("📸 Starting photo load from database...");
+
         const photos = await database.photos.getAll();
+        console.log(
+          `📸 Retrieved ${photos.length} photos from database service`,
+        );
+
         if (photos && photos.length > 0) {
-          const photoData = photos.map((photo) => photo.photo_data);
-          setUploadedPhotos(photoData);
-          const storageType = database.isUsingSupabase()
-            ? "Supabase"
-            : "localStorage";
-          console.log(
-            `📸 Gallery updated: ${photos.length} photos loaded from ${storageType}`,
+          // Filter out any photos with invalid data
+          const validPhotos = photos.filter(
+            (photo) =>
+              photo.photo_data && photo.photo_data.startsWith("data:image/"),
           );
+
+          if (validPhotos.length > 0) {
+            const photoData = validPhotos.map((photo) => photo.photo_data);
+            setUploadedPhotos(photoData);
+            console.log(`📸 Gallery loaded: ${validPhotos.length} photos`);
+          } else {
+            setUploadedPhotos([]);
+          }
         } else {
           setUploadedPhotos([]);
           console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.log("Error loading photos:", error);
-        // Try to load from localStorage as fallback (both admin and guest photos)
-        try {
-          const adminPhotos = JSON.parse(
-            localStorage.getItem("wedding_photos") || "[]",
-          );
-          const guestPhotosData = JSON.parse(
-            localStorage.getItem("wedding_guest_photos") || "[]",
-          );
-          const guestPhotos = guestPhotosData.map(
-            (photo: any) => photo.photoData || photo.photo_data,
-          );
-
-          const allPhotos = [...adminPhotos, ...guestPhotos];
-          if (allPhotos.length > 0) {
-            setUploadedPhotos(allPhotos);
-            console.log(
-              `📸 Gallery fallback: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos from localStorage`,
-            );
-          } else {
-            setUploadedPhotos([]);
-          }
-        } catch (fallbackError) {
-          console.log("Fallback photo loading failed:", fallbackError);
-          setUploadedPhotos([]);
-        }
+        console.error("Error loading photos:", error);
+        setUploadedPhotos([]);
       }
     };
 
@@ -389,7 +376,7 @@ export default function Index() {
 
       toast({
         title: isEditMode
-          ? "RSVP Updated Successfully! ✏️"
+          ? "RSVP Updated Successfully! ��️"
           : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
           ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
@@ -1365,77 +1352,6 @@ Please RSVP at our wedding website
                 {uploadedPhotos.length !== 1 ? "s" : ""}
               </p>
             )}
-            <div className="mt-4">
-              <Button
-                onClick={() => {
-                  const loadPhotos = async () => {
-                    try {
-                      console.log("📸 Manual gallery refresh requested...");
-                      const photos = await database.photos.getAll();
-                      if (photos && photos.length > 0) {
-                        // Sort by creation date and extract photo data
-                        const sortedPhotos = photos.sort(
-                          (a, b) =>
-                            new Date(b.created_at || 0).getTime() -
-                            new Date(a.created_at || 0).getTime(),
-                        );
-                        const photoData = sortedPhotos.map(
-                          (photo) => photo.photo_data,
-                        );
-                        setUploadedPhotos(photoData);
-
-                        const storageType = database.isUsingSupabase()
-                          ? "Supabase"
-                          : "localStorage";
-                        const adminCount = sortedPhotos.filter(
-                          (p) => p.uploaded_by === "admin",
-                        ).length;
-                        const guestCount = sortedPhotos.filter(
-                          (p) => p.uploaded_by !== "admin",
-                        ).length;
-
-                        console.log(
-                          `📸 Photos refreshed from ${storageType}: ${photos.length} total (${adminCount} admin, ${guestCount} guest)`,
-                        );
-
-                        toast({
-                          title: "Gallery Refreshed! 📸",
-                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? "s" : ""} from ${storageType}`,
-                          duration: 3000,
-                        });
-                      } else {
-                        console.log("No photos found during refresh");
-                        setUploadedPhotos([]);
-                        toast({
-                          title: "No Photos Found",
-                          description:
-                            "No photos are currently stored in the database.",
-                          variant: "default",
-                          duration: 3000,
-                        });
-                      }
-                    } catch (error) {
-                      console.log("Refresh failed:", error);
-                      setUploadedPhotos([]);
-                      toast({
-                        title: "Refresh Failed",
-                        description:
-                          "Unable to refresh gallery. Please try again.",
-                        variant: "destructive",
-                        duration: 3000,
-                      });
-                    }
-                  };
-                  loadPhotos();
-                }}
-                variant="outline"
-                size="sm"
-                className="border-sage-300 text-sage-600 hover:bg-sage-50"
-              >
-                <Camera className="mr-2" size={16} />
-                Refresh Gallery
-              </Button>
-            </div>
           </div>
 
           {/* QR Code for Guest Photo Uploads */}

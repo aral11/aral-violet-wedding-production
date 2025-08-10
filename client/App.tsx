@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import GuestUpload from "./pages/GuestUpload";
 import Debug from "./pages/Debug";
+import TestPhotos from "./pages/TestPhotos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/guest-upload" element={<GuestUpload />} />
             <Route path="/debug" element={<Debug />} />
+            <Route path="/test-photos" element={<TestPhotos />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

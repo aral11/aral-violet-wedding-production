@@ -11,6 +11,21 @@ const isSupabaseConfigured = () => {
   return supabase !== null && supabase !== undefined;
 };
 
+// Test if Supabase is actually reachable
+const testSupabaseConnection = async () => {
+  if (!isSupabaseConfigured()) return false;
+
+  try {
+    // Simple connectivity test
+    const { data, error } = await supabase.from("photos").select("id").limit(1);
+
+    return !error; // Return true if no error
+  } catch (error) {
+    console.warn("Supabase connectivity test failed:", error);
+    return false;
+  }
+};
+
 // Guest Database Service
 export const guestService = {
   async getAll(): Promise<SupabaseGuest[]> {
@@ -132,18 +147,37 @@ export const guestService = {
 // Photo Database Service
 export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
+    console.log("📸 photoService.getAll() called");
+
+    // Check localStorage first for immediate results
+    const localPhotos = this.getFromLocalStorage();
+    if (localPhotos.length > 0) {
+      console.log(
+        `📸 Found ${localPhotos.length} photos in localStorage, returning immediately`,
+      );
+      return localPhotos;
+    }
+
+    // Only try Supabase if localStorage is empty
     if (isSupabaseConfigured()) {
       try {
+        console.log("📸 localStorage empty, attempting Supabase connection...");
         const { data, error } = await supabase
           .from("photos")
           .select("*")
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error("📸 Supabase query error:", error.message);
+          throw new Error(`Supabase query failed: ${error.message}`);
+        }
 
-        // Sync to localStorage with proper structure
         if (data && data.length > 0) {
-          // Separate admin and guest photos for localStorage sync
+          console.log(
+            `📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`,
+          );
+
+          // Sync to localStorage for future use
           const adminPhotos = data
             .filter((p) => p.uploaded_by === "admin")
             .map((p) => p.photo_data);
@@ -161,15 +195,20 @@ export const photoService = {
             "wedding_guest_photos",
             JSON.stringify(guestPhotos),
           );
-        }
 
-        return data || [];
-      } catch (error) {
-        console.warn("Supabase unavailable, using localStorage:", error);
-        return this.getFromLocalStorage();
+          return data;
+        }
+      } catch (directError) {
+        console.error("📸 Supabase connection failed, network issue detected");
+        console.log(
+          "📸 This appears to be a network connectivity problem with Supabase",
+        );
       }
     }
-    return this.getFromLocalStorage();
+
+    // Return empty array if both localStorage and Supabase fail
+    console.log("📸 No photos found in localStorage or Supabase");
+    return [];
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
@@ -289,24 +328,37 @@ export const photoService = {
   },
 
   getFromLocalStorage(): SupabasePhoto[] {
+    console.log("📸 Loading photos from localStorage...");
     const saved = localStorage.getItem("wedding_photos");
     const guestSaved = localStorage.getItem("wedding_guest_photos");
     const photos: SupabasePhoto[] = [];
+
+    console.log("📸 localStorage check:", {
+      adminPhotos: saved ? "found" : "not found",
+      guestPhotos: guestSaved ? "found" : "not found",
+    });
 
     // Load admin photos
     if (saved) {
       try {
         const photoData = JSON.parse(saved);
-        const adminPhotos = photoData.map((data: string, index: number) => ({
-          id: `admin_${index}`,
-          photo_data: data,
-          uploaded_by: "admin",
-          guest_name: null,
-          created_at: new Date().toISOString(),
-        }));
+        console.log(
+          `📸 Found ${photoData.length} admin photos in localStorage`,
+        );
+
+        const adminPhotos = photoData
+          .filter((data: string) => data && data.startsWith("data:image/"))
+          .map((data: string, index: number) => ({
+            id: `admin_${index}`,
+            photo_data: data,
+            uploaded_by: "admin",
+            guest_name: null,
+            created_at: new Date().toISOString(),
+          }));
         photos.push(...adminPhotos);
+        console.log(`📸 Loaded ${adminPhotos.length} valid admin photos`);
       } catch (error) {
-        console.warn("Error parsing admin photos from localStorage:", error);
+        console.warn("📸 Error parsing admin photos from localStorage:", error);
       }
     }
 
@@ -314,28 +366,40 @@ export const photoService = {
     if (guestSaved) {
       try {
         const guestPhotoData = JSON.parse(guestSaved);
-        const guestPhotos = guestPhotoData.map((photo: any, index: number) => ({
-          id: `guest_${index}`,
-          photo_data: photo.photoData || photo.photo_data,
-          uploaded_by:
-            photo.uploadedBy ||
-            photo.uploaded_by ||
-            `guest_${photo.guestName}_${Date.now()}`,
-          guest_name: photo.guestName || photo.guest_name,
-          created_at:
-            photo.createdAt || photo.created_at || new Date().toISOString(),
-        }));
+        console.log(
+          `📸 Found ${guestPhotoData.length} guest photos in localStorage`,
+        );
+
+        const guestPhotos = guestPhotoData
+          .filter(
+            (photo: any) => photo && (photo.photoData || photo.photo_data),
+          )
+          .map((photo: any, index: number) => ({
+            id: `guest_${index}`,
+            photo_data: photo.photoData || photo.photo_data,
+            uploaded_by:
+              photo.uploadedBy ||
+              photo.uploaded_by ||
+              `guest_${photo.guestName || "anonymous"}_${Date.now()}`,
+            guest_name: photo.guestName || photo.guest_name,
+            created_at:
+              photo.createdAt || photo.created_at || new Date().toISOString(),
+          }));
         photos.push(...guestPhotos);
+        console.log(`📸 Loaded ${guestPhotos.length} valid guest photos`);
       } catch (error) {
-        console.warn("Error parsing guest photos from localStorage:", error);
+        console.warn("📸 Error parsing guest photos from localStorage:", error);
       }
     }
 
-    return photos.sort(
+    const sortedPhotos = photos.sort(
       (a, b) =>
         new Date(b.created_at || 0).getTime() -
         new Date(a.created_at || 0).getTime(),
     );
+
+    console.log(`📸 localStorage total: ${sortedPhotos.length} photos`);
+    return sortedPhotos;
   },
 
   saveToLocalStorage(
