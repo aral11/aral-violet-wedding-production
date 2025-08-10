@@ -944,14 +944,29 @@ export default function AdminDashboard() {
         return;
       }
 
-      // More reasonable file size limit for mobile devices (5MB instead of 10MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      // File size requirement: at least 25MB per photo
+      const minSize = 25 * 1024 * 1024; // 25MB
+      if (file.size < minSize) {
+        console.error(`File ${file.name} is too small`);
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        toast({
+          title: "File Too Small",
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images that are at least 25MB.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+        errorCount++;
+        return;
+      }
+
+      // Maximum file size limit (100MB to be safe)
+      const maxSize = 100 * 1024 * 1024; // 100MB
       if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 5MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 100MB.`,
           variant: "destructive",
           duration: 4000,
         });
@@ -962,17 +977,17 @@ export default function AdminDashboard() {
       // Convert to base64 with improved error handling
       const reader = new FileReader();
 
-      // Add timeout for mobile devices that might struggle with large files
+      // Add timeout for large files (25MB+ requires more time)
       const timeout = setTimeout(() => {
         console.error(`Timeout reading file ${file.name}`);
         toast({
           title: "Upload Timeout",
-          description: `Timeout uploading "${file.name}". Please try a smaller file.`,
+          description: `Timeout uploading "${file.name}". File too large or connection issue.`,
           variant: "destructive",
           duration: 4000,
         });
         errorCount++;
-      }, 30000); // 30 second timeout
+      }, 120000); // 2 minute timeout for large files
 
       reader.onload = async (event) => {
         clearTimeout(timeout);
@@ -1696,7 +1711,7 @@ export default function AdminDashboard() {
 
           <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
             <CardContent className="p-6 text-center">
-              <Camera className="mx-auto mb-2 text-olive-600" size={32} />
+              <Upload className="mx-auto mb-2 text-olive-600" size={32} />
               <p className="text-2xl font-bold text-olive-700">
                 {uploadedPhotos.length}
               </p>
@@ -1771,8 +1786,8 @@ export default function AdminDashboard() {
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
                 title="Photo Gallery"
               >
-                <Camera size={16} className="sm:hidden" />
-                <Camera size={14} className="hidden sm:inline" />
+                <Upload size={16} className="sm:hidden" />
+                <Upload size={14} className="hidden sm:inline" />
                 <span className="hidden sm:inline lg:hidden">Photos</span>
                 <span className="hidden lg:inline">Photo Gallery</span>
               </TabsTrigger>
@@ -1955,19 +1970,18 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   {/* Upload Section */}
                   <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
-                    <Camera className="mx-auto mb-4 text-olive-600" size={48} />
+                    <Upload className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Upload Wedding Photos
+                      Select Wedding Photos (25MB+ each)
                     </h3>
                     <div className="space-y-3">
                       <input
                         ref={photoInputRef}
                         type="file"
                         multiple
-                        accept={getMobileFileAccept("image")}
+                        accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
                         onChange={handlePhotoUpload}
                         className="hidden"
-                        capture="environment"
                       />
                       <Button
                         onClick={() => {
@@ -2003,7 +2017,7 @@ export default function AdminDashboard() {
                         size="lg"
                       >
                         <Upload className="mr-2" size={20} />
-                        Choose Photos
+                        Select Photos (25MB+ each)
                       </Button>
 
                       {/* Alternative mobile-friendly upload button */}
@@ -2012,30 +2026,28 @@ export default function AdminDashboard() {
                           htmlFor="mobile-photo-upload"
                           className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
                         >
-                          <Camera className="mr-2" size={16} />
-                          Take/Upload Photo
+                          <Upload className="mr-2" size={16} />
+                          Select Photos (25MB+ each)
                         </label>
                         <input
                           id="mobile-photo-upload"
                           type="file"
                           multiple
-                          accept="image/*"
+                          accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
                           onChange={handlePhotoUpload}
                           className="hidden"
-                          capture="environment"
                         />
                       </div>
                     </div>
                     <div className="mt-4 space-y-1">
                       <p className="text-sm text-sage-600">
-                        Select multiple photos • Maximum 5MB per photo
+                        Select multiple photos • Minimum 25MB per photo required
                       </p>
                       <p className="text-xs text-sage-500">
-                        Supports: JPG, PNG, GIF, WebP formats
+                        Supports: JPG, PNG, GIF, WebP, BMP formats
                       </p>
                       <div className="text-xs text-sage-400 mt-2">
-                        📱 Mobile users: Use "Take/Upload Photo" for better
-                        compatibility
+                        📱 File selection only - camera capture disabled
                       </div>
                     </div>
                   </div>
@@ -2628,7 +2640,7 @@ export default function AdminDashboard() {
                           • Keep admin credentials confidential and secure
                         </li>
                         <li>• Download RSVP data regularly as backup</li>
-                        <li>• Photo uploads are limited to 5MB per image</li>
+                        <li>• Photo uploads require minimum 25MB per image</li>
                         <li>
                           • Wedding timeline download for guests activates on
                           December 28, 2025
