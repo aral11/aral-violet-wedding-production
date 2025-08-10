@@ -1019,6 +1019,14 @@ Please RSVP at our wedding website
                   : "Download Reception Timeline"}
               </Button>
             </div>
+
+            {/* Mobile Compatibility Notice */}
+            <div className="mt-6">
+              <MobileCompatibilityNotice
+                showForFeature="download"
+                className="max-w-md mx-auto"
+              />
+            </div>
           </div>
 
           {/* Countdown */}
