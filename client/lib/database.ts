@@ -156,6 +156,44 @@ export const photoService = {
     return this.getFromLocalStorage();
   },
 
+  async getAdminPhotos(): Promise<SupabasePhoto[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from("photos")
+          .select("*")
+          .eq("uploaded_by", "admin")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.warn("Supabase unavailable, filtering localStorage:", error);
+        return this.getFromLocalStorage().filter(p => p.uploaded_by === "admin");
+      }
+    }
+    return this.getFromLocalStorage().filter(p => p.uploaded_by === "admin");
+  },
+
+  async getGuestPhotos(): Promise<SupabasePhoto[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from("photos")
+          .select("*")
+          .neq("uploaded_by", "admin")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.warn("Supabase unavailable, filtering localStorage:", error);
+        return this.getFromLocalStorage().filter(p => p.uploaded_by !== "admin");
+      }
+    }
+    return this.getFromLocalStorage().filter(p => p.uploaded_by !== "admin");
+  },
+
   async create(
     photoData: string,
     uploadedBy = "admin",
