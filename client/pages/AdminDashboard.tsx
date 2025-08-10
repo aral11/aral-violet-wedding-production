@@ -2033,6 +2033,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* Mobile Compatibility Notice */}
+                  <MobileCompatibilityNotice
+                    showForFeature="upload"
+                    className="mt-4"
+                  />
+
                   {/* Photos Grid */}
                   {uploadedPhotos.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -2417,7 +2423,7 @@ export default function AdminDashboard() {
                                   setInvitationPDF(null);
 
                                   toast({
-                                    title: "Invitation Removed! ����️",
+                                    title: "Invitation Removed! 🗑️",
                                     description:
                                       "Custom invitation has been removed. Guests will now download the default text invitation.",
                                     duration: 3000,
