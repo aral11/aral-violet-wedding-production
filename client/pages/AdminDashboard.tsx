@@ -30,6 +30,7 @@ import {
 } from "@/lib/api";
 import { database } from "@/lib/database";
 import { getMobileFileAccept } from "@/lib/mobile-utils";
+import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
 
 interface Guest {
   id: string;
@@ -2416,7 +2417,7 @@ export default function AdminDashboard() {
                                   setInvitationPDF(null);
 
                                   toast({
-                                    title: "Invitation Removed! 🗑️",
+                                    title: "Invitation Removed! ����️",
                                     description:
                                       "Custom invitation has been removed. Guests will now download the default text invitation.",
                                     duration: 3000,
