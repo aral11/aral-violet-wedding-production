@@ -149,30 +149,30 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Always try Supabase first if configured, then fall back to localStorage
-    if (isSupabaseConfigured()) {
-      try {
-        console.log("📸 Attempting Supabase connection...");
-        const { data, error } = await supabase
-          .from("photos")
-          .select("*")
-          .order("created_at", { ascending: false });
+    // Try API first, then fall back to localStorage
+    try {
+      console.log("📸 Attempting API connection...");
+      const response = await fetch('/api/photos');
 
-        if (error) {
-          console.error("📸 Supabase query error:", error);
-          throw new Error(`Supabase query failed: ${error.message}`);
-        }
+      if (response.ok) {
+        const apiPhotos = await response.json();
+        console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
 
-        console.log(
-          `📸 SUCCESS: Found ${data?.length || 0} photos via Supabase`,
-        );
+        if (apiPhotos && apiPhotos.length > 0) {
+          // Convert API response to SupabasePhoto format
+          const photos = apiPhotos.map((photo: any) => ({
+            id: photo.id,
+            photo_data: photo.photoData,
+            uploaded_by: photo.uploadedBy,
+            guest_name: photo.guestName,
+            created_at: photo.createdAt,
+          }));
 
-        if (data && data.length > 0) {
           // Sync to localStorage for future use
-          const adminPhotos = data
+          const adminPhotos = photos
             .filter((p) => p.uploaded_by === "admin")
             .map((p) => p.photo_data);
-          const guestPhotos = data
+          const guestPhotos = photos
             .filter((p) => p.uploaded_by !== "admin")
             .map((p) => ({
               photoData: p.photo_data,
@@ -187,17 +187,14 @@ export const photoService = {
             JSON.stringify(guestPhotos),
           );
 
-          return data;
+          return photos;
         }
-
-        // If Supabase returns empty but no error, still check localStorage
-        console.log("📸 Supabase returned empty, checking localStorage...");
-      } catch (directError) {
-        console.error("📸 Supabase connection failed:", directError);
-        console.log("📸 Falling back to localStorage...");
       }
-    } else {
-      console.log("📸 Supabase not configured, using localStorage");
+
+      console.log("📸 API request failed or empty, checking localStorage...");
+    } catch (apiError) {
+      console.error("📸 API connection failed:", apiError);
+      console.log("📸 Falling back to localStorage...");
     }
 
     // Fall back to localStorage
@@ -209,8 +206,8 @@ export const photoService = {
       return localPhotos;
     }
 
-    // Return empty array if both localStorage and Supabase fail
-    console.log("📸 No photos found in localStorage or Supabase");
+    // Return empty array if both API and localStorage fail
+    console.log("📸 No photos found in API or localStorage");
     return [];
   },
 
@@ -387,7 +384,7 @@ export const photoService = {
         photos.push(...adminPhotos);
         console.log(`📸 Loaded ${adminPhotos.length} valid admin photos`);
       } catch (error) {
-        console.warn("📸 Error parsing admin photos from localStorage:", error);
+        console.warn("��� Error parsing admin photos from localStorage:", error);
       }
     }
 
