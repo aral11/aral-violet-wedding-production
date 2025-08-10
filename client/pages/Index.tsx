@@ -7,6 +7,7 @@ import {
   Camera,
   Users,
   Download,
+  Upload,
   Sparkles,
   Lock,
 } from "lucide-react";
@@ -1355,6 +1356,74 @@ Please RSVP at our wedding website
                 Refresh Gallery
               </Button>
             </div>
+          </div>
+
+          {/* QR Code for Guest Photo Uploads */}
+          <div className="mb-12">
+            <Card className="bg-gradient-to-r from-olive-50 to-sage-50 border-2 border-olive-200 shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-2xl font-serif text-olive-700 mb-4 flex items-center justify-center md:justify-start gap-2">
+                      <Camera className="w-6 h-6" />
+                      Capture Us During the Wedding!
+                    </h3>
+                    <p className="text-sage-700 mb-4 text-lg">
+                      During the wedding ceremony and reception, please take
+                      photos of us (the couple) and share them for our memories!
+                      Scan the QR code to upload your couple photos directly to
+                      our wedding gallery.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-sage-600">
+                        📱 <strong>Easy 3-step process:</strong>
+                      </p>
+                      <ol className="text-sm text-sage-600 space-y-1 list-decimal list-inside">
+                        <li>Take photos of the couple during the wedding</li>
+                        <li>Scan the QR code with your phone camera</li>
+                        <li>
+                          Enter your name and upload - they'll appear here
+                          automatically!
+                        </li>
+                      </ol>
+                    </div>
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => window.open("/guest-upload", "_blank")}
+                        className="bg-olive-600 hover:bg-olive-700 text-white"
+                      >
+                        <Upload className="mr-2 w-4 h-4" />
+                        Upload Couple Photos
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0">
+                    <div className="bg-white p-6 rounded-xl border-2 border-olive-300 shadow-lg text-center">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                          window.location.origin +
+                            (import.meta.env.PROD &&
+                            import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                              "netlify"
+                              ? "/aral-violet-wedding"
+                              : "") +
+                            "/guest-upload",
+                        )}`}
+                        alt="QR Code for Guest Photo Upload"
+                        className="w-40 h-40 mb-3 rounded-lg"
+                      />
+                      <p className="text-sm font-medium text-olive-700">
+                        📸 Scan to Upload Couple Photos
+                      </p>
+                      <p className="text-xs text-sage-500">
+                        Point your camera here
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {uploadedPhotos.length > 0 ? (

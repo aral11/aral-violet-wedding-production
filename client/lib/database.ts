@@ -156,15 +156,69 @@ export const photoService = {
     return this.getFromLocalStorage();
   },
 
-  async create(
-    photoData: string,
-    uploadedBy = "admin",
-  ): Promise<SupabasePhoto> {
+  async getAdminPhotos(): Promise<SupabasePhoto[]> {
     if (isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase
           .from("photos")
-          .insert([{ photo_data: photoData, uploaded_by: uploadedBy }])
+          .select("*")
+          .eq("uploaded_by", "admin")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.warn("Supabase unavailable, filtering localStorage:", error);
+        return this.getFromLocalStorage().filter(
+          (p) => p.uploaded_by === "admin",
+        );
+      }
+    }
+    return this.getFromLocalStorage().filter((p) => p.uploaded_by === "admin");
+  },
+
+  async getGuestPhotos(): Promise<SupabasePhoto[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from("photos")
+          .select("*")
+          .neq("uploaded_by", "admin")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        console.warn("Supabase unavailable, filtering localStorage:", error);
+        return this.getFromLocalStorage().filter(
+          (p) => p.uploaded_by !== "admin",
+        );
+      }
+    }
+    return this.getFromLocalStorage().filter((p) => p.uploaded_by !== "admin");
+  },
+
+  async create(
+    photoData: string,
+    uploadedBy = "admin",
+    guestName?: string,
+  ): Promise<SupabasePhoto> {
+    const actualUploadedBy =
+      uploadedBy === "guest"
+        ? `guest_${guestName || "anonymous"}_${Date.now()}`
+        : uploadedBy;
+
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from("photos")
+          .insert([
+            {
+              photo_data: photoData,
+              uploaded_by: actualUploadedBy,
+              guest_name: guestName || null,
+            },
+          ])
           .select()
           .single();
 
@@ -180,7 +234,8 @@ export const photoService = {
         return {
           id: Date.now().toString(),
           photo_data: photoData,
-          uploaded_by: uploadedBy,
+          uploaded_by: actualUploadedBy,
+          guest_name: guestName || null,
           created_at: new Date().toISOString(),
         };
       }
@@ -190,7 +245,8 @@ export const photoService = {
     return {
       id: Date.now().toString(),
       photo_data: photoData,
-      uploaded_by: uploadedBy,
+      uploaded_by: actualUploadedBy,
+      guest_name: guestName || null,
       created_at: new Date().toISOString(),
     };
   },

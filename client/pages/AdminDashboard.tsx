@@ -60,6 +60,15 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [guestPhotos, setGuestPhotos] = useState<
+    Array<{
+      id: string;
+      photoData: string;
+      guestName: string | null;
+      uploadedBy: string;
+      createdAt: string;
+    }>
+  >([]);
   const [weddingFlow, setWeddingFlow] = useState<WeddingFlowItem[]>([]);
   const [invitationPDF, setInvitationPDF] = useState<string | null>(null);
   const [newFlowItem, setNewFlowItem] = useState<Omit<WeddingFlowItem, "id">>({
@@ -237,6 +246,32 @@ export default function AdminDashboard() {
           setInvitationPDF(savedInvitation);
         }
       }
+
+      // Load guest photos using database service
+      try {
+        const guestPhotosData = await database.photos.getGuestPhotos();
+        if (guestPhotosData && guestPhotosData.length > 0) {
+          setGuestPhotos(
+            guestPhotosData.map((photo) => ({
+              id: photo.id || Date.now().toString(),
+              photoData: photo.photo_data,
+              guestName: photo.guest_name,
+              uploadedBy: photo.uploaded_by,
+              createdAt: photo.created_at || new Date().toISOString(),
+            })),
+          );
+          const storageType = database.isUsingSupabase()
+            ? "Supabase"
+            : "localStorage";
+          console.log(
+            `Guest photos loaded from ${storageType}:`,
+            guestPhotosData.length,
+          );
+        }
+      } catch (error) {
+        console.log("Error loading guest photos:", error);
+        setGuestPhotos([]);
+      }
     };
 
     loadAllData();
@@ -270,7 +305,7 @@ export default function AdminDashboard() {
         case "special":
           return "✨";
         default:
-          return "📋";
+          return "����";
       }
     };
 
@@ -719,7 +754,7 @@ export default function AdminDashboard() {
 </head>
 <body>
     <div class="header">
-        <div class="logo">❤️ TheVIRALWedding</div>
+        <div class="logo">❤��� TheVIRALWedding</div>
         <div class="couple-names">Aral & Violet</div>
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
@@ -944,29 +979,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      // File size requirement: at least 25MB per photo
-      const minSize = 25 * 1024 * 1024; // 25MB
-      if (file.size < minSize) {
-        console.error(`File ${file.name} is too small`);
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-        toast({
-          title: "File Too Small",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images that are at least 25MB.`,
-          variant: "destructive",
-          duration: 4000,
-        });
-        errorCount++;
-        return;
-      }
-
-      // Maximum file size limit (100MB to be safe)
-      const maxSize = 100 * 1024 * 1024; // 100MB
+      // Maximum file size limit (25MB as requested)
+      const maxSize = 25 * 1024 * 1024; // 25MB
       if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 100MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images up to 25MB.`,
           variant: "destructive",
           duration: 4000,
         });
@@ -1770,7 +1790,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <Tabs defaultValue="rsvp" className="space-y-6">
           <div className="w-full overflow-x-auto scrollbar-hide">
-            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-5 gap-1 h-auto p-1">
+            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-6 gap-1 h-auto p-1">
               <TabsTrigger
                 value="rsvp"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
@@ -1784,12 +1804,22 @@ export default function AdminDashboard() {
               <TabsTrigger
                 value="photos"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
-                title="Photo Gallery"
+                title="Admin Photos"
               >
                 <Upload size={16} className="sm:hidden" />
                 <Upload size={14} className="hidden sm:inline" />
-                <span className="hidden sm:inline lg:hidden">Photos</span>
-                <span className="hidden lg:inline">Photo Gallery</span>
+                <span className="hidden sm:inline lg:hidden">Admin</span>
+                <span className="hidden lg:inline">Admin Photos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="guest-photos"
+                className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
+                title="Guest Photos"
+              >
+                <Camera size={16} className="sm:hidden" />
+                <Camera size={14} className="hidden sm:inline" />
+                <span className="hidden sm:inline lg:hidden">Guest</span>
+                <span className="hidden lg:inline">Guest Photos</span>
               </TabsTrigger>
               <TabsTrigger
                 value="flow"
@@ -1972,76 +2002,50 @@ export default function AdminDashboard() {
                   <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
                     <Upload className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Select Wedding Photos (25MB+ each)
+                      Upload Wedding Photos
                     </h3>
-                    <div className="space-y-3">
-                      <input
-                        ref={photoInputRef}
-                        type="file"
-                        multiple
-                        accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                      <Button
-                        onClick={() => {
-                          console.log("Photo upload button clicked");
-                          try {
-                            // Enhanced mobile compatibility
-                            if (photoInputRef.current) {
-                              // Reset any previous value
-                              photoInputRef.current.value = "";
-
-                              // Trigger file picker
-                              photoInputRef.current.click();
-
-                              // For some mobile browsers, also trigger focus
-                              setTimeout(() => {
-                                photoInputRef.current?.focus();
-                              }, 100);
-                            }
-                          } catch (error) {
-                            console.error(
-                              "Error triggering file picker:",
-                              error,
-                            );
-                            toast({
-                              title: "Upload Error",
-                              description:
-                                "Could not open file picker. Please try again.",
-                              variant: "destructive",
-                            });
+                    <p className="text-sage-600 mb-6">
+                      Upload high-quality photos (up to 25MB each) for the
+                      wedding gallery
+                    </p>
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => {
+                        console.log("Photo upload button clicked");
+                        try {
+                          if (photoInputRef.current) {
+                            photoInputRef.current.value = "";
+                            photoInputRef.current.click();
+                            setTimeout(() => {
+                              photoInputRef.current?.focus();
+                            }, 100);
                           }
-                        }}
-                        className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
-                        size="lg"
-                      >
-                        <Upload className="mr-2" size={20} />
-                        Select Photos (25MB+ each)
-                      </Button>
-
-                      {/* Alternative mobile-friendly upload button */}
-                      <div className="sm:hidden">
-                        <label
-                          htmlFor="mobile-photo-upload"
-                          className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
-                        >
-                          <Upload className="mr-2" size={16} />
-                          Select Photos (25MB+ each)
-                        </label>
-                        <input
-                          id="mobile-photo-upload"
-                          type="file"
-                          multiple
-                          accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
-                          onChange={handlePhotoUpload}
-                          className="hidden"
-                        />
-                      </div>
-                    </div>
+                        } catch (error) {
+                          console.error("Error triggering file picker:", error);
+                          toast({
+                            title: "Upload Error",
+                            description:
+                              "Could not open file picker. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
+                      size="lg"
+                    >
+                      <Upload className="mr-2" size={20} />
+                      Select Photos (up to 25MB each)
+                    </Button>
                     <div className="mt-4 space-y-1">
                       <p className="text-sm text-sage-600">
-                        Select multiple photos • Minimum 25MB per photo required
+                        Select multiple photos • Up to 25MB per photo supported
                       </p>
                       <p className="text-xs text-sage-500">
                         Supports: JPG, PNG, GIF, WebP, BMP formats
@@ -2085,6 +2089,305 @@ export default function AdminDashboard() {
                     <div className="text-center py-12">
                       <p className="text-sage-600">
                         No photos uploaded yet. Upload some beautiful memories!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Guest Photos Management */}
+          <TabsContent value="guest-photos" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
+              <CardHeader>
+                <CardTitle className="text-olive-700">
+                  Guest Photo Uploads
+                </CardTitle>
+                <p className="text-sage-600">
+                  View and manage photos uploaded by wedding guests via QR code
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* QR Code for Guest Uploads */}
+                  <Card className="bg-sage-50 border-sage-200">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-olive-700">
+                          QR Code for Guest Photo Uploads
+                        </CardTitle>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              const currentUrl =
+                                window.location.origin +
+                                (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                  "netlify"
+                                  ? "/aral-violet-wedding"
+                                  : "") +
+                                "/guest-upload";
+                              navigator.clipboard.writeText(currentUrl);
+                              toast({
+                                title: "Link Copied!",
+                                description:
+                                  "Guest upload link copied to clipboard.",
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Copy Link
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
+                                window.location.origin +
+                                  (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                    "netlify"
+                                    ? "/aral-violet-wedding"
+                                    : "") +
+                                  "/guest-upload",
+                              )}`;
+                              const link = document.createElement("a");
+                              link.href = qrUrl;
+                              link.download =
+                                "wedding-guest-photo-upload-qr.png";
+                              link.click();
+                              toast({
+                                title: "QR Code Downloaded!",
+                                description:
+                                  "High-quality QR code saved for printing.",
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            Download QR
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="flex-1">
+                          <p className="text-sage-700 mb-4">
+                            This QR code is already displayed on your home page
+                            for guests to see! You can also download and print
+                            additional copies for venue placement.
+                          </p>
+                          <div className="space-y-2">
+                            <p className="text-sm text-sage-600">
+                              <strong>Guest Upload URL:</strong>
+                            </p>
+                            <code className="text-xs bg-white p-2 rounded border block break-all">
+                              {window.location.origin +
+                                (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                  "netlify"
+                                  ? "/aral-violet-wedding"
+                                  : "") +
+                                "/guest-upload"}
+                            </code>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <div className="bg-white p-4 rounded-lg border-2 border-olive-200 text-center">
+                            <img
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(
+                                window.location.origin +
+                                  (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !==
+                                    "netlify"
+                                    ? "/aral-violet-wedding"
+                                    : "") +
+                                  "/guest-upload",
+                              )}`}
+                              alt="QR Code for Guest Photo Upload"
+                              className="w-32 h-32 mb-2 rounded"
+                            />
+                            <p className="text-xs text-sage-600">
+                              Scan to upload photos
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4 p-3 bg-cream-100 rounded border-l-4 border-olive-500">
+                        <p className="text-sm text-olive-700">
+                          <strong>💡 Pro Tip:</strong> The QR code is already
+                          visible on your home page! You can also print
+                          additional copies and place them on guest tables or
+                          display on screens around the venue for easy access!
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Guest Photos Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card className="p-4 text-center">
+                      <Camera
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {guestPhotos.length}
+                      </p>
+                      <p className="text-sm text-sage-600">Guest Photos</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Users
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {new Set(guestPhotos.map((p) => p.guestName)).size}
+                      </p>
+                      <p className="text-sm text-sage-600">Contributors</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Heart
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
+                      <p className="text-2xl font-bold text-olive-700">
+                        {
+                          guestPhotos.filter(
+                            (p) =>
+                              p.createdAt &&
+                              new Date(p.createdAt).toDateString() ===
+                                new Date().toDateString(),
+                          ).length
+                        }
+                      </p>
+                      <p className="text-sm text-sage-600">Today</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Download
+                        className="mx-auto mb-2 text-olive-600"
+                        size={32}
+                      />
+                      <Button
+                        onClick={() => {
+                          // Download all guest photos as ZIP
+                          toast({
+                            title: "Download Started",
+                            description:
+                              "Preparing guest photos for download...",
+                          });
+                        }}
+                        className="bg-olive-600 hover:bg-olive-700 text-white text-xs px-2 py-1"
+                        size="sm"
+                      >
+                        Download All
+                      </Button>
+                    </Card>
+                  </div>
+
+                  {/* Guest Photos Grid */}
+                  {guestPhotos.length > 0 ? (
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-olive-700">
+                          Guest Contributions
+                        </h3>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const guestPhotosData =
+                                await database.photos.getGuestPhotos();
+                              setGuestPhotos(
+                                guestPhotosData.map((photo) => ({
+                                  id: photo.id || Date.now().toString(),
+                                  photoData: photo.photo_data,
+                                  guestName: photo.guest_name,
+                                  uploadedBy: photo.uploaded_by,
+                                  createdAt:
+                                    photo.created_at ||
+                                    new Date().toISOString(),
+                                })),
+                              );
+                              toast({
+                                title: "Guest Photos Refreshed",
+                                description:
+                                  "Latest guest uploads loaded successfully!",
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Refresh Failed",
+                                description: "Could not refresh guest photos.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Refresh
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {guestPhotos.map((photo) => (
+                          <Card key={photo.id} className="overflow-hidden">
+                            <div className="aspect-square relative">
+                              <img
+                                src={photo.photoData}
+                                alt={`Photo by ${photo.guestName || "Guest"}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-3">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-medium text-olive-700">
+                                    {photo.guestName || "Anonymous Guest"}
+                                  </p>
+                                  <p className="text-xs text-sage-500">
+                                    {new Date(
+                                      photo.createdAt,
+                                    ).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                                <Button
+                                  onClick={() => {
+                                    const link = document.createElement("a");
+                                    link.href = photo.photoData;
+                                    link.download = `${photo.guestName || "guest"}_${photo.id}.jpg`;
+                                    link.click();
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs"
+                                >
+                                  <Download className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Camera
+                        className="mx-auto mb-4 text-sage-400"
+                        size={64}
+                      />
+                      <h3 className="text-xl font-serif text-sage-600 mb-2">
+                        No Guest Photos Yet
+                      </h3>
+                      <p className="text-sage-500 mb-4">
+                        Share the QR code with guests during the wedding to
+                        start collecting photos!
                       </p>
                     </div>
                   )}
@@ -2640,7 +2943,7 @@ export default function AdminDashboard() {
                           • Keep admin credentials confidential and secure
                         </li>
                         <li>• Download RSVP data regularly as backup</li>
-                        <li>• Photo uploads require minimum 25MB per image</li>
+                        <li>• Photo uploads support up to 25MB per image</li>
                         <li>
                           • Wedding timeline download for guests activates on
                           December 28, 2025
