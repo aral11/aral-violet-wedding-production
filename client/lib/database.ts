@@ -149,34 +149,25 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Check localStorage first for immediate results
-    const localPhotos = this.getFromLocalStorage();
-    if (localPhotos.length > 0) {
-      console.log(
-        `📸 Found ${localPhotos.length} photos in localStorage, returning immediately`,
-      );
-      return localPhotos;
-    }
-
-    // Only try Supabase if localStorage is empty
+    // Always try Supabase first if configured, then fall back to localStorage
     if (isSupabaseConfigured()) {
       try {
-        console.log("📸 localStorage empty, attempting Supabase connection...");
+        console.log("📸 Attempting Supabase connection...");
         const { data, error } = await supabase
           .from("photos")
           .select("*")
           .order("created_at", { ascending: false });
 
         if (error) {
-          console.error("📸 Supabase query error:", error.message);
+          console.error("📸 Supabase query error:", error);
           throw new Error(`Supabase query failed: ${error.message}`);
         }
 
-        if (data && data.length > 0) {
-          console.log(
-            `📸 SUCCESS: Found ${data.length} photos via Supabase, syncing to localStorage`,
-          );
+        console.log(
+          `📸 SUCCESS: Found ${data?.length || 0} photos via Supabase`,
+        );
 
+        if (data && data.length > 0) {
           // Sync to localStorage for future use
           const adminPhotos = data
             .filter((p) => p.uploaded_by === "admin")
@@ -198,16 +189,28 @@ export const photoService = {
 
           return data;
         }
+
+        // If Supabase returns empty but no error, still check localStorage
+        console.log("📸 Supabase returned empty, checking localStorage...");
       } catch (directError) {
-        console.error("📸 Supabase connection failed, network issue detected");
-        console.log(
-          "📸 This appears to be a network connectivity problem with Supabase",
-        );
+        console.error("📸 Supabase connection failed:", directError);
+        console.log("📸 Falling back to localStorage...");
       }
+    } else {
+      console.log("📸 Supabase not configured, using localStorage");
+    }
+
+    // Fall back to localStorage
+    const localPhotos = this.getFromLocalStorage();
+    if (localPhotos.length > 0) {
+      console.log(
+        `📸 Found ${localPhotos.length} photos in localStorage`,
+      );
+      return localPhotos;
     }
 
     // Return empty array if both localStorage and Supabase fail
-    console.log("📸 No photos found in localStorage or Supabase");
+    console.log("�� No photos found in localStorage or Supabase");
     return [];
   },
 
