@@ -83,7 +83,7 @@ export default function GuestUpload() {
           reader.readAsDataURL(file);
         });
 
-        // Upload to database
+        // Upload to database with proper guest metadata
         await database.photos.create(base64String, "guest", guestName.trim());
         return { success: true, fileName: file.name };
       } catch (error) {
