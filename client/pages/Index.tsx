@@ -1366,20 +1366,20 @@ Please RSVP at our wedding website
                   <div className="flex-1 text-center md:text-left">
                     <h3 className="text-2xl font-serif text-olive-700 mb-4 flex items-center justify-center md:justify-start gap-2">
                       <Camera className="w-6 h-6" />
-                      Share Your Photos!
+                      Capture Us During the Wedding!
                     </h3>
                     <p className="text-sage-700 mb-4 text-lg">
-                      Capture memories from our special day? Share them with us!
-                      Scan the QR code to upload your photos directly to our wedding gallery.
+                      During the wedding ceremony and reception, please take photos of us (the couple) and share them for our memories!
+                      Scan the QR code to upload your couple photos directly to our wedding gallery.
                     </p>
                     <div className="space-y-2">
                       <p className="text-sm text-sage-600">
                         📱 <strong>Easy 3-step process:</strong>
                       </p>
                       <ol className="text-sm text-sage-600 space-y-1 list-decimal list-inside">
+                        <li>Take photos of the couple during the wedding</li>
                         <li>Scan the QR code with your phone camera</li>
-                        <li>Enter your name and select photos</li>
-                        <li>Upload - they'll appear here automatically!</li>
+                        <li>Enter your name and upload - they'll appear here automatically!</li>
                       </ol>
                     </div>
                     <div className="mt-4">
