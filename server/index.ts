@@ -14,6 +14,8 @@ import {
   uploadPhoto,
   deletePhoto,
   bulkUploadPhotos,
+  generateGuestUploadQR,
+  validateGuestUpload,
 } from "./routes/photos";
 import {
   getWeddingFlow,
