@@ -1434,7 +1434,6 @@ Please RSVP at our wedding website
 
           {uploadedPhotos.length > 0 ? (
             <>
-              {console.log(`📸 RENDERING: ${uploadedPhotos.length} photos`, uploadedPhotos.map(p => `${p.substring(0, 30)}...`))}
               {/* Photo Grid with Pagination */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                 {uploadedPhotos
@@ -1445,7 +1444,6 @@ Please RSVP at our wedding website
                   .map((photo, index) => {
                     const actualIndex =
                       (currentPage - 1) * photosPerPage + index;
-                    console.log(`📸 RENDERING photo ${actualIndex + 1}:`, `${photo.substring(0, 50)}...`);
                     return (
                       <div
                         key={actualIndex}
@@ -1456,8 +1454,6 @@ Please RSVP at our wedding website
                           alt={`Wedding memory ${actualIndex + 1}`}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
-                          onLoad={() => console.log(`📸 ✅ Image ${actualIndex + 1} loaded successfully`)}
-                          onError={(e) => console.error(`📸 ❌ Image ${actualIndex + 1} failed to load:`, e)}
                         />
                       </div>
                     );
