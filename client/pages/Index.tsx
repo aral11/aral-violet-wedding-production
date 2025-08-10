@@ -73,6 +73,10 @@ export default function Index() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
 
+  // Pagination state for photo gallery
+  const [currentPage, setCurrentPage] = useState(1);
+  const photosPerPage = 12; // Show 12 photos per page
+
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
 
   useEffect(() => {
@@ -597,7 +601,7 @@ export default function Index() {
 🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
-🎵 Traditional dance and music performances
+��� Traditional dance and music performances
 
 10:00 PM | Cake Cutting (15 min)
 ✨ Wedding cake cutting ceremony
@@ -1493,20 +1497,84 @@ Please RSVP at our wedding website
           </div>
 
           {uploadedPhotos.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {uploadedPhotos.map((photo, index) => (
-                <div
-                  key={index}
-                  className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <img
-                    src={photo}
-                    alt={`Wedding memory ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
+            <>
+              {/* Photo Grid with Pagination */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                {uploadedPhotos
+                  .slice((currentPage - 1) * photosPerPage, currentPage * photosPerPage)
+                  .map((photo, index) => {
+                    const actualIndex = (currentPage - 1) * photosPerPage + index;
+                    return (
+                      <div
+                        key={actualIndex}
+                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Wedding memory ${actualIndex + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Pagination Controls */}
+              {uploadedPhotos.length > photosPerPage && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="border-sage-300 text-sage-600 hover:bg-sage-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {[...Array(Math.ceil(uploadedPhotos.length / photosPerPage))].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <Button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          className={currentPage === pageNum
+                            ? "bg-olive-600 hover:bg-olive-700 text-white"
+                            : "border-sage-300 text-sage-600 hover:bg-sage-50"
+                          }
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    onClick={() => setCurrentPage(prev =>
+                      Math.min(prev + 1, Math.ceil(uploadedPhotos.length / photosPerPage))
+                    )}
+                    disabled={currentPage === Math.ceil(uploadedPhotos.length / photosPerPage)}
+                    variant="outline"
+                    size="sm"
+                    className="border-sage-300 text-sage-600 hover:bg-sage-50 disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Photo Count Info */}
+              <div className="text-center mt-4">
+                <p className="text-sm text-sage-500">
+                  Showing {Math.min((currentPage - 1) * photosPerPage + 1, uploadedPhotos.length)}-
+                  {Math.min(currentPage * photosPerPage, uploadedPhotos.length)} of {uploadedPhotos.length} photos
+                </p>
+              </div>
+            </>
           ) : (
             <Card className="bg-white/80 backdrop-blur-sm border-sage-200 shadow-lg">
               <CardContent className="p-12 text-center">
