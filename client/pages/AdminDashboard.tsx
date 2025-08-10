@@ -2082,7 +2082,7 @@ export default function AdminDashboard() {
                         onChange={handlePhotoUpload}
                         className="hidden"
                       />
-                      <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4 mb-6">
                         <Button
                           onClick={() => {
                             console.log("Photo upload button clicked");
@@ -2093,6 +2093,13 @@ export default function AdminDashboard() {
                                 setTimeout(() => {
                                   photoInputRef.current?.focus();
                                 }, 100);
+                              } else {
+                                console.error("Photo input ref is null");
+                                toast({
+                                  title: "Upload Error",
+                                  description: "File input not found. Please refresh the page.",
+                                  variant: "destructive",
+                                });
                               }
                             } catch (error) {
                               console.error(
@@ -2107,22 +2114,21 @@ export default function AdminDashboard() {
                               });
                             }
                           }}
-                          className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg shadow-lg relative z-10"
+                          className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-4 text-lg shadow-lg transition-all duration-200 hover:shadow-xl"
                           size="lg"
                         >
-                          <Upload className="mr-2" size={20} />
+                          <Upload className="mr-3" size={24} />
                           Select Photos (up to 25MB each)
                         </Button>
-                        <div className="text-center space-y-1">
-                          <p className="text-sm text-sage-600">
-                            Select multiple photos • Up to 25MB per photo
-                            supported
+                        <div className="text-center space-y-2 max-w-md">
+                          <p className="text-sm text-sage-600 font-medium">
+                            Select multiple photos • Up to 25MB per photo supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
                           </p>
-                          <div className="text-xs text-sage-400">
-                            📱 File selection only - camera capture disabled
+                          <div className="text-xs text-sage-400 italic">
+                            📱 File selection only - camera capture disabled for compatibility
                           </div>
                         </div>
                       </div>
