@@ -318,7 +318,7 @@ export default function AdminDashboard() {
               })),
             );
             console.log(
-              `📸 Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`,
+              `�� Guest photos fallback: ${guestPhotosFromStorage.length} photos from localStorage`,
             );
           } else {
             setGuestPhotos([]);
@@ -1192,17 +1192,56 @@ export default function AdminDashboard() {
     e.target.value = "";
   };
 
-  const removePhoto = (index: number) => {
+  const removePhoto = async (index: number) => {
     if (
       confirm(
         "Are you sure you want to delete this photo? This action cannot be undone.",
       )
     ) {
-      const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
-      setUploadedPhotos(newPhotos);
-      // Immediately update localStorage
-      localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
-      console.log("Photo removed successfully");
+      try {
+        // Try to get the photo ID from database if available
+        const photos = await database.photos.getAll();
+        const photoToDelete = photos[index];
+
+        if (photoToDelete && photoToDelete.id) {
+          // Delete from database
+          await database.photos.delete(photoToDelete.id);
+          console.log(`📸 Photo ${photoToDelete.id} deleted from database`);
+        }
+
+        // Update local state
+        const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
+        setUploadedPhotos(newPhotos);
+
+        // Update localStorage as fallback
+        localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
+
+        // Adjust current page if we deleted the last photo on the current page
+        const totalPages = Math.ceil(newPhotos.length / photosPerPage);
+        if (currentPage > totalPages && totalPages > 0) {
+          setCurrentPage(totalPages);
+        }
+
+        toast({
+          title: "Photo Deleted ✅",
+          description: "Photo has been removed from the gallery.",
+          duration: 3000,
+        });
+
+        console.log("📸 Photo removed successfully");
+      } catch (error) {
+        console.error("Error deleting photo:", error);
+        // Fallback to local deletion
+        const newPhotos = uploadedPhotos.filter((_, i) => i !== index);
+        setUploadedPhotos(newPhotos);
+        localStorage.setItem("wedding_photos", JSON.stringify(newPhotos));
+
+        toast({
+          title: "Photo Deleted ✅",
+          description: "Photo removed from local gallery.",
+          duration: 3000,
+        });
+      }
     }
   };
 
@@ -1673,7 +1712,7 @@ export default function AdminDashboard() {
 
     <div class="footer">
         <div class="logo">❤️ TheVIRALWedding</div>
-        <div style="font-size: 1.2em; margin: 10px 0;">Aral & Violet • December 28, 2025</div>
+        <div style="font-size: 1.2em; margin: 10px 0;">Aral & Violet �� December 28, 2025</div>
         <div style="color: #718096;">With hearts full of joy and blessings from above</div>
         <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
             © 2025 TheVIRALWedding. Made with love By Aral D'Souza.
@@ -3031,7 +3070,7 @@ export default function AdminDashboard() {
                   <Card className="bg-sage-50 border-sage-200">
                     <CardContent className="p-6">
                       <h4 className="font-semibold text-sage-800 mb-3">
-                        📋 How it works:
+                        �� How it works:
                       </h4>
                       <ul className="space-y-2 text-sm text-sage-700">
                         <li>
