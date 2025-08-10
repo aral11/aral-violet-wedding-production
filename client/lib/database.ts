@@ -158,40 +158,44 @@ export const photoService = {
       if (response.ok) {
         const apiPhotos = await response.json();
         console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
-        console.log("📸 Raw API response:", apiPhotos);
+        console.log("📸 Raw API response sample:", apiPhotos.slice(0, 2));
 
         if (apiPhotos && apiPhotos.length > 0) {
-          console.log(`📸 API returned photos:`, apiPhotos.map(p => ({ id: p.id, hasData: !!p.photoData, dataStart: p.photoData?.substring(0, 20) })));
-
           // Convert API response to SupabasePhoto format
           const photos = apiPhotos.map((photo: any) => ({
             id: photo.id,
             photo_data: photo.photoData,
-            uploaded_by: photo.uploadedBy,
-            guest_name: photo.guestName,
-            created_at: photo.createdAt,
+            uploaded_by: photo.uploadedBy || 'admin',
+            guest_name: photo.guestName || null,
+            created_at: photo.createdAt || new Date().toISOString(),
           }));
 
-          console.log(`📸 Converted photos:`, photos.map(p => ({ id: p.id, hasData: !!p.photo_data, dataStart: p.photo_data?.substring(0, 20) })));
+          console.log(`📸 Converted ${photos.length} photos successfully`);
+          console.log("📸 First photo data check:", {
+            hasData: !!photos[0]?.photo_data,
+            isDataUrl: photos[0]?.photo_data?.startsWith('data:')
+          });
 
           // Sync to localStorage for future use
-          const adminPhotos = photos
-            .filter((p) => p.uploaded_by === "admin")
-            .map((p) => p.photo_data);
-          const guestPhotos = photos
-            .filter((p) => p.uploaded_by !== "admin")
-            .map((p) => ({
-              photoData: p.photo_data,
-              uploadedBy: p.uploaded_by,
-              guestName: p.guest_name,
-              createdAt: p.created_at,
-            }));
+          try {
+            const adminPhotos = photos
+              .filter((p) => p.uploaded_by === "admin")
+              .map((p) => p.photo_data);
+            const guestPhotos = photos
+              .filter((p) => p.uploaded_by !== "admin")
+              .map((p) => ({
+                photoData: p.photo_data,
+                uploadedBy: p.uploaded_by,
+                guestName: p.guest_name,
+                createdAt: p.created_at,
+              }));
 
-          localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
-          localStorage.setItem(
-            "wedding_guest_photos",
-            JSON.stringify(guestPhotos),
-          );
+            localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
+            localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+            console.log("📸 Synced to localStorage");
+          } catch (storageError) {
+            console.warn("📸 localStorage sync failed:", storageError);
+          }
 
           return photos;
         }
@@ -205,14 +209,8 @@ export const photoService = {
 
     // Fall back to localStorage
     const localPhotos = this.getFromLocalStorage();
-    if (localPhotos.length > 0) {
-      console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
-      return localPhotos;
-    }
-
-    // Return empty array if both API and localStorage fail
-    console.log("📸 No photos found in API or localStorage");
-    return [];
+    console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
+    return localPhotos;
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
