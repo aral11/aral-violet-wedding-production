@@ -808,7 +808,7 @@ export default function AdminDashboard() {
       accommodationNeeded.length > 0
         ? `
     <div class="section">
-        <div class="section-header">🏨 Accommodation Required (${accommodationNeeded.length})</div>
+        <div class="section-header">�� Accommodation Required (${accommodationNeeded.length})</div>
         <div class="guest-list">
             ${accommodationNeeded
               .map(
@@ -1755,7 +1755,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <Tabs defaultValue="rsvp" className="space-y-6">
           <div className="w-full overflow-x-auto scrollbar-hide">
-            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-5 gap-1 h-auto p-1">
+            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-6 gap-1 h-auto p-1">
               <TabsTrigger
                 value="rsvp"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
@@ -2516,7 +2516,7 @@ export default function AdminDashboard() {
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
                             <li>• Guest experience overview</li>
-                            <li>• Wedding day information</li>
+                            <li>�� Wedding day information</li>
                           </ul>
                         </div>
                         <div>
