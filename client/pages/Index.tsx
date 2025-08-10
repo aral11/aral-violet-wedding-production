@@ -1473,14 +1473,17 @@ Please RSVP at our wedding website
                   .map((photo, index) => {
                     const actualIndex =
                       (currentPage - 1) * photosPerPage + index;
+                    const isPlaceholder = photo.includes("[FALLBACK]") || photo.includes("diagnostic") || photo.includes("No Photos Found");
                     return (
                       <div
                         key={actualIndex}
-                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                        className={`aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
+                          isPlaceholder ? "border-2 border-dashed border-yellow-300" : ""
+                        }`}
                       >
                         <img
                           src={photo}
-                          alt={`Wedding memory ${actualIndex + 1}`}
+                          alt={isPlaceholder ? `Configuration needed ${actualIndex + 1}` : `Wedding memory ${actualIndex + 1}`}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
