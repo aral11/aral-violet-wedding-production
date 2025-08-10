@@ -2106,23 +2106,48 @@ export default function AdminDashboard() {
                         <CardTitle className="text-lg text-olive-700">
                           QR Code for Guest Photo Uploads
                         </CardTitle>
-                        <Button
-                          onClick={() => {
-                            const currentUrl = window.location.origin + (import.meta.env.PROD &&
-                              import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
-                                ? "/aral-violet-wedding"
-                                : "") + "/guest-upload";
-                            navigator.clipboard.writeText(currentUrl);
-                            toast({
-                              title: "Link Copied!",
-                              description: "Guest upload link copied to clipboard.",
-                            });
-                          }}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Copy Link
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              const currentUrl = window.location.origin + (import.meta.env.PROD &&
+                                import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                  ? "/aral-violet-wedding"
+                                  : "") + "/guest-upload";
+                              navigator.clipboard.writeText(currentUrl);
+                              toast({
+                                title: "Link Copied!",
+                                description: "Guest upload link copied to clipboard.",
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Copy Link
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(
+                                window.location.origin + (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                    ? "/aral-violet-wedding"
+                                    : "") + "/guest-upload"
+                              )}`;
+                              const link = document.createElement('a');
+                              link.href = qrUrl;
+                              link.download = 'wedding-guest-photo-upload-qr.png';
+                              link.click();
+                              toast({
+                                title: "QR Code Downloaded!",
+                                description: "High-quality QR code saved for printing.",
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Download className="w-4 h-4 mr-1" />
+                            Download QR
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
