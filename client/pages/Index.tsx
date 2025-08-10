@@ -25,6 +25,7 @@ import {
 } from "@/lib/api";
 import { database } from "@/lib/database";
 import { sendRSVPNotification, isSMSConfigured } from "@/lib/sms-service";
+import { mobileOptimizedDownload, detectMobile, getDownloadInstructions } from "@/lib/mobile-utils";
 
 interface Guest {
   id: string;
