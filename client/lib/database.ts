@@ -210,7 +210,7 @@ export const photoService = {
     }
 
     // Return empty array if both localStorage and Supabase fail
-    console.log("�� No photos found in localStorage or Supabase");
+    console.log("📸 No photos found in localStorage or Supabase");
     return [];
   },
 
@@ -340,6 +340,32 @@ export const photoService = {
       adminPhotos: saved ? "found" : "not found",
       guestPhotos: guestSaved ? "found" : "not found",
     });
+
+    // Add some test photos if none exist (for development/testing)
+    if (!saved && !guestSaved && typeof window !== 'undefined') {
+      console.log("📸 Adding test photos for development...");
+      const testAdminPhotos = [
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMjwvdGV4dD48L3N2Zz4="
+      ];
+      const testGuestPhotos = [
+        {
+          photoData: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
+          uploadedBy: "guest_john_doe_1234567890",
+          guestName: "John Doe",
+          createdAt: new Date().toISOString()
+        },
+        {
+          photoData: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2FjY2Y5OSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
+          uploadedBy: "guest_jane_smith_1234567891",
+          guestName: "Jane Smith",
+          createdAt: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem("wedding_photos", JSON.stringify(testAdminPhotos));
+      localStorage.setItem("wedding_guest_photos", JSON.stringify(testGuestPhotos));
+      console.log("📸 Test photos added to localStorage");
+    }
 
     // Load admin photos
     if (saved) {
