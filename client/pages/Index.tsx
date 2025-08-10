@@ -7,6 +7,7 @@ import {
   Camera,
   Users,
   Download,
+  Upload,
   Sparkles,
   Lock,
 } from "lucide-react";
