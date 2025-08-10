@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photo Debug Test</title>
+</head>
+<body>
+    <h1>Photo Debug Test</h1>
+    <div id="output"></div>
+    <div id="images"></div>
+
+    <script>
+        async function testPhotos() {
+            try {
+                console.log('🔍 Testing photos API...');
+                const response = await fetch('/api/photos');
+                console.log('📡 Response:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const photos = await response.json();
+                    console.log('📸 Photos data:', photos);
+                    
+                    const output = document.getElementById('output');
+                    output.innerHTML = `<pre>${JSON.stringify(photos, null, 2)}</pre>`;
+                    
+                    const imagesDiv = document.getElementById('images');
+                    photos.forEach((photo, index) => {
+                        const img = document.createElement('img');
+                        img.src = photo.photoData;
+                        img.style.width = '200px';
+                        img.style.height = '200px';
+                        img.style.margin = '10px';
+                        img.alt = `Photo ${index + 1}`;
+                        img.onload = () => console.log(`✅ Image ${index + 1} loaded successfully`);
+                        img.onerror = () => console.error(`❌ Image ${index + 1} failed to load`);
+                        imagesDiv.appendChild(img);
+                    });
+                } else {
+                    console.error('❌ API call failed:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+            }
+        }
+        
+        testPhotos();
+    </script>
+</body>
+</html>
