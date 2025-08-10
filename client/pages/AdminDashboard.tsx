@@ -238,6 +238,27 @@ export default function AdminDashboard() {
           setInvitationPDF(savedInvitation);
         }
       }
+
+      // Load guest photos using database service
+      try {
+        const guestPhotosData = await database.photos.getGuestPhotos();
+        if (guestPhotosData && guestPhotosData.length > 0) {
+          setGuestPhotos(guestPhotosData.map((photo) => ({
+            id: photo.id || Date.now().toString(),
+            photoData: photo.photo_data,
+            guestName: photo.guest_name,
+            uploadedBy: photo.uploaded_by,
+            createdAt: photo.created_at || new Date().toISOString(),
+          })));
+          const storageType = database.isUsingSupabase()
+            ? "Supabase"
+            : "localStorage";
+          console.log(`Guest photos loaded from ${storageType}:`, guestPhotosData.length);
+        }
+      } catch (error) {
+        console.log("Error loading guest photos:", error);
+        setGuestPhotos([]);
+      }
     };
 
     loadAllData();
@@ -720,7 +741,7 @@ export default function AdminDashboard() {
 </head>
 <body>
     <div class="header">
-        <div class="logo">❤️ TheVIRALWedding</div>
+        <div class="logo">❤��� TheVIRALWedding</div>
         <div class="couple-names">Aral & Violet</div>
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
