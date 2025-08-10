@@ -1487,6 +1487,42 @@ Please RSVP at our wedding website
                 Refresh Gallery
               </Button>
 
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  onClick={() => {
+                    // Add some test photos to localStorage for testing
+                    const testPhotos = [
+                      "data:image/svg+xml;base64," + btoa('<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#84a178"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="white">Test 1</text></svg>'),
+                      "data:image/svg+xml;base64," + btoa('<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#5a6c57"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="white">Test 2</text></svg>')
+                    ];
+
+                    localStorage.setItem("wedding_photos", JSON.stringify(testPhotos));
+
+                    const testGuestPhotos = [
+                      {
+                        photoData: "data:image/svg+xml;base64," + btoa('<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#9ca3af"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="white">Guest 1</text></svg>'),
+                        uploadedBy: "guest_test_user",
+                        guestName: "Test User",
+                        createdAt: new Date().toISOString()
+                      }
+                    ];
+
+                    localStorage.setItem("wedding_guest_photos", JSON.stringify(testGuestPhotos));
+
+                    toast({
+                      title: "Test Photos Added",
+                      description: "Added test photos to localStorage. Click Refresh Gallery to see them.",
+                      duration: 3000,
+                    });
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                >
+                  Add Test Photos
+                </Button>
+              </div>
+
               <div className="text-xs text-sage-500">
                 Storage: {database.isUsingSupabase() ? "Supabase" : "LocalStorage"} |
                 Currently showing {uploadedPhotos.length} photos
