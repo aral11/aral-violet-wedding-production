@@ -1961,7 +1961,7 @@ export default function AdminDashboard() {
                         ref={photoInputRef}
                         type="file"
                         multiple
-                        accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp"
+                        accept={getMobileFileAccept('image')}
                         onChange={handlePhotoUpload}
                         className="hidden"
                         capture="environment"
