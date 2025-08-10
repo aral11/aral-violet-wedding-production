@@ -127,13 +127,6 @@ export default function Index() {
             console.log(
               `📸 Gallery updated: ${validPhotos.length} photos loaded from ${storageType}`,
             );
-
-            // Show a toast with the count
-            toast({
-              title: "Gallery Loaded! 📸",
-              description: `Found ${validPhotos.length} photo${validPhotos.length !== 1 ? 's' : ''} from ${storageType}`,
-              duration: 3000,
-            });
           } else {
             console.log("📸 No valid photos found - all photos have invalid data");
             setUploadedPhotos([]);
@@ -622,7 +615,7 @@ export default function Index() {
             )
             .join("\n\n")
         : `7:00 PM | Welcome & Cocktails (30 min)
-🎉 Guests arrive and enjoy welcome drinks and appetizers
+�� Guests arrive and enjoy welcome drinks and appetizers
 
 7:30 PM | Grand Entrance (10 min)
 💒 Introduction of the newly married couple
