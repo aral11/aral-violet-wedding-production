@@ -29,6 +29,7 @@ import {
   handleApiError,
 } from "@/lib/api";
 import { database } from "@/lib/database";
+import { getMobileFileAccept } from "@/lib/mobile-utils";
 
 interface Guest {
   id: string;
@@ -501,7 +502,7 @@ export default function AdminDashboard() {
     </div>
 
     <div class="footer">
-        <div class="logo">❤�� TheVIRALWedding</div>
+        <div class="logo">❤️ TheVIRALWedding</div>
         <div style="font-size: 1.2em; margin: 10px 0;">A&V • 12.28.2025</div>
         <div style="color: #718096;">With hearts full of joy and blessings from above</div>
         <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
