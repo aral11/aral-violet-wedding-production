@@ -136,10 +136,14 @@ export default function Index() {
           console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.error("❌ Error loading photos from database:", {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          fullError: error
-        });
+        console.error("❌ Error loading photos from database:");
+        if (error instanceof Error) {
+          console.error("- Error message:", error.message);
+          console.error("- Error name:", error.name);
+          console.error("- Error stack:", error.stack);
+        } else {
+          console.error("- Non-Error object:", JSON.stringify(error, null, 2));
+        }
 
         // Force localStorage fallback when database fails
         console.log("🔄 Database failed, forcing localStorage fallback...");
