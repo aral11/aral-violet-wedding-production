@@ -107,7 +107,7 @@ export const getPhotos: RequestHandler = async (req, res) => {
     } else {
       console.log("📸 No Supabase client - returning mock data for testing");
       // Return some mock data if Supabase is not available (for testing)
-      const mockPhotos = [
+      const allMockPhotos = [
         {
           id: "mock_admin_1",
           photoData: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
@@ -128,15 +128,27 @@ export const getPhotos: RequestHandler = async (req, res) => {
           uploadedBy: "guest_john_doe_123",
           guestName: "John Doe",
           createdAt: new Date().toISOString(),
+        },
+        {
+          id: "mock_guest_2",
+          photoData: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2FjY2Y5OSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
+          uploadedBy: "guest_jane_smith_456",
+          guestName: "Jane Smith",
+          createdAt: new Date().toISOString(),
         }
       ];
 
       // Filter mock data based on type
-      let filteredPhotos = mockPhotos;
+      let filteredPhotos;
       if (type === "admin") {
-        filteredPhotos = mockPhotos.filter(p => p.uploadedBy === "admin");
+        filteredPhotos = allMockPhotos.filter(p => p.uploadedBy === "admin");
+        console.log(`📸 Returning ${filteredPhotos.length} admin mock photos`);
       } else if (type === "guest") {
-        filteredPhotos = mockPhotos.filter(p => p.uploadedBy !== "admin");
+        filteredPhotos = allMockPhotos.filter(p => p.uploadedBy !== "admin");
+        console.log(`📸 Returning ${filteredPhotos.length} guest mock photos`);
+      } else {
+        filteredPhotos = allMockPhotos;
+        console.log(`📸 Returning ${filteredPhotos.length} total mock photos`);
       }
 
       res.json(filteredPhotos);
