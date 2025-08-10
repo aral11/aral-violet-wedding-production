@@ -209,7 +209,12 @@ export const photoService = {
           return [];
         }
       } catch (directError) {
-        console.error("📸 Direct Supabase connection failed:", directError);
+        console.error("📸 Direct Supabase connection failed:", {
+          message: directError instanceof Error ? directError.message : 'Unknown error',
+          stack: directError instanceof Error ? directError.stack : null,
+          fullError: directError
+        });
+        console.log("📸 Will attempt localStorage fallback...");
         // Fall through to localStorage fallback
       }
     } else {
