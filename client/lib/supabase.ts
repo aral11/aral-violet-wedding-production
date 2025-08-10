@@ -45,6 +45,7 @@ export interface SupabasePhoto {
   id?: string;
   photo_data: string;
   uploaded_by: string;
+  guest_name?: string | null;
   created_at?: string;
 }
 
