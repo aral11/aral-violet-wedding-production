@@ -168,7 +168,9 @@ export const photoService = {
           .order("created_at", { ascending: false });
 
         if (!error && data && data.length > 0) {
-          console.log(`📸 SUCCESS: Found ${data.length} photos via direct Supabase`);
+          console.log(
+            `📸 SUCCESS: Found ${data.length} photos via direct Supabase`,
+          );
 
           const photos = data.map((row: any) => ({
             id: row.id,
@@ -182,7 +184,9 @@ export const photoService = {
           const validPhotos = photos.filter(
             (p) => p.photo_data && p.photo_data.startsWith("data:"),
           );
-          console.log(`📸 ${validPhotos.length} photos have valid data URLs from Supabase`);
+          console.log(
+            `📸 ${validPhotos.length} photos have valid data URLs from Supabase`,
+          );
 
           if (validPhotos.length > 0) {
             console.log("📸 Returning photos from direct Supabase connection");
@@ -227,7 +231,8 @@ export const photoService = {
             photo_data: photo.photoData || photo.photo_data,
             uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
             guest_name: photo.guestName || photo.guest_name || null,
-            created_at: photo.createdAt || photo.created_at || new Date().toISOString(),
+            created_at:
+              photo.createdAt || photo.created_at || new Date().toISOString(),
           }));
 
           // Validate the photos have proper data
@@ -243,7 +248,10 @@ export const photoService = {
         }
       }
     } catch (apiError) {
-      console.log("📸 API connection failed (this is expected if network is limited):", apiError.message);
+      console.log(
+        "📸 API connection failed (this is expected if network is limited):",
+        apiError.message,
+      );
     }
 
     // If everything fails, return placeholder photos
@@ -566,7 +574,10 @@ export const photoService = {
       }
 
       if (guestPhotos.length > 0) {
-        localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+        localStorage.setItem(
+          "wedding_guest_photos",
+          JSON.stringify(guestPhotos),
+        );
       }
 
       console.log(`📸 Synced ${photos.length} photos to localStorage`);
