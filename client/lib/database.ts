@@ -149,7 +149,45 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // Try API first with better error handling
+    // Try client-side Supabase first (this is where uploads go)
+    if (supabase) {
+      try {
+        console.log("📸 Attempting direct Supabase connection from client...");
+        const { data, error } = await supabase
+          .from("photos")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          console.log(`📸 SUCCESS: Found ${data.length} photos via direct Supabase`);
+
+          const photos = data.map((row: any) => ({
+            id: row.id,
+            photo_data: row.photo_data,
+            uploaded_by: row.uploaded_by,
+            guest_name: row.guest_name || null,
+            created_at: row.created_at,
+          }));
+
+          // Validate the photos have proper data
+          const validPhotos = photos.filter(
+            (p) => p.photo_data && p.photo_data.startsWith("data:"),
+          );
+          console.log(`📸 ${validPhotos.length} photos have valid data URLs from Supabase`);
+
+          if (validPhotos.length > 0) {
+            console.log("📸 Returning photos from direct Supabase connection");
+            return validPhotos;
+          }
+        } else if (error) {
+          console.log("📸 Direct Supabase error:", error.message);
+        }
+      } catch (supabaseError) {
+        console.log("📸 Direct Supabase failed:", supabaseError);
+      }
+    }
+
+    // Try API as backup
     try {
       console.log("📸 Attempting API connection...");
 
