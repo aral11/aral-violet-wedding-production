@@ -29,6 +29,8 @@ import {
   handleApiError,
 } from "@/lib/api";
 import { database } from "@/lib/database";
+import { getMobileFileAccept } from "@/lib/mobile-utils";
+import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
 
 interface Guest {
   id: string;
@@ -910,43 +912,107 @@ export default function AdminDashboard() {
     console.log(`Processing ${files.length} files`);
     let successCount = 0;
     let errorCount = 0;
+    const totalFiles = files.length;
 
-    // Process each file
+    // Show initial processing message for better UX
+    toast({
+      title: "Processing Photos... ⏳",
+      description: `Uploading ${totalFiles} photo${totalFiles !== 1 ? "s" : ""}. Please wait...`,
+      duration: 2000,
+    });
+
+    // Process each file with improved mobile handling
     Array.from(files).forEach((file, index) => {
       console.log(
         `Processing file ${index + 1}: ${file.name}, Type: ${file.type}, Size: ${file.size}`,
       );
 
-      // Check file type
-      if (!file.type.startsWith("image/")) {
+      // Enhanced file type validation (including file extension check for mobile)
+      const isValidImage =
+        file.type.startsWith("image/") ||
+        /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
+
+      if (!isValidImage) {
         console.error(`File ${file.name} is not an image`);
-        alert(
-          `"${file.name}" is not an image file. Please upload only image files.`,
-        );
+        toast({
+          title: "Invalid File Type",
+          description: `"${file.name}" is not a valid image file. Please upload JPG, PNG, GIF, or WebP files.`,
+          variant: "destructive",
+          duration: 4000,
+        });
         errorCount++;
         return;
       }
 
-      // Check file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // More reasonable file size limit for mobile devices (5MB instead of 10MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
-        alert(
-          `"${file.name}" is too large. Please upload images smaller than 10MB.`,
-        );
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        toast({
+          title: "File Too Large",
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 5MB.`,
+          variant: "destructive",
+          duration: 4000,
+        });
         errorCount++;
         return;
       }
 
-      // Convert to base64 for persistent storage
+      // Convert to base64 with improved error handling
       const reader = new FileReader();
+
+      // Add timeout for mobile devices that might struggle with large files
+      const timeout = setTimeout(() => {
+        console.error(`Timeout reading file ${file.name}`);
+        toast({
+          title: "Upload Timeout",
+          description: `Timeout uploading "${file.name}". Please try a smaller file.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+        errorCount++;
+      }, 30000); // 30 second timeout
+
       reader.onload = async (event) => {
+        clearTimeout(timeout);
         console.log(`File ${file.name} read successfully`);
+
         if (event.target?.result) {
           const base64String = event.target.result as string;
 
+          // Validate base64 data
+          if (!base64String.startsWith("data:image/")) {
+            console.error(`Invalid base64 data for ${file.name}`);
+            toast({
+              title: "Upload Error",
+              description: `Invalid image data for "${file.name}". Please try again.`,
+              variant: "destructive",
+            });
+            errorCount++;
+            return;
+          }
+
           try {
-            // Save photo using database service (Supabase + localStorage fallback)
-            await database.photos.create(base64String, "admin");
+            // Save photo using database service with retry logic
+            let saveAttempts = 0;
+            const maxAttempts = 3;
+
+            while (saveAttempts < maxAttempts) {
+              try {
+                await database.photos.create(base64String, "admin");
+                break; // Success, break out of retry loop
+              } catch (saveError) {
+                saveAttempts++;
+                if (saveAttempts >= maxAttempts) {
+                  throw saveError; // Throw error after max attempts
+                }
+                // Wait before retry
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 1000 * saveAttempts),
+                );
+              }
+            }
 
             // Update local state
             setUploadedPhotos((prev) => {
@@ -962,13 +1028,14 @@ export default function AdminDashboard() {
             errorCount++;
             toast({
               title: "Photo Upload Error",
-              description: `Error saving "${file.name}". Please try again.`,
+              description: `Error saving "${file.name}". ${error instanceof Error ? error.message : "Please try again."}`,
               variant: "destructive",
+              duration: 4000,
             });
           }
 
-          // Show success message after processing all files
-          if (successCount + errorCount === files.length) {
+          // Show final message after processing all files
+          if (successCount + errorCount === totalFiles) {
             if (successCount > 0) {
               const storageType = database.isUsingSupabase()
                 ? "Supabase database"
@@ -976,23 +1043,48 @@ export default function AdminDashboard() {
               toast({
                 title: "Photos Uploaded Successfully! 📷",
                 description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
-                duration: 3000,
+                duration: 4000,
+              });
+            }
+
+            if (errorCount > 0) {
+              toast({
+                title: "Some uploads failed",
+                description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload. Please try again.`,
+                variant: "destructive",
+                duration: 4000,
               });
             }
           }
         }
       };
+
       reader.onerror = (error) => {
+        clearTimeout(timeout);
         console.error(`Error reading file ${file.name}:`, error);
         toast({
-          title: "Photo Upload Error",
-          description: `Error reading "${file.name}". Please try again.`,
+          title: "Photo Read Error",
+          description: `Error reading "${file.name}". Please try again or use a different file.`,
           variant: "destructive",
-          duration: 3000,
+          duration: 4000,
         });
         errorCount++;
       };
-      reader.readAsDataURL(file);
+
+      // Use readAsDataURL with error handling
+      try {
+        reader.readAsDataURL(file);
+      } catch (readError) {
+        clearTimeout(timeout);
+        console.error(`Error starting to read file ${file.name}:`, readError);
+        toast({
+          title: "Photo Read Error",
+          description: `Cannot read "${file.name}". File may be corrupted.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+        errorCount++;
+      }
     });
 
     // Clear the input so the same files can be uploaded again if needed
@@ -1862,35 +1954,97 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-6">
                   {/* Upload Section */}
-                  <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg">
+                  <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
                     <Camera className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
                       Upload Wedding Photos
                     </h3>
-                    <div>
+                    <div className="space-y-3">
                       <input
                         ref={photoInputRef}
                         type="file"
                         multiple
-                        accept="image/*"
+                        accept={getMobileFileAccept("image")}
                         onChange={handlePhotoUpload}
                         className="hidden"
+                        capture="environment"
                       />
                       <Button
                         onClick={() => {
                           console.log("Photo upload button clicked");
-                          photoInputRef.current?.click();
+                          try {
+                            // Enhanced mobile compatibility
+                            if (photoInputRef.current) {
+                              // Reset any previous value
+                              photoInputRef.current.value = "";
+
+                              // Trigger file picker
+                              photoInputRef.current.click();
+
+                              // For some mobile browsers, also trigger focus
+                              setTimeout(() => {
+                                photoInputRef.current?.focus();
+                              }, 100);
+                            }
+                          } catch (error) {
+                            console.error(
+                              "Error triggering file picker:",
+                              error,
+                            );
+                            toast({
+                              title: "Upload Error",
+                              description:
+                                "Could not open file picker. Please try again.",
+                              variant: "destructive",
+                            });
+                          }
                         }}
-                        className="bg-olive-600 hover:bg-olive-700 text-white"
+                        className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
+                        size="lg"
                       >
-                        <Upload className="mr-2" size={16} />
+                        <Upload className="mr-2" size={20} />
                         Choose Photos
                       </Button>
+
+                      {/* Alternative mobile-friendly upload button */}
+                      <div className="sm:hidden">
+                        <label
+                          htmlFor="mobile-photo-upload"
+                          className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
+                        >
+                          <Camera className="mr-2" size={16} />
+                          Take/Upload Photo
+                        </label>
+                        <input
+                          id="mobile-photo-upload"
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                          capture="environment"
+                        />
+                      </div>
                     </div>
-                    <p className="text-xs text-sage-500 mt-2">
-                      Select multiple photos • Maximum 5MB per photo
-                    </p>
+                    <div className="mt-4 space-y-1">
+                      <p className="text-sm text-sage-600">
+                        Select multiple photos • Maximum 5MB per photo
+                      </p>
+                      <p className="text-xs text-sage-500">
+                        Supports: JPG, PNG, GIF, WebP formats
+                      </p>
+                      <div className="text-xs text-sage-400 mt-2">
+                        📱 Mobile users: Use "Take/Upload Photo" for better
+                        compatibility
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Mobile Compatibility Notice */}
+                  <MobileCompatibilityNotice
+                    showForFeature="upload"
+                    className="mt-4"
+                  />
 
                   {/* Photos Grid */}
                   {uploadedPhotos.length > 0 ? (

@@ -25,6 +25,12 @@ import {
 } from "@/lib/api";
 import { database } from "@/lib/database";
 import { sendRSVPNotification, isSMSConfigured } from "@/lib/sms-service";
+import {
+  mobileOptimizedDownload,
+  detectMobile,
+  getDownloadInstructions,
+} from "@/lib/mobile-utils";
+import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
 
 interface Guest {
   id: string;
@@ -450,7 +456,7 @@ export default function Index() {
 
         toast({
           title: isEditMode
-            ? "RSVP Updated Successfully! ✏️"
+            ? "RSVP Updated Successfully! ✏��"
             : "RSVP Submitted Successfully! 🎉",
           description: isEditMode
             ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.`
@@ -587,6 +593,10 @@ Made with love ❤️ By Aral D'Souza
 
   const downloadInvitation = async () => {
     try {
+      // Mobile detection and utilities
+      const { isMobile } = detectMobile();
+      const downloadInstructions = getDownloadInstructions();
+
       // First priority: Check if there's a custom invitation PDF uploaded from admin
       console.log("🔍 Checking for uploaded invitation from admin...");
 
@@ -619,20 +629,25 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // For mobile browsers that might not support download attribute
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            // On mobile, open in new tab/window instead of direct download
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(
-              navigator.userAgent,
-            );
-            if (isMobile) {
-              window.open(uploadedInvitation.pdf_data, "_blank");
-            } else {
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          } else {
+          // Use mobile-optimized download utility
+          const downloadSuccess = mobileOptimizedDownload(
+            uploadedInvitation.pdf_data,
+            {
+              filename:
+                uploadedInvitation.filename ||
+                "Aral-Violet-Wedding-Invitation.pdf",
+              mimeType: "application/pdf",
+            },
+          );
+
+          if (!downloadSuccess) {
+            // Fallback to original method
+            const link = document.createElement("a");
+            link.href = uploadedInvitation.pdf_data;
+            link.download =
+              uploadedInvitation.filename ||
+              "Aral-Violet-Wedding-Invitation.pdf";
+            link.target = "_blank";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -640,9 +655,10 @@ Made with love ❤️ By Aral D'Souza
 
           toast({
             title: "Invitation downloaded Successfully! 💌",
-            description:
-              "Your custom uploaded wedding invitation has been downloaded successfully.",
-            duration: 3000,
+            description: isMobile
+              ? `Your custom wedding invitation has been downloaded. ${downloadInstructions}`
+              : "Your custom uploaded wedding invitation has been downloaded successfully.",
+            duration: isMobile ? 5000 : 3000,
           });
 
           console.log(
@@ -675,10 +691,36 @@ Made with love ❤️ By Aral D'Souza
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.target = "_blank";
 
-        // Mobile-friendly download
-        if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-          // On mobile, open in new tab/window
-          window.open(url, "_blank");
+        // Mobile-optimized download
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+          // For mobile, use a more reliable download approach
+          try {
+            // Add download attribute for modern mobile browsers
+            link.setAttribute("download", "Aral-Violet-Wedding-Invitation.pdf");
+            link.style.display = "none";
+            document.body.appendChild(link);
+
+            // Trigger click event
+            const clickEvent = new MouseEvent("click", {
+              view: window,
+              bubbles: true,
+              cancelable: false,
+            });
+            link.dispatchEvent(clickEvent);
+
+            document.body.removeChild(link);
+          } catch (mobileError) {
+            console.warn(
+              "Mobile download failed, trying fallback:",
+              mobileError,
+            );
+            // Fallback to standard approach
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
         } else {
           document.body.appendChild(link);
           link.click();
@@ -713,9 +755,44 @@ Made with love ❤️ By Aral D'Souza
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-friendly download
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(pdfData, "_blank");
+          // Mobile-optimized download
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(
+            navigator.userAgent,
+          );
+
+          if (isMobile) {
+            // Create blob for mobile compatibility
+            try {
+              if (pdfData.startsWith("data:")) {
+                const base64Data = pdfData.split(",")[1];
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+
+                for (let i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+                const blobUrl = URL.createObjectURL(blob);
+
+                link.href = blobUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+              } else {
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }
+            } catch (error) {
+              console.warn("Mobile blob creation failed:", error);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
           } else {
             document.body.appendChild(link);
             link.click();
@@ -751,9 +828,38 @@ Made with love ❤️ By Aral D'Souza
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-friendly download
-          if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-            window.open(savedInvitation, "_blank");
+          // Mobile-optimized download
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(
+            navigator.userAgent,
+          );
+
+          if (isMobile && savedInvitation.startsWith("data:")) {
+            // Create blob for mobile compatibility
+            try {
+              const base64Data = savedInvitation.split(",")[1];
+              const byteCharacters = atob(base64Data);
+              const byteNumbers = new Array(byteCharacters.length);
+
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+
+              const byteArray = new Uint8Array(byteNumbers);
+              const blob = new Blob([byteArray], { type: "application/pdf" });
+              const blobUrl = URL.createObjectURL(blob);
+
+              link.href = blobUrl;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            } catch (error) {
+              console.warn("Mobile blob creation failed:", error);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
           } else {
             document.body.appendChild(link);
             link.click();
@@ -930,6 +1036,14 @@ Please RSVP at our wedding website
                   ? "Wedding Timeline"
                   : "Download Reception Timeline"}
               </Button>
+            </div>
+
+            {/* Mobile Compatibility Notice */}
+            <div className="mt-6">
+              <MobileCompatibilityNotice
+                showForFeature="download"
+                className="max-w-md mx-auto"
+              />
             </div>
           </div>
 
