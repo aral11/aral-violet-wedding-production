@@ -105,20 +105,36 @@ export default function Index() {
         const photos = await database.photos.getAll();
 
         if (photos && photos.length > 0) {
-          // Filter out any photos with invalid data
+          // Filter for photos with valid data (data URLs or HTTP URLs)
           const validPhotos = photos.filter(
             (photo) =>
-              photo.photo_data && photo.photo_data.startsWith("data:image/"),
+              photo.photo_data &&
+              (photo.photo_data.startsWith("data:image/") ||
+               photo.photo_data.startsWith("http") ||
+               photo.photo_data.startsWith("blob:")),
           );
 
           if (validPhotos.length > 0) {
             const photoData = validPhotos.map((photo) => photo.photo_data);
             setUploadedPhotos(photoData);
-            console.log(`📸 Gallery loaded: ${validPhotos.length} photos`);
+            console.log(`📸 Gallery loaded: ${validPhotos.length} real photos from Supabase`);
+
+            // Log sample URLs for debugging
+            if (validPhotos.length > 0) {
+              const firstPhoto = validPhotos[0];
+              console.log(`📸 Sample photo URL type:`, {
+                isDataURL: firstPhoto.photo_data.startsWith("data:"),
+                isHttpURL: firstPhoto.photo_data.startsWith("http"),
+                isBlobURL: firstPhoto.photo_data.startsWith("blob:"),
+                urlStart: firstPhoto.photo_data.substring(0, 50) + "..."
+              });
+            }
           } else {
+            console.log(`📸 No valid photos found - total: ${photos.length}, valid: 0`);
             setUploadedPhotos([]);
           }
         } else {
+          console.log("📸 No photos returned from database");
           setUploadedPhotos([]);
         }
       } catch (error) {
@@ -355,7 +371,7 @@ export default function Index() {
 
           if (smsSuccess) {
             console.log(
-              "✅ SMS notifications sent successfully to family members",
+              "��� SMS notifications sent successfully to family members",
             );
           } else {
             console.log("⚠️ SMS notifications failed to send");
@@ -1342,8 +1358,10 @@ Please RSVP at our wedding website
             </p>
             {uploadedPhotos.length > 0 && (
               <p className="text-sm text-sage-500 mt-2">
-                Gallery updates automatically • {uploadedPhotos.length} photo
-                {uploadedPhotos.length !== 1 ? "s" : ""}
+                {uploadedPhotos.some(photo => photo.includes("[FALLBACK]") || photo.includes("diagnostic"))
+                  ? `Showing ${uploadedPhotos.length} placeholder photos • Upload photos in admin panel to see real gallery`
+                  : `Gallery updates automatically • ${uploadedPhotos.length} photo${uploadedPhotos.length !== 1 ? "s" : ""}`
+                }
               </p>
             )}
           </div>
