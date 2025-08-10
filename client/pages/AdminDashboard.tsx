@@ -2145,13 +2145,16 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex-shrink-0">
                           <div className="bg-white p-4 rounded-lg border-2 border-olive-200 text-center">
-                            <div className="w-32 h-32 bg-sage-100 border-2 border-dashed border-sage-300 rounded flex items-center justify-center mb-2">
-                              <div className="text-center">
-                                <Camera className="mx-auto mb-1 text-sage-500" size={24} />
-                                <p className="text-xs text-sage-500">QR Code</p>
-                                <p className="text-xs text-sage-400">Would appear here</p>
-                              </div>
-                            </div>
+                            <img
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(
+                                window.location.origin + (import.meta.env.PROD &&
+                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+                                    ? "/aral-violet-wedding"
+                                    : "") + "/guest-upload"
+                              )}`}
+                              alt="QR Code for Guest Photo Upload"
+                              className="w-32 h-32 mb-2 rounded"
+                            />
                             <p className="text-xs text-sage-600">Scan to upload photos</p>
                           </div>
                         </div>
