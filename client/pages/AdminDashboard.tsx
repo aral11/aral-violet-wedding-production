@@ -120,15 +120,28 @@ export default function AdminDashboard() {
 
       // Load photos using database service
       try {
+        console.log("📷 Admin loading photos from database...");
+        console.log("📊 Admin storage status:", database.getStorageStatus());
+
         const photos = await database.photos.getAll();
+        console.log("📷 Admin raw photos from database:", photos);
+
         if (photos && photos.length > 0) {
-          const photoData = photos.map((photo) => photo.photo_data);
+          // Filter for valid photos only
+          const validPhotos = photos.filter(photo =>
+            photo.photo_data &&
+            photo.photo_data.startsWith("data:image/")
+          );
+
+          console.log(`📷 Admin filtered photos (${validPhotos.length}/${photos.length} valid):`, validPhotos);
+
+          const photoData = validPhotos.map((photo) => photo.photo_data);
           setUploadedPhotos(photoData);
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
           console.log(
-            `📷 Admin gallery: ${photos.length} photos loaded from ${storageType}`,
+            `📷 Admin gallery: ${validPhotos.length} photos loaded from ${storageType}`,
           );
         } else {
           setUploadedPhotos([]);
