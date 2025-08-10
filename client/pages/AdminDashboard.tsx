@@ -270,7 +270,7 @@ export default function AdminDashboard() {
         case "special":
           return "✨";
         default:
-          return "📋";
+          return "����";
       }
     };
 
@@ -944,29 +944,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      // File size requirement: at least 25MB per photo
-      const minSize = 25 * 1024 * 1024; // 25MB
-      if (file.size < minSize) {
-        console.error(`File ${file.name} is too small`);
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-        toast({
-          title: "File Too Small",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images that are at least 25MB.`,
-          variant: "destructive",
-          duration: 4000,
-        });
-        errorCount++;
-        return;
-      }
-
-      // Maximum file size limit (100MB to be safe)
-      const maxSize = 100 * 1024 * 1024; // 100MB
+      // Maximum file size limit (25MB as requested)
+      const maxSize = 25 * 1024 * 1024; // 25MB
       if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Please upload images smaller than 100MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Please upload images up to 25MB.`,
           variant: "destructive",
           duration: 4000,
         });
@@ -1972,76 +1957,52 @@ export default function AdminDashboard() {
                   <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg hover:border-sage-400 transition-colors">
                     <Upload className="mx-auto mb-4 text-olive-600" size={48} />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Select Wedding Photos (25MB+ each)
+                      Upload Wedding Photos
                     </h3>
-                    <div className="space-y-3">
-                      <input
-                        ref={photoInputRef}
-                        type="file"
-                        multiple
-                        accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                      <Button
-                        onClick={() => {
-                          console.log("Photo upload button clicked");
-                          try {
-                            // Enhanced mobile compatibility
-                            if (photoInputRef.current) {
-                              // Reset any previous value
-                              photoInputRef.current.value = "";
-
-                              // Trigger file picker
-                              photoInputRef.current.click();
-
-                              // For some mobile browsers, also trigger focus
-                              setTimeout(() => {
-                                photoInputRef.current?.focus();
-                              }, 100);
-                            }
-                          } catch (error) {
-                            console.error(
-                              "Error triggering file picker:",
-                              error,
-                            );
-                            toast({
-                              title: "Upload Error",
-                              description:
-                                "Could not open file picker. Please try again.",
-                              variant: "destructive",
-                            });
+                    <p className="text-sage-600 mb-6">
+                      Upload high-quality photos (up to 25MB each) for the wedding gallery
+                    </p>
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => {
+                        console.log("Photo upload button clicked");
+                        try {
+                          if (photoInputRef.current) {
+                            photoInputRef.current.value = "";
+                            photoInputRef.current.click();
+                            setTimeout(() => {
+                              photoInputRef.current?.focus();
+                            }, 100);
                           }
-                        }}
-                        className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
-                        size="lg"
-                      >
-                        <Upload className="mr-2" size={20} />
-                        Select Photos (25MB+ each)
-                      </Button>
-
-                      {/* Alternative mobile-friendly upload button */}
-                      <div className="sm:hidden">
-                        <label
-                          htmlFor="mobile-photo-upload"
-                          className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
-                        >
-                          <Upload className="mr-2" size={16} />
-                          Select Photos (25MB+ each)
-                        </label>
-                        <input
-                          id="mobile-photo-upload"
-                          type="file"
-                          multiple
-                          accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
-                          onChange={handlePhotoUpload}
-                          className="hidden"
-                        />
-                      </div>
-                    </div>
+                        } catch (error) {
+                          console.error(
+                            "Error triggering file picker:",
+                            error,
+                          );
+                          toast({
+                            title: "Upload Error",
+                            description:
+                              "Could not open file picker. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      className="bg-olive-600 hover:bg-olive-700 text-white px-6 py-3 text-lg"
+                      size="lg"
+                    >
+                      <Upload className="mr-2" size={20} />
+                      Select Photos (up to 25MB each)
+                    </Button>
                     <div className="mt-4 space-y-1">
                       <p className="text-sm text-sage-600">
-                        Select multiple photos • Minimum 25MB per photo required
+                        Select multiple photos • Up to 25MB per photo supported
                       </p>
                       <p className="text-xs text-sage-500">
                         Supports: JPG, PNG, GIF, WebP, BMP formats
@@ -2640,7 +2601,7 @@ export default function AdminDashboard() {
                           • Keep admin credentials confidential and secure
                         </li>
                         <li>• Download RSVP data regularly as backup</li>
-                        <li>• Photo uploads require minimum 25MB per image</li>
+                        <li>• Photo uploads support up to 25MB per image</li>
                         <li>
                           • Wedding timeline download for guests activates on
                           December 28, 2025
