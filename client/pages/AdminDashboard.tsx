@@ -2154,7 +2154,7 @@ export default function AdminDashboard() {
                       <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="flex-1">
                           <p className="text-sage-700 mb-4">
-                            Share this QR code with guests during the wedding day. They can scan it to upload photos directly to your gallery!
+                            This QR code is already displayed on your home page for guests to see! You can also download and print additional copies for venue placement.
                           </p>
                           <div className="space-y-2">
                             <p className="text-sm text-sage-600">
