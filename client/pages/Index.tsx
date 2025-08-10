@@ -136,10 +136,14 @@ export default function Index() {
           console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.error("❌ Error loading photos from database:", error);
-        // Try to load from localStorage as fallback (both admin and guest photos)
+        console.error("❌ Error loading photos from database:", {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          fullError: error
+        });
+
+        // Force localStorage fallback when database fails
+        console.log("🔄 Database failed, forcing localStorage fallback...");
         try {
-          console.log("🔄 Attempting localStorage fallback...");
           const adminPhotos = JSON.parse(
             localStorage.getItem("wedding_photos") || "[]",
           );
@@ -158,13 +162,33 @@ export default function Index() {
             console.log(
               `📸 Gallery fallback: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos from localStorage`,
             );
+
+            toast({
+              title: "Photos Loaded from Local Storage",
+              description: `Found ${allPhotos.length} photos locally (database unavailable)`,
+              duration: 5000,
+            });
           } else {
             setUploadedPhotos([]);
             console.log("📸 No photos found in localStorage fallback either");
+
+            toast({
+              title: "No Photos Available",
+              description: "Database connection failed and no local photos found",
+              variant: "destructive",
+              duration: 5000,
+            });
           }
         } catch (fallbackError) {
           console.error("❌ Fallback photo loading failed:", fallbackError);
           setUploadedPhotos([]);
+
+          toast({
+            title: "Photo Loading Failed",
+            description: "Both database and local storage failed",
+            variant: "destructive",
+            duration: 5000,
+          });
         }
       }
     };
