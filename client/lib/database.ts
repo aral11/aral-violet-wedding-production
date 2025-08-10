@@ -153,10 +153,12 @@ export const photoService = {
     try {
       console.log("📸 Attempting API connection...");
       const response = await fetch("/api/photos");
+      console.log("📸 API response status:", response.status, response.statusText);
 
       if (response.ok) {
         const apiPhotos = await response.json();
         console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
+        console.log("📸 Raw API response:", apiPhotos);
 
         if (apiPhotos && apiPhotos.length > 0) {
           console.log(`📸 API returned photos:`, apiPhotos.map(p => ({ id: p.id, hasData: !!p.photoData, dataStart: p.photoData?.substring(0, 20) })));
