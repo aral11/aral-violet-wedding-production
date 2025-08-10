@@ -40,18 +40,23 @@ export default function GuestUpload() {
       description: `Processing ${totalFiles} photo${totalFiles !== 1 ? "s" : ""}...`,
     });
 
-    // Process files with proper async handling
-    const uploadPromises = Array.from(files).map(async (file) => {
+    // Process files with proper async handling and improved error management
+    const uploadPromises = Array.from(files).map(async (file, index) => {
+      console.log(`🔄 Processing file ${index + 1}/${totalFiles}: ${file.name}`);
+
       // Validate file type
       const isValidImage =
         file.type.startsWith("image/") ||
         /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
 
       if (!isValidImage) {
+        const errorMsg = `"${file.name}" is not a valid image file. Please upload JPG, PNG, GIF, WebP, or SVG files.`;
+        console.error(`❌ ${errorMsg}`);
         toast({
           title: "Invalid File Type",
-          description: `"${file.name}" is not a valid image file.`,
+          description: errorMsg,
           variant: "destructive",
+          duration: 4000,
         });
         throw new Error(`Invalid file type: ${file.name}`);
       }
@@ -60,35 +65,73 @@ export default function GuestUpload() {
       const maxSize = 25 * 1024 * 1024; // 25MB
       if (file.size > maxSize) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`;
+        console.error(`❌ ${errorMsg}`);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
+          description: errorMsg,
           variant: "destructive",
+          duration: 4000,
         });
         throw new Error(`File too large: ${file.name}`);
       }
 
       try {
-        // Convert to base64
+        // Convert to base64 with timeout protection
         const base64String = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
+
+          // Add timeout for large files (2 minute timeout)
+          const timeout = setTimeout(() => {
+            reject(new Error(`Timeout reading file ${file.name}`));
+          }, 120000);
+
           reader.onload = (event) => {
+            clearTimeout(timeout);
             if (event.target?.result) {
               resolve(event.target.result as string);
             } else {
               reject(new Error("Failed to read file"));
             }
           };
-          reader.onerror = () => reject(new Error("File read error"));
+
+          reader.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error(`File read error for ${file.name}`));
+          };
+
           reader.readAsDataURL(file);
         });
 
-        // Upload to database with proper guest metadata
-        await database.photos.create(base64String, "guest", guestName.trim());
-        return { success: true, fileName: file.name };
+        // Validate base64 data
+        if (!base64String.startsWith("data:image/")) {
+          throw new Error(`Invalid image data for ${file.name}`);
+        }
+
+        // Upload to database with proper guest metadata and retry logic
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts) {
+          try {
+            const savedPhoto = await database.photos.create(base64String, "guest", guestName.trim());
+            console.log(`✅ Guest photo ${file.name} uploaded successfully:`, savedPhoto.id);
+            return { success: true, fileName: file.name, photoId: savedPhoto.id };
+          } catch (uploadError) {
+            attempts++;
+            console.error(`❌ Guest photo upload attempt ${attempts} failed for ${file.name}:`, uploadError);
+
+            if (attempts >= maxAttempts) {
+              throw uploadError;
+            }
+
+            // Wait before retry with exponential backoff
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+          }
+        }
       } catch (error) {
-        console.error(`Error uploading ${file.name}:`, error);
-        throw new Error(`Upload failed: ${file.name}`);
+        console.error(`Error processing ${file.name}:`, error);
+        throw new Error(`Failed to process ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     });
 
@@ -110,18 +153,22 @@ export default function GuestUpload() {
 
     if (successCount > 0) {
       setIsSuccess(true);
+      const storageType = database.isUsingSupabase() ? 'Supabase database' : 'local storage';
       toast({
         title: "Photos Uploaded Successfully! 📷",
-        description: `${successCount} photo${successCount !== 1 ? "s" : ""} uploaded to the wedding gallery!`,
-        duration: 5000,
+        description: `${successCount} photo${successCount !== 1 ? "s" : ""} from ${guestName} uploaded to the wedding gallery and saved to ${storageType}!`,
+        duration: 6000,
       });
+
+      console.log(`🎉 Guest upload complete: ${successCount} photos from ${guestName}`);
     }
 
     if (errorCount > 0) {
       toast({
-        title: "Some uploads failed",
-        description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload.`,
-        variant: "destructive",
+        title: `Upload Issues (${errorCount}/${totalFiles})`,
+        description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload. ${successCount > 0 ? `${successCount} photo${successCount !== 1 ? 's' : ''} uploaded successfully.` : 'Please try again.'}`,
+        variant: errorCount === totalFiles ? "destructive" : "default",
+        duration: 6000,
       });
     }
 
