@@ -1366,25 +1366,50 @@ Please RSVP at our wedding website
                 onClick={() => {
                   const loadPhotos = async () => {
                     try {
+                      console.log("📸 Manual gallery refresh requested...");
                       const photos = await database.photos.getAll();
                       if (photos && photos.length > 0) {
-                        setUploadedPhotos(
-                          photos.map((photo) => photo.photo_data),
+                        // Sort by creation date and extract photo data
+                        const sortedPhotos = photos.sort((a, b) =>
+                          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
                         );
+                        const photoData = sortedPhotos.map((photo) => photo.photo_data);
+                        setUploadedPhotos(photoData);
+
                         const storageType = database.isUsingSupabase()
                           ? "Supabase"
                           : "localStorage";
+                        const adminCount = sortedPhotos.filter(p => p.uploaded_by === 'admin').length;
+                        const guestCount = sortedPhotos.filter(p => p.uploaded_by !== 'admin').length;
+
                         console.log(
-                          `Photos refreshed from ${storageType}:`,
-                          photos.length,
+                          `📸 Photos refreshed from ${storageType}: ${photos.length} total (${adminCount} admin, ${guestCount} guest)`,
                         );
+
+                        toast({
+                          title: "Gallery Refreshed! 📸",
+                          description: `Loaded ${photos.length} photo${photos.length !== 1 ? 's' : ''} from ${storageType}`,
+                          duration: 3000,
+                        });
                       } else {
-                        console.log("No photos found");
+                        console.log("No photos found during refresh");
                         setUploadedPhotos([]);
+                        toast({
+                          title: "No Photos Found",
+                          description: "No photos are currently stored in the database.",
+                          variant: "default",
+                          duration: 3000,
+                        });
                       }
                     } catch (error) {
                       console.log("Refresh failed:", error);
                       setUploadedPhotos([]);
+                      toast({
+                        title: "Refresh Failed",
+                        description: "Unable to refresh gallery. Please try again.",
+                        variant: "destructive",
+                        duration: 3000,
+                      });
                     }
                   };
                   loadPhotos();
