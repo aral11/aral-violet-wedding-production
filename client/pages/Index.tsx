@@ -126,15 +126,8 @@ export default function Index() {
           console.log("📸 No photos found in database");
         }
       } catch (error) {
-        console.error("❌ Error loading photos:", error);
+        console.error("Error loading photos:", error);
         setUploadedPhotos([]);
-
-        toast({
-          title: "Photo Loading Failed",
-          description: "Could not load photos from any source",
-          variant: "destructive",
-          duration: 5000,
-        });
       }
     };
 
@@ -381,7 +374,7 @@ export default function Index() {
 
       toast({
         title: isEditMode
-          ? "RSVP Updated Successfully! ✏️"
+          ? "RSVP Updated Successfully! ��️"
           : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
           ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
