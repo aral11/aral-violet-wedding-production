@@ -134,15 +134,22 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     if (isSupabaseConfigured()) {
       try {
+        console.log("📸 Querying Supabase photos table...");
         const { data, error } = await supabase
           .from("photos")
           .select("*")
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
+        console.log("📸 Supabase query result:", { data, error, count: data?.length });
+
+        if (error) {
+          console.error("📸 Supabase query error:", error);
+          throw error;
+        }
 
         // Sync to localStorage with proper structure
         if (data && data.length > 0) {
+          console.log("📸 Syncing photos to localStorage...");
           // Separate admin and guest photos for localStorage sync
           const adminPhotos = data
             .filter((p) => p.uploaded_by === "admin")
@@ -161,14 +168,19 @@ export const photoService = {
             "wedding_guest_photos",
             JSON.stringify(guestPhotos),
           );
+
+          console.log(`📸 Synced ${adminPhotos.length} admin + ${guestPhotos.length} guest photos to localStorage`);
+        } else {
+          console.log("📸 No photos found in Supabase");
         }
 
         return data || [];
       } catch (error) {
-        console.warn("Supabase unavailable, using localStorage:", error);
+        console.error("📸 Supabase error, using localStorage fallback:", error);
         return this.getFromLocalStorage();
       }
     }
+    console.log("📸 Supabase not configured, using localStorage");
     return this.getFromLocalStorage();
   },
 
