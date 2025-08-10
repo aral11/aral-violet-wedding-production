@@ -59,10 +59,43 @@ export default function Debug() {
       console.log("🔍 Testing Supabase connection...");
       const isUsing = database.isUsingSupabase();
       console.log("📊 Using Supabase:", isUsing);
-      
+
       const status = database.getStorageStatus();
       console.log("💾 Storage status:", status);
-      
+
+      // Test direct Supabase connection from browser
+      if (isUsing) {
+        console.log("🔍 Testing direct Supabase query from browser...");
+        // Import supabase directly to test
+        const { supabase } = await import("@/lib/supabase");
+        if (supabase) {
+          console.log("📱 Supabase client exists, testing query...");
+          const { data, error } = await supabase
+            .from("photos")
+            .select("*")
+            .limit(5);
+
+          console.log("📸 Direct Supabase query result:", { data, error });
+
+          if (error) {
+            console.error("❌ Direct Supabase query error:", error);
+            toast({
+              title: "Supabase Query Failed",
+              description: `Error: ${error.message}`,
+              variant: "destructive",
+              duration: 5000,
+            });
+          } else {
+            console.log("✅ Direct Supabase query successful:", data?.length || 0, "photos");
+            toast({
+              title: "Direct Supabase Test",
+              description: `Success! Found ${data?.length || 0} photos directly from Supabase`,
+              duration: 5000,
+            });
+          }
+        }
+      }
+
       toast({
         title: "Storage Info",
         description: `Using: ${status.type} | Syncs: ${status.syncsAcrossDevices}`,
@@ -70,6 +103,12 @@ export default function Debug() {
       });
     } catch (err) {
       console.error("❌ Supabase test failed:", err);
+      toast({
+        title: "Supabase Test Failed",
+        description: `Error: ${err instanceof Error ? err.message : String(err)}`,
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
