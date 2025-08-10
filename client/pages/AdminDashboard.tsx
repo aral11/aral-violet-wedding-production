@@ -2017,7 +2017,7 @@ export default function AdminDashboard() {
                         size="lg"
                       >
                         <Upload className="mr-2" size={20} />
-                        Choose Photos
+                        Select Photos (25MB+ each)
                       </Button>
 
                       {/* Alternative mobile-friendly upload button */}
