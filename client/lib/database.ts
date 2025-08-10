@@ -141,10 +141,19 @@ export const photoService = {
 
         if (error) throw error;
 
-        // Sync to localStorage
-        if (data) {
-          const photoData = data.map((p) => p.photo_data);
-          localStorage.setItem("wedding_photos", JSON.stringify(photoData));
+        // Sync to localStorage with proper structure
+        if (data && data.length > 0) {
+          // Separate admin and guest photos for localStorage sync
+          const adminPhotos = data.filter(p => p.uploaded_by === 'admin').map(p => p.photo_data);
+          const guestPhotos = data.filter(p => p.uploaded_by !== 'admin').map(p => ({
+            photoData: p.photo_data,
+            uploadedBy: p.uploaded_by,
+            guestName: p.guest_name,
+            createdAt: p.created_at
+          }));
+
+          localStorage.setItem("wedding_photos", JSON.stringify(adminPhotos));
+          localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
         }
 
         return data || [];
@@ -327,24 +336,30 @@ export const photoService = {
     uploadedBy = "admin",
     guestName?: string,
   ): void {
-    if (uploadedBy === "admin") {
-      // Save admin photos to wedding_photos
-      const existing = localStorage.getItem("wedding_photos");
-      const photos = existing ? JSON.parse(existing) : [];
-      photos.push(photoData);
-      localStorage.setItem("wedding_photos", JSON.stringify(photos));
-    } else {
-      // Save guest photos to wedding_guest_photos with metadata
-      const existing = localStorage.getItem("wedding_guest_photos");
-      const guestPhotos = existing ? JSON.parse(existing) : [];
-      const guestPhoto = {
-        photoData,
-        uploadedBy,
-        guestName,
-        createdAt: new Date().toISOString(),
-      };
-      guestPhotos.push(guestPhoto);
-      localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+    try {
+      if (uploadedBy === "admin") {
+        // Save admin photos to wedding_photos
+        const existing = localStorage.getItem("wedding_photos");
+        const photos = existing ? JSON.parse(existing) : [];
+        photos.push(photoData);
+        localStorage.setItem("wedding_photos", JSON.stringify(photos));
+        console.log(`📸 Admin photo saved to localStorage`);
+      } else {
+        // Save guest photos to wedding_guest_photos with metadata
+        const existing = localStorage.getItem("wedding_guest_photos");
+        const guestPhotos = existing ? JSON.parse(existing) : [];
+        const guestPhoto = {
+          photoData,
+          uploadedBy,
+          guestName,
+          createdAt: new Date().toISOString(),
+        };
+        guestPhotos.push(guestPhoto);
+        localStorage.setItem("wedding_guest_photos", JSON.stringify(guestPhotos));
+        console.log(`📸 Guest photo from ${guestName} saved to localStorage`);
+      }
+    } catch (error) {
+      console.error("Error saving photo to localStorage:", error);
     }
   },
 
