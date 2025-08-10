@@ -2026,17 +2026,16 @@ export default function AdminDashboard() {
                           htmlFor="mobile-photo-upload"
                           className="inline-flex items-center px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-md cursor-pointer transition-colors"
                         >
-                          <Camera className="mr-2" size={16} />
-                          Take/Upload Photo
+                          <Upload className="mr-2" size={16} />
+                          Select Photos (25MB+ each)
                         </label>
                         <input
                           id="mobile-photo-upload"
                           type="file"
                           multiple
-                          accept="image/*"
+                          accept=".jpg,.jpeg,.png,.gif,.webp,.bmp"
                           onChange={handlePhotoUpload}
                           className="hidden"
-                          capture="environment"
                         />
                       </div>
                     </div>
