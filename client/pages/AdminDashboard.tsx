@@ -754,7 +754,7 @@ export default function AdminDashboard() {
 </head>
 <body>
     <div class="header">
-        <div class="logo">❤��� TheVIRALWedding</div>
+        <div class="logo">❤���� TheVIRALWedding</div>
         <div class="couple-names">Aral & Violet</div>
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
@@ -935,7 +935,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("Photo upload function called");
     const files = e.target.files;
 
@@ -945,8 +945,6 @@ export default function AdminDashboard() {
     }
 
     console.log(`Processing ${files.length} files`);
-    let successCount = 0;
-    let errorCount = 0;
     const totalFiles = files.length;
 
     // Show initial processing message for better UX
@@ -956,8 +954,8 @@ export default function AdminDashboard() {
       duration: 2000,
     });
 
-    // Process each file with improved mobile handling
-    Array.from(files).forEach((file, index) => {
+    // Process files with proper async handling
+    const uploadPromises = Array.from(files).map(async (file, index) => {
       console.log(
         `Processing file ${index + 1}: ${file.name}, Type: ${file.type}, Size: ${file.size}`,
       );
@@ -975,8 +973,7 @@ export default function AdminDashboard() {
           variant: "destructive",
           duration: 4000,
         });
-        errorCount++;
-        return;
+        throw new Error(`Invalid file type: ${file.name}`);
       }
 
       // Maximum file size limit (25MB as requested)
@@ -990,137 +987,130 @@ export default function AdminDashboard() {
           variant: "destructive",
           duration: 4000,
         });
-        errorCount++;
-        return;
+        throw new Error(`File too large: ${file.name}`);
       }
 
-      // Convert to base64 with improved error handling
-      const reader = new FileReader();
+      try {
+        // Convert to base64 with proper async handling
+        const base64String = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
 
-      // Add timeout for large files (25MB+ requires more time)
-      const timeout = setTimeout(() => {
-        console.error(`Timeout reading file ${file.name}`);
-        toast({
-          title: "Upload Timeout",
-          description: `Timeout uploading "${file.name}". File too large or connection issue.`,
-          variant: "destructive",
-          duration: 4000,
+          // Add timeout for large files (2 minute timeout)
+          const timeout = setTimeout(() => {
+            reject(new Error(`Timeout reading file ${file.name}`));
+          }, 120000);
+
+          reader.onload = (event) => {
+            clearTimeout(timeout);
+            if (event.target?.result) {
+              resolve(event.target.result as string);
+            } else {
+              reject(new Error("Failed to read file"));
+            }
+          };
+
+          reader.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error("File read error"));
+          };
+
+          reader.readAsDataURL(file);
         });
-        errorCount++;
-      }, 120000); // 2 minute timeout for large files
 
-      reader.onload = async (event) => {
-        clearTimeout(timeout);
-        console.log(`File ${file.name} read successfully`);
+        // Validate base64 data
+        if (!base64String.startsWith("data:image/")) {
+          throw new Error(`Invalid image data for ${file.name}`);
+        }
 
-        if (event.target?.result) {
-          const base64String = event.target.result as string;
+        // Save photo using database service with retry logic
+        let saveAttempts = 0;
+        const maxAttempts = 3;
 
-          // Validate base64 data
-          if (!base64String.startsWith("data:image/")) {
-            console.error(`Invalid base64 data for ${file.name}`);
-            toast({
-              title: "Upload Error",
-              description: `Invalid image data for "${file.name}". Please try again.`,
-              variant: "destructive",
-            });
-            errorCount++;
-            return;
-          }
-
+        while (saveAttempts < maxAttempts) {
           try {
-            // Save photo using database service with retry logic
-            let saveAttempts = 0;
-            const maxAttempts = 3;
-
-            while (saveAttempts < maxAttempts) {
-              try {
-                await database.photos.create(base64String, "admin");
-                break; // Success, break out of retry loop
-              } catch (saveError) {
-                saveAttempts++;
-                if (saveAttempts >= maxAttempts) {
-                  throw saveError; // Throw error after max attempts
-                }
-                // Wait before retry
-                await new Promise((resolve) =>
-                  setTimeout(resolve, 1000 * saveAttempts),
-                );
-              }
+            await database.photos.create(base64String, "admin");
+            console.log(`Photo ${file.name} saved to database successfully`);
+            return { success: true, fileName: file.name, photoData: base64String };
+          } catch (saveError) {
+            saveAttempts++;
+            if (saveAttempts >= maxAttempts) {
+              throw saveError;
             }
-
-            // Update local state
-            setUploadedPhotos((prev) => {
-              const newPhotos = [...prev, base64String];
-              console.log(
-                `Photo ${file.name} saved to database and added to gallery`,
-              );
-              return newPhotos;
-            });
-            successCount++;
-          } catch (error) {
-            console.error(`Error saving photo ${file.name}:`, error);
-            errorCount++;
-            toast({
-              title: "Photo Upload Error",
-              description: `Error saving "${file.name}". ${error instanceof Error ? error.message : "Please try again."}`,
-              variant: "destructive",
-              duration: 4000,
-            });
-          }
-
-          // Show final message after processing all files
-          if (successCount + errorCount === totalFiles) {
-            if (successCount > 0) {
-              const storageType = database.isUsingSupabase()
-                ? "Supabase database"
-                : "local storage";
-              toast({
-                title: "Photos Uploaded Successfully! 📷",
-                description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
-                duration: 4000,
-              });
-            }
-
-            if (errorCount > 0) {
-              toast({
-                title: "Some uploads failed",
-                description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload. Please try again.`,
-                variant: "destructive",
-                duration: 4000,
-              });
-            }
+            // Wait before retry
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1000 * saveAttempts),
+            );
           }
         }
-      };
-
-      reader.onerror = (error) => {
-        clearTimeout(timeout);
-        console.error(`Error reading file ${file.name}:`, error);
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error);
         toast({
-          title: "Photo Read Error",
-          description: `Error reading "${file.name}". Please try again or use a different file.`,
+          title: "Photo Upload Error",
+          description: `Error processing "${file.name}". ${error instanceof Error ? error.message : "Please try again."}`,
           variant: "destructive",
           duration: 4000,
         });
-        errorCount++;
-      };
-
-      // Use readAsDataURL with error handling
-      try {
-        reader.readAsDataURL(file);
-      } catch (readError) {
-        clearTimeout(timeout);
-        console.error(`Error starting to read file ${file.name}:`, readError);
-        toast({
-          title: "Photo Read Error",
-          description: `Cannot read "${file.name}". File may be corrupted.`,
-          variant: "destructive",
-          duration: 4000,
-        });
-        errorCount++;
+        throw error;
       }
     });
+
+    try {
+      // Wait for all uploads to complete
+      const results = await Promise.allSettled(uploadPromises);
+
+      // Count successes and failures
+      let successCount = 0;
+      let errorCount = 0;
+      const successfulUploads: string[] = [];
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          successCount++;
+          successfulUploads.push(result.value.photoData);
+        } else {
+          errorCount++;
+          console.error('Upload error:', result.reason);
+        }
+      });
+
+      // Update local state with successful uploads
+      if (successfulUploads.length > 0) {
+        setUploadedPhotos((prev) => {
+          const newPhotos = [...prev, ...successfulUploads];
+          console.log(`${successfulUploads.length} photos added to gallery`);
+          return newPhotos;
+        });
+      }
+
+      // Show final message
+      if (successCount > 0) {
+        const storageType = database.isUsingSupabase()
+          ? "Supabase database"
+          : "local storage";
+        toast({
+          title: "Photos Uploaded Successfully! 📷",
+          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType} and synced across devices!`,
+          duration: 4000,
+        });
+      }
+
+      if (errorCount > 0) {
+        toast({
+          title: "Some uploads failed",
+          description: `${errorCount} photo${errorCount !== 1 ? "s" : ""} failed to upload. Please try again.`,
+          variant: "destructive",
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.error('Upload process failed:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload photos. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    }
 
     // Clear the input so the same files can be uploaded again if needed
     e.target.value = "";
