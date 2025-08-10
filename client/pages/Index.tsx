@@ -112,12 +112,16 @@ export default function Index() {
         }
       } catch (error) {
         console.log("Error loading photos:", error);
-        // Try to load from localStorage as fallback
+        // Try to load from localStorage as fallback (both admin and guest photos)
         try {
-          const fallbackPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
-          if (fallbackPhotos.length > 0) {
-            setUploadedPhotos(fallbackPhotos);
-            console.log(`📸 Gallery fallback: ${fallbackPhotos.length} photos from localStorage`);
+          const adminPhotos = JSON.parse(localStorage.getItem("wedding_photos") || "[]");
+          const guestPhotosData = JSON.parse(localStorage.getItem("wedding_guest_photos") || "[]");
+          const guestPhotos = guestPhotosData.map((photo: any) => photo.photoData || photo.photo_data);
+
+          const allPhotos = [...adminPhotos, ...guestPhotos];
+          if (allPhotos.length > 0) {
+            setUploadedPhotos(allPhotos);
+            console.log(`📸 Gallery fallback: ${adminPhotos.length} admin + ${guestPhotos.length} guest photos from localStorage`);
           } else {
             setUploadedPhotos([]);
           }
