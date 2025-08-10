@@ -1518,11 +1518,12 @@ Please RSVP at our wedding website
                   onClick={() => {
                     localStorage.removeItem("wedding_photos");
                     localStorage.removeItem("wedding_guest_photos");
+                    localStorage.removeItem("wedding_photos_placeholder_added");
                     setUploadedPhotos([]);
 
                     toast({
                       title: "LocalStorage Cleared",
-                      description: "Removed all photos from localStorage",
+                      description: "Removed all photos from localStorage. Click Refresh to try database again.",
                       duration: 3000,
                     });
                   }}
@@ -1530,7 +1531,7 @@ Please RSVP at our wedding website
                   size="sm"
                   className="border-red-300 text-red-600 hover:bg-red-50"
                 >
-                  Clear Local Photos
+                  Reset & Try Database
                 </Button>
               </div>
 
