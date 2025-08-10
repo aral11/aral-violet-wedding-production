@@ -47,22 +47,38 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Supabase configuration
-const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+// Supabase configuration - check both server and client env vars
+const supabaseUrl =
+  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const supabaseKey =
+  process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
 
 let supabase: any = null;
-if (supabaseUrl && supabaseKey) {
+if (
+  supabaseUrl &&
+  supabaseKey &&
+  supabaseUrl !== "YOUR_SUPABASE_URL" &&
+  supabaseKey !== "YOUR_SUPABASE_ANON_KEY"
+) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("✅ Supabase client initialized for photos service");
+    console.log("📊 Supabase URL:", supabaseUrl.substring(0, 30) + "...");
   } catch (error) {
     console.warn("❌ Failed to initialize Supabase for photos:", error);
   }
 } else {
   console.warn(
-    "⚠️ Supabase credentials not found - photos service will use fallback mock data",
+    "⚠️ Supabase credentials not properly configured - photos service will use fallback mock data",
   );
+  console.log("📋 Available env vars:", {
+    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ? "set" : "not set",
+    SUPABASE_URL: process.env.SUPABASE_URL ? "set" : "not set",
+    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
+      ? "set"
+      : "not set",
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
+  });
 }
 
 // Get all photos with optional filtering by uploader type
@@ -73,6 +89,27 @@ export const getPhotos: RequestHandler = async (req, res) => {
   try {
     if (supabase) {
       console.log("📸 Using Supabase for photos");
+
+      // Test Supabase connection first
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from("photos")
+          .select("count", { count: "exact", head: true });
+
+        if (testError) {
+          console.error("📸 Supabase connection test failed:", testError);
+          throw testError;
+        }
+
+        console.log(
+          "📸 Supabase connection successful, total photos:",
+          testData?.length || 0,
+        );
+      } catch (connectionError) {
+        console.error("📸 Supabase connection failed:", connectionError);
+        throw connectionError;
+      }
+
       let query = supabase
         .from("photos")
         .select("*")
@@ -88,7 +125,7 @@ export const getPhotos: RequestHandler = async (req, res) => {
       const { data, error } = await query;
 
       if (error) {
-        console.error("📸 Supabase error:", error);
+        console.error("📸 Supabase query error:", error);
         throw error;
       }
 
@@ -102,17 +139,34 @@ export const getPhotos: RequestHandler = async (req, res) => {
         })) || [];
 
       console.log(
-        `📸 Returning ${photos.length} photos from Supabase (type: ${type || "all"})`,
+        `📸 SUCCESS: Returning ${photos.length} photos from Supabase (type: ${type || "all"})`,
       );
+
+      // Log sample of photo data for debugging (first photo only)
+      if (photos.length > 0) {
+        const firstPhoto = photos[0];
+        console.log("📸 Sample photo data:", {
+          id: firstPhoto.id,
+          uploadedBy: firstPhoto.uploadedBy,
+          hasValidData:
+            firstPhoto.photoData && firstPhoto.photoData.startsWith("data:"),
+          dataStart: firstPhoto.photoData
+            ? firstPhoto.photoData.substring(0, 50) + "..."
+            : "no data",
+        });
+      }
+
       res.json(photos);
     } else {
-      console.log("📸 No Supabase client - returning mock data for testing");
-      // Return some mock data if Supabase is not available (for testing)
+      console.log(
+        "📸 No Supabase client - returning enhanced mock data for testing",
+      );
+      // Return enhanced mock data that shows we're in fallback mode
       const allMockPhotos = [
         {
           id: "mock_admin_1",
           photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzg0YTE3OCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y2ODg1NiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBObyBTdXBhYmFzZSBDb25uZWN0aW9uPC90ZXh0Pjwvc3ZnPg==",
           uploadedBy: "admin",
           guestName: null,
           createdAt: new Date().toISOString(),
@@ -120,7 +174,7 @@ export const getPhotos: RequestHandler = async (req, res) => {
         {
           id: "mock_admin_2",
           photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzVhNmM1NyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWRtaW4gUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1OWU5ZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBDb25maWd1cmUgU3VwYWJhc2U8L3RleHQ+PC9zdmc+",
           uploadedBy: "admin",
           guestName: null,
           createdAt: new Date().toISOString(),
@@ -128,17 +182,17 @@ export const getPhotos: RequestHandler = async (req, res) => {
         {
           id: "mock_guest_1",
           photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzk5YzNiNCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMTwvdGV4dD48L3N2Zz4=",
-          uploadedBy: "guest_john_doe_123",
-          guestName: "John Doe",
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZiN2I4ZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBUZXN0IEd1ZXN0IFBob3RvPC90ZXh0Pjwvc3ZnPg==",
+          uploadedBy: "guest_test_user",
+          guestName: "Test Guest",
           createdAt: new Date().toISOString(),
         },
         {
-          id: "mock_guest_2",
+          id: "mock_no_supabase",
           photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2FjY2Y5OSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R3Vlc3QgUGhvdG8gMjwvdGV4dD48L3N2Zz4=",
-          uploadedBy: "guest_jane_smith_456",
-          guestName: "Jane Smith",
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VmNDQ0NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gU3VwYWJhc2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Db25maWd1cmF0aW9uPC90ZXh0Pjwvc3ZnPg==",
+          uploadedBy: "system",
+          guestName: null,
           createdAt: new Date().toISOString(),
         },
       ];

@@ -105,20 +105,40 @@ export default function Index() {
         const photos = await database.photos.getAll();
 
         if (photos && photos.length > 0) {
-          // Filter out any photos with invalid data
+          // Filter for photos with valid data (data URLs or HTTP URLs)
           const validPhotos = photos.filter(
             (photo) =>
-              photo.photo_data && photo.photo_data.startsWith("data:image/"),
+              photo.photo_data &&
+              (photo.photo_data.startsWith("data:image/") ||
+                photo.photo_data.startsWith("http") ||
+                photo.photo_data.startsWith("blob:")),
           );
 
           if (validPhotos.length > 0) {
             const photoData = validPhotos.map((photo) => photo.photo_data);
             setUploadedPhotos(photoData);
-            console.log(`📸 Gallery loaded: ${validPhotos.length} photos`);
+            console.log(
+              `📸 Gallery loaded: ${validPhotos.length} real photos from Supabase`,
+            );
+
+            // Log sample URLs for debugging
+            if (validPhotos.length > 0) {
+              const firstPhoto = validPhotos[0];
+              console.log(`📸 Sample photo URL type:`, {
+                isDataURL: firstPhoto.photo_data.startsWith("data:"),
+                isHttpURL: firstPhoto.photo_data.startsWith("http"),
+                isBlobURL: firstPhoto.photo_data.startsWith("blob:"),
+                urlStart: firstPhoto.photo_data.substring(0, 50) + "...",
+              });
+            }
           } else {
+            console.log(
+              `📸 No valid photos found - total: ${photos.length}, valid: 0`,
+            );
             setUploadedPhotos([]);
           }
         } else {
+          console.log("📸 No photos returned from database");
           setUploadedPhotos([]);
         }
       } catch (error) {
@@ -355,7 +375,7 @@ export default function Index() {
 
           if (smsSuccess) {
             console.log(
-              "✅ SMS notifications sent successfully to family members",
+              "��� SMS notifications sent successfully to family members",
             );
           } else {
             console.log("⚠️ SMS notifications failed to send");
@@ -1342,8 +1362,13 @@ Please RSVP at our wedding website
             </p>
             {uploadedPhotos.length > 0 && (
               <p className="text-sm text-sage-500 mt-2">
-                Gallery updates automatically • {uploadedPhotos.length} photo
-                {uploadedPhotos.length !== 1 ? "s" : ""}
+                {uploadedPhotos.some(
+                  (photo) =>
+                    photo.includes("[FALLBACK]") ||
+                    photo.includes("diagnostic"),
+                )
+                  ? `Showing ${uploadedPhotos.length} placeholder photos • Upload photos in admin panel to see real gallery`
+                  : `Gallery updates automatically • ${uploadedPhotos.length} photo${uploadedPhotos.length !== 1 ? "s" : ""}`}
               </p>
             )}
           </div>
@@ -1418,6 +1443,48 @@ Please RSVP at our wedding website
 
           {uploadedPhotos.length > 0 ? (
             <>
+              {/* Show configuration notice if displaying fallback photos */}
+              {uploadedPhotos.some(
+                (photo) =>
+                  photo.includes("[FALLBACK]") ||
+                  photo.includes("diagnostic") ||
+                  photo.includes("No Photos Found"),
+              ) && (
+                <div className="mb-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                      📸 Configure Supabase to Show Real Photos
+                    </h3>
+                    <p className="text-yellow-700 mb-4">
+                      The photos you see below are placeholders. To display your
+                      actual wedding photos from Supabase:
+                    </p>
+                    <div className="text-left max-w-md mx-auto space-y-2 text-sm text-yellow-700">
+                      <p>
+                        • Update your Supabase URL and API key in environment
+                        variables
+                      </p>
+                      <p>• Restart the development server</p>
+                      <p>• Upload photos through the admin panel</p>
+                    </div>
+                    <div className="mt-4 space-x-4">
+                      <a
+                        href="/test-photos"
+                        className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
+                        Test Connection
+                      </a>
+                      <a
+                        href="/login"
+                        className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
+                        Admin Panel
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Photo Grid with Pagination */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                 {uploadedPhotos
@@ -1428,14 +1495,26 @@ Please RSVP at our wedding website
                   .map((photo, index) => {
                     const actualIndex =
                       (currentPage - 1) * photosPerPage + index;
+                    const isPlaceholder =
+                      photo.includes("[FALLBACK]") ||
+                      photo.includes("diagnostic") ||
+                      photo.includes("No Photos Found");
                     return (
                       <div
                         key={actualIndex}
-                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                        className={`aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
+                          isPlaceholder
+                            ? "border-2 border-dashed border-yellow-300"
+                            : ""
+                        }`}
                       >
                         <img
                           src={photo}
-                          alt={`Wedding memory ${actualIndex + 1}`}
+                          alt={
+                            isPlaceholder
+                              ? `Configuration needed ${actualIndex + 1}`
+                              : `Wedding memory ${actualIndex + 1}`
+                          }
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
@@ -1529,10 +1608,32 @@ Please RSVP at our wedding website
                 <h3 className="text-2xl font-serif text-sage-600 mb-4">
                   Photo Gallery
                 </h3>
-                <p className="text-sage-500">
+                <p className="text-sage-500 mb-6">
                   We're still preparing our photo gallery. Check back soon to
                   see our beautiful memories!
                 </p>
+
+                {/* Configuration notice for developers */}
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
+                  <p className="text-sm text-blue-700 mb-2">
+                    🔧 <strong>For Developers:</strong> If you have photos in
+                    Supabase but they're not showing:
+                  </p>
+                  <div className="space-x-2">
+                    <a
+                      href="/test-photos"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                    >
+                      Test Connection
+                    </a>
+                    <a
+                      href="/login"
+                      className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                    >
+                      Admin Panel
+                    </a>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
