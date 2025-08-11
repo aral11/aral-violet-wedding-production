@@ -76,34 +76,6 @@ export const getPhotos: RequestHandler = async (req, res) => {
     if (supabase) {
       console.log("📸 Using Supabase for photos");
 
-      // Test Supabase connection with better error handling
-      try {
-        const { data: testData, error: testError } = await supabase
-          .from("photos")
-          .select("count", { count: "exact", head: true })
-          .limit(1);
-
-        if (testError) {
-          console.error("📸 Supabase connection test failed:", {
-            message: testError.message,
-            details: testError.details,
-            hint: testError.hint,
-            code: testError.code,
-          });
-          throw testError;
-        }
-
-        console.log("📸 Supabase connection successful, query test passed");
-      } catch (connectionError) {
-        console.error("📸 Supabase connection failed:", {
-          message: connectionError.message,
-          details: connectionError.details || connectionError.toString(),
-          hint: connectionError.hint || "",
-          code: connectionError.code || "",
-        });
-        throw connectionError;
-      }
-
       let query = supabase
         .from("photos")
         .select("*")
