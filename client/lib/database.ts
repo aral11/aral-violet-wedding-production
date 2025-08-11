@@ -151,9 +151,10 @@ export const photoService = {
 
     // For Netlify deployments, try Netlify Functions first since Supabase environment variables
     // are handled server-side via Netlify Functions
-    const isNetlifyDeployment = window.location.hostname.includes('netlify') ||
-                                 window.location.hostname.includes('netlify.app') ||
-                                 import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+    const isNetlifyDeployment =
+      window.location.hostname.includes("netlify") ||
+      window.location.hostname.includes("netlify.app") ||
+      import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
 
     if (isNetlifyDeployment) {
       console.log("📸 Detected Netlify deployment, using Netlify Functions...");
@@ -175,7 +176,9 @@ export const photoService = {
 
         if (response.ok) {
           const apiPhotos = await response.json();
-          console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via Netlify API`);
+          console.log(
+            `📸 SUCCESS: Found ${apiPhotos.length} photos via Netlify API`,
+          );
 
           if (apiPhotos && apiPhotos.length > 0) {
             // Convert API response to SupabasePhoto format
@@ -208,10 +211,15 @@ export const photoService = {
             }
           }
         } else {
-          console.log(`📸 Netlify API returned ${response.status}: ${response.statusText}`);
+          console.log(
+            `📸 Netlify API returned ${response.status}: ${response.statusText}`,
+          );
         }
       } catch (apiError) {
-        console.log("📸 Netlify API connection failed:", apiError instanceof Error ? apiError.message : apiError);
+        console.log(
+          "📸 Netlify API connection failed:",
+          apiError instanceof Error ? apiError.message : apiError,
+        );
       }
     }
 
@@ -307,7 +315,9 @@ export const photoService = {
 
         if (response.ok) {
           const apiPhotos = await response.json();
-          console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via fallback API`);
+          console.log(
+            `📸 SUCCESS: Found ${apiPhotos.length} photos via fallback API`,
+          );
 
           if (apiPhotos && apiPhotos.length > 0) {
             // Convert API response to SupabasePhoto format
@@ -408,9 +418,10 @@ export const photoService = {
         : uploadedBy;
 
     // Check if we're on Netlify
-    const isNetlifyDeployment = window.location.hostname.includes('netlify') ||
-                                 window.location.hostname.includes('netlify.app') ||
-                                 import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+    const isNetlifyDeployment =
+      window.location.hostname.includes("netlify") ||
+      window.location.hostname.includes("netlify.app") ||
+      import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
 
     // For Netlify deployments, use Netlify Functions
     if (isNetlifyDeployment) {
@@ -450,7 +461,10 @@ export const photoService = {
           throw new Error(errorData.error || "Upload failed");
         }
       } catch (error) {
-        console.warn("Netlify Functions unavailable, falling back to localStorage:", error);
+        console.warn(
+          "Netlify Functions unavailable, falling back to localStorage:",
+          error,
+        );
       }
     }
 
@@ -476,7 +490,10 @@ export const photoService = {
 
         return data;
       } catch (error) {
-        console.warn("Direct Supabase unavailable, saving to localStorage:", error);
+        console.warn(
+          "Direct Supabase unavailable, saving to localStorage:",
+          error,
+        );
       }
     }
 

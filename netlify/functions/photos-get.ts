@@ -31,14 +31,18 @@ exports.handler = async (event, context) => {
     console.log("📸 Netlify Function: Getting photos from Supabase...");
 
     // Get environment variables (these should be set in Netlify dashboard)
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseKey =
+      process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     console.log("📸 Environment check:", {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseKey,
       urlValid: supabaseUrl?.includes("supabase.co"),
-      urlPreview: supabaseUrl ? supabaseUrl.substring(0, 50) + "..." : "not set"
+      urlPreview: supabaseUrl
+        ? supabaseUrl.substring(0, 50) + "..."
+        : "not set",
     });
 
     if (!supabaseUrl || !supabaseKey) {
@@ -48,7 +52,8 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({
           error: "Supabase credentials not configured",
-          details: "Please set SUPABASE_URL and SUPABASE_ANON_KEY in Netlify environment variables"
+          details:
+            "Please set SUPABASE_URL and SUPABASE_ANON_KEY in Netlify environment variables",
         }),
       };
     }
@@ -61,7 +66,8 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({
           error: "Invalid Supabase credentials",
-          details: "Supabase credentials appear to be placeholder values. Please update environment variables."
+          details:
+            "Supabase credentials appear to be placeholder values. Please update environment variables.",
         }),
       };
     }
@@ -88,13 +94,15 @@ exports.handler = async (event, context) => {
             message: error.message,
             details: error.details,
             hint: error.hint,
-            code: error.code
-          }
+            code: error.code,
+          },
         }),
       };
     }
 
-    console.log(`✅ Successfully retrieved ${data?.length || 0} photos from Supabase`);
+    console.log(
+      `✅ Successfully retrieved ${data?.length || 0} photos from Supabase`,
+    );
 
     // Transform data to match expected format
     const photos = (data || []).map((row: any) => ({
@@ -106,21 +114,23 @@ exports.handler = async (event, context) => {
     }));
 
     // Filter for valid photos (having proper data URLs)
-    const validPhotos = photos.filter((photo) => 
-      photo.photoData && 
-      (photo.photoData.startsWith("data:image/") || 
-       photo.photoData.startsWith("http") || 
-       photo.photoData.startsWith("blob:"))
+    const validPhotos = photos.filter(
+      (photo) =>
+        photo.photoData &&
+        (photo.photoData.startsWith("data:image/") ||
+          photo.photoData.startsWith("http") ||
+          photo.photoData.startsWith("blob:")),
     );
 
-    console.log(`📸 Returning ${validPhotos.length} valid photos out of ${photos.length} total`);
+    console.log(
+      `📸 Returning ${validPhotos.length} valid photos out of ${photos.length} total`,
+    );
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify(validPhotos),
     };
-
   } catch (error) {
     console.error("❌ Netlify function error:", error);
     return {
@@ -129,7 +139,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         error: "Internal server error",
         details: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
   }

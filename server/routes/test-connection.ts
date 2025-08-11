@@ -5,26 +5,30 @@ import { createClient } from "@supabase/supabase-js";
 export const testSupabaseConnection: RequestHandler = async (req, res) => {
   try {
     console.log("🔍 Testing Supabase connection...");
-    
+
     // Check environment variables
-    const supabaseUrl = 
-      process.env.SUPABASE_URL || 
-      process.env.VITE_SUPABASE_URL || 
-      "";
-    const supabaseKey = 
-      process.env.SUPABASE_ANON_KEY || 
-      process.env.VITE_SUPABASE_ANON_KEY || 
-      "";
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+    const supabaseKey =
+      process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
 
     const envInfo = {
       NODE_ENV: process.env.NODE_ENV,
       hasSupabaseUrl: !!supabaseUrl,
       hasSupabaseKey: !!supabaseKey,
       urlValid: supabaseUrl.includes("supabase.co"),
-      urlNotPlaceholder: !supabaseUrl.includes("yourproject") && supabaseUrl !== "https://yourproject.supabase.co",
-      keyNotPlaceholder: supabaseKey !== "your_anon_key_here" && supabaseKey !== "YOUR_SUPABASE_ANON_KEY",
-      urlPreview: supabaseUrl ? supabaseUrl.substring(0, 50) + "..." : "not set",
-      keyPreview: supabaseKey ? supabaseKey.substring(0, 20) + "..." : "not set"
+      urlNotPlaceholder:
+        !supabaseUrl.includes("yourproject") &&
+        supabaseUrl !== "https://yourproject.supabase.co",
+      keyNotPlaceholder:
+        supabaseKey !== "your_anon_key_here" &&
+        supabaseKey !== "YOUR_SUPABASE_ANON_KEY",
+      urlPreview: supabaseUrl
+        ? supabaseUrl.substring(0, 50) + "..."
+        : "not set",
+      keyPreview: supabaseKey
+        ? supabaseKey.substring(0, 20) + "..."
+        : "not set",
     };
 
     console.log("🔍 Environment info:", envInfo);
@@ -34,16 +38,20 @@ export const testSupabaseConnection: RequestHandler = async (req, res) => {
         success: false,
         error: "Missing Supabase credentials",
         envInfo,
-        message: "Supabase URL or key not found in environment variables"
+        message: "Supabase URL or key not found in environment variables",
       });
     }
 
-    if (!envInfo.urlValid || !envInfo.urlNotPlaceholder || !envInfo.keyNotPlaceholder) {
+    if (
+      !envInfo.urlValid ||
+      !envInfo.urlNotPlaceholder ||
+      !envInfo.keyNotPlaceholder
+    ) {
       return res.json({
         success: false,
         error: "Invalid Supabase credentials",
         envInfo,
-        message: "Supabase credentials appear to be placeholder values"
+        message: "Supabase credentials appear to be placeholder values",
       });
     }
 
@@ -58,7 +66,7 @@ export const testSupabaseConnection: RequestHandler = async (req, res) => {
         success: false,
         error: "Failed to create Supabase client",
         details: clientError.message,
-        envInfo
+        envInfo,
       });
     }
 
@@ -78,14 +86,14 @@ export const testSupabaseConnection: RequestHandler = async (req, res) => {
             message: testError.message,
             details: testError.details,
             hint: testError.hint,
-            code: testError.code
+            code: testError.code,
           },
-          envInfo
+          envInfo,
         });
       }
 
       console.log("✅ Supabase connection test successful");
-      
+
       // Try to get actual photos count
       const { count, error: countError } = await supabase
         .from("photos")
@@ -98,25 +106,23 @@ export const testSupabaseConnection: RequestHandler = async (req, res) => {
         message: "Supabase connection successful",
         photoCount,
         envInfo,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-
     } catch (queryError) {
       console.error("❌ Supabase query exception:", queryError);
       return res.json({
         success: false,
         error: "Supabase query exception",
         details: queryError.message,
-        envInfo
+        envInfo,
       });
     }
-
   } catch (error) {
     console.error("❌ Test connection failed:", error);
     return res.status(500).json({
       success: false,
       error: "Connection test failed",
-      details: error.message
+      details: error.message,
     });
   }
 };

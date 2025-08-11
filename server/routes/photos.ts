@@ -83,10 +83,16 @@ if (
   );
   console.log("📋 Environment check:", {
     NODE_ENV: process.env.NODE_ENV,
-    SUPABASE_URL: process.env.SUPABASE_URL ? `${process.env.SUPABASE_URL.substring(0, 30)}...` : "not set",
-    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ? `${process.env.VITE_SUPABASE_URL.substring(0, 30)}...` : "not set",
+    SUPABASE_URL: process.env.SUPABASE_URL
+      ? `${process.env.SUPABASE_URL.substring(0, 30)}...`
+      : "not set",
+    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL
+      ? `${process.env.VITE_SUPABASE_URL.substring(0, 30)}...`
+      : "not set",
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
-    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY ? "set" : "not set",
+    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
+      ? "set"
+      : "not set",
     detectedUrl: supabaseUrl || "none",
     detectedKey: supabaseKey ? "present" : "missing",
   });
@@ -113,20 +119,18 @@ export const getPhotos: RequestHandler = async (req, res) => {
             message: testError.message,
             details: testError.details,
             hint: testError.hint,
-            code: testError.code
+            code: testError.code,
           });
           throw testError;
         }
 
-        console.log(
-          "📸 Supabase connection successful, query test passed"
-        );
+        console.log("📸 Supabase connection successful, query test passed");
       } catch (connectionError) {
         console.error("📸 Supabase connection failed:", {
           message: connectionError.message,
           details: connectionError.details || connectionError.toString(),
-          hint: connectionError.hint || '',
-          code: connectionError.code || ''
+          hint: connectionError.hint || "",
+          code: connectionError.code || "",
         });
         throw connectionError;
       }

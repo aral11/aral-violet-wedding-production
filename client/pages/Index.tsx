@@ -1500,7 +1500,8 @@ Please RSVP at our wedding website
                       No Photos Yet
                     </h3>
                     <p className="text-sage-600 mb-6">
-                      Photos will appear here once they're uploaded by the admin or guests.
+                      Photos will appear here once they're uploaded by the admin
+                      or guests.
                     </p>
                     <div className="space-y-2">
                       <p className="text-sm text-sage-500">

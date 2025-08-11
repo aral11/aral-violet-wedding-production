@@ -11,7 +11,8 @@ interface ConnectionTest {
 }
 
 export default function Debug() {
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionTest | null>(null);
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionTest | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [photoStats, setPhotoStats] = useState<any>(null);
 
@@ -43,7 +44,9 @@ export default function Debug() {
       const photos = await database.photos.getAll();
       setPhotoStats({
         totalPhotos: photos.length,
-        validPhotos: photos.filter(p => p.photo_data && p.photo_data.startsWith("data:")).length,
+        validPhotos: photos.filter(
+          (p) => p.photo_data && p.photo_data.startsWith("data:"),
+        ).length,
         photos: photos.slice(0, 3), // First 3 for preview
         timestamp: new Date().toISOString(),
       });
@@ -77,21 +80,28 @@ export default function Debug() {
         {/* Environment Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-olive-700">Environment Information</CardTitle>
+            <CardTitle className="text-olive-700">
+              Environment Information
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Platform:</strong> {window.location.hostname.includes('netlify') ? 'Netlify' : 'Local/Other'}
+                <strong>Platform:</strong>{" "}
+                {window.location.hostname.includes("netlify")
+                  ? "Netlify"
+                  : "Local/Other"}
               </div>
               <div>
                 <strong>Hostname:</strong> {window.location.hostname}
               </div>
               <div>
-                <strong>Storage Type:</strong> {database.isUsingSupabase() ? 'Supabase' : 'localStorage'}
+                <strong>Storage Type:</strong>{" "}
+                {database.isUsingSupabase() ? "Supabase" : "localStorage"}
               </div>
               <div>
-                <strong>Deployment Platform:</strong> {import.meta.env.VITE_DEPLOYMENT_PLATFORM || 'Not set'}
+                <strong>Deployment Platform:</strong>{" "}
+                {import.meta.env.VITE_DEPLOYMENT_PLATFORM || "Not set"}
               </div>
             </div>
           </CardContent>
@@ -102,8 +112,8 @@ export default function Debug() {
           <CardHeader>
             <CardTitle className="text-olive-700 flex items-center justify-between">
               Supabase Connection Test
-              <Button 
-                onClick={testConnection} 
+              <Button
+                onClick={testConnection}
                 disabled={isLoading}
                 variant="outline"
                 size="sm"
@@ -114,17 +124,24 @@ export default function Debug() {
           </CardHeader>
           <CardContent>
             {connectionStatus ? (
-              <div className={`p-4 rounded-lg ${connectionStatus.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              <div
+                className={`p-4 rounded-lg ${connectionStatus.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+              >
                 <div className="flex items-center mb-2">
-                  <span className={`w-3 h-3 rounded-full mr-2 ${connectionStatus.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span
+                    className={`w-3 h-3 rounded-full mr-2 ${connectionStatus.success ? "bg-green-500" : "bg-red-500"}`}
+                  ></span>
                   <strong>{connectionStatus.message}</strong>
                 </div>
                 <div className="text-sm text-gray-600">
-                  Tested at: {new Date(connectionStatus.timestamp).toLocaleString()}
+                  Tested at:{" "}
+                  {new Date(connectionStatus.timestamp).toLocaleString()}
                 </div>
                 {connectionStatus.details && (
                   <details className="mt-4">
-                    <summary className="cursor-pointer text-sm font-medium">Show Details</summary>
+                    <summary className="cursor-pointer text-sm font-medium">
+                      Show Details
+                    </summary>
                     <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
                       {JSON.stringify(connectionStatus.details, null, 2)}
                     </pre>
@@ -132,7 +149,9 @@ export default function Debug() {
                 )}
               </div>
             ) : (
-              <div className="text-gray-500">No connection test results yet...</div>
+              <div className="text-gray-500">
+                No connection test results yet...
+              </div>
             )}
           </CardContent>
         </Card>
@@ -142,8 +161,8 @@ export default function Debug() {
           <CardHeader>
             <CardTitle className="text-olive-700 flex items-center justify-between">
               Photo Database Test
-              <Button 
-                onClick={testPhotosLoad} 
+              <Button
+                onClick={testPhotosLoad}
                 disabled={isLoading}
                 variant="outline"
                 size="sm"
@@ -169,24 +188,39 @@ export default function Debug() {
                         <strong>Valid Photos:</strong> {photoStats.validPhotos}
                       </div>
                     </div>
-                    
+
                     {photoStats.photos && photoStats.photos.length > 0 && (
                       <div>
                         <h4 className="font-medium mb-2">Sample Photos:</h4>
                         <div className="grid grid-cols-3 gap-2">
-                          {photoStats.photos.map((photo: any, index: number) => (
-                            <div key={index} className="border rounded p-2 text-xs">
-                              <div><strong>ID:</strong> {photo.id}</div>
-                              <div><strong>By:</strong> {photo.uploaded_by}</div>
-                              <div><strong>Data:</strong> {photo.photo_data ? photo.photo_data.substring(0, 30) + "..." : "No data"}</div>
-                            </div>
-                          ))}
+                          {photoStats.photos.map(
+                            (photo: any, index: number) => (
+                              <div
+                                key={index}
+                                className="border rounded p-2 text-xs"
+                              >
+                                <div>
+                                  <strong>ID:</strong> {photo.id}
+                                </div>
+                                <div>
+                                  <strong>By:</strong> {photo.uploaded_by}
+                                </div>
+                                <div>
+                                  <strong>Data:</strong>{" "}
+                                  {photo.photo_data
+                                    ? photo.photo_data.substring(0, 30) + "..."
+                                    : "No data"}
+                                </div>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="mt-4 text-sm text-gray-600">
-                      Last checked: {new Date(photoStats.timestamp).toLocaleString()}
+                      Last checked:{" "}
+                      {new Date(photoStats.timestamp).toLocaleString()}
                     </div>
                   </div>
                 )}
@@ -204,21 +238,21 @@ export default function Debug() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Button 
-                onClick={() => window.location.href = "/"}
+              <Button
+                onClick={() => (window.location.href = "/")}
                 variant="outline"
                 className="mr-2"
               >
                 ← Back to Home
               </Button>
-              <Button 
-                onClick={() => window.location.href = "/admin"}
+              <Button
+                onClick={() => (window.location.href = "/admin")}
                 variant="outline"
                 className="mr-2"
               >
                 Admin Dashboard
               </Button>
-              <Button 
+              <Button
                 onClick={() => localStorage.clear()}
                 variant="outline"
                 className="mr-2"

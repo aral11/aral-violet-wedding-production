@@ -31,7 +31,11 @@ exports.handler = async (event, context) => {
     console.log("📸 Netlify Function: Uploading photo to Supabase...");
 
     // Parse request body
-    const { photoData, uploadedBy = "admin", guestName } = JSON.parse(event.body || "{}");
+    const {
+      photoData,
+      uploadedBy = "admin",
+      guestName,
+    } = JSON.parse(event.body || "{}");
 
     if (!photoData) {
       return {
@@ -42,8 +46,10 @@ exports.handler = async (event, context) => {
     }
 
     // Get environment variables
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseKey =
+      process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       console.error("❌ Missing Supabase credentials in Netlify environment");
@@ -52,7 +58,8 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({
           error: "Supabase credentials not configured",
-          details: "Please set SUPABASE_URL and SUPABASE_ANON_KEY in Netlify environment variables"
+          details:
+            "Please set SUPABASE_URL and SUPABASE_ANON_KEY in Netlify environment variables",
         }),
       };
     }
@@ -62,9 +69,10 @@ exports.handler = async (event, context) => {
     console.log("✅ Supabase client created for upload");
 
     // Generate unique uploader identifier for guest uploads
-    const actualUploadedBy = uploadedBy === "guest"
-      ? `guest_${guestName || "anonymous"}_${Date.now()}`
-      : uploadedBy;
+    const actualUploadedBy =
+      uploadedBy === "guest"
+        ? `guest_${guestName || "anonymous"}_${Date.now()}`
+        : uploadedBy;
 
     // Insert photo into database
     const { data, error } = await supabase
@@ -91,13 +99,15 @@ exports.handler = async (event, context) => {
             message: error.message,
             details: error.details,
             hint: error.hint,
-            code: error.code
-          }
+            code: error.code,
+          },
         }),
       };
     }
 
-    console.log(`✅ Photo uploaded successfully by ${uploadedBy === "guest" ? `guest: ${guestName}` : "admin"}`);
+    console.log(
+      `✅ Photo uploaded successfully by ${uploadedBy === "guest" ? `guest: ${guestName}` : "admin"}`,
+    );
 
     // Return the saved photo in the expected format
     const savedPhoto = {
@@ -113,7 +123,6 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify(savedPhoto),
     };
-
   } catch (error) {
     console.error("❌ Netlify function error:", error);
     return {
@@ -122,7 +131,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         error: "Internal server error",
         details: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
     };
   }
