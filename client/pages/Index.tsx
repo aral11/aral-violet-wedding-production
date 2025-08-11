@@ -168,7 +168,7 @@ export default function Index() {
 
     // Listen for storage changes (when photos are added from other tabs)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "wedding_photos") {
+      if (e.key === "wedding_photos" || e.key === "wedding_guest_photos") {
         console.log("📸 Storage change detected, refreshing gallery...");
         loadPhotos();
       }

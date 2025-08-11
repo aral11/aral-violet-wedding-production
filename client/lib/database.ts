@@ -454,6 +454,10 @@ export const photoService = {
 
           // Also save to localStorage for offline access
           this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
+
+          // Trigger gallery refresh
+          this.clearGalleryCache();
+
           return photo;
         } else {
           const errorData = await response.json();
@@ -488,6 +492,9 @@ export const photoService = {
         // Also save to localStorage
         this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
 
+        // Trigger gallery refresh
+        this.clearGalleryCache();
+
         return data;
       } catch (error) {
         console.warn(
@@ -500,6 +507,10 @@ export const photoService = {
     // Fallback to localStorage only
     console.log("📸 Saving photo to localStorage as fallback");
     this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
+
+    // Trigger gallery refresh
+    this.clearGalleryCache();
+
     return {
       id: Date.now().toString(),
       photo_data: photoData,
@@ -624,6 +635,9 @@ export const photoService = {
         photos.push(photoData);
         localStorage.setItem("wedding_photos", JSON.stringify(photos));
         console.log(`📸 Admin photo saved to localStorage`);
+
+        // Clear gallery cache to force refresh
+        this.clearGalleryCache();
       } else {
         // Save guest photos to wedding_guest_photos with metadata
         const existing = localStorage.getItem("wedding_guest_photos");
@@ -640,10 +654,55 @@ export const photoService = {
           JSON.stringify(guestPhotos),
         );
         console.log(`📸 Guest photo from ${guestName} saved to localStorage`);
+
+        // Clear gallery cache to force refresh
+        this.clearGalleryCache();
       }
     } catch (error) {
       console.error("Error saving photo to localStorage:", error);
     }
+  },
+
+  // Clear all gallery-related cache
+  clearGalleryCache(): void {
+    try {
+      // Clear any potential cached photo URLs
+      console.log("🗑️ Clearing gallery cache...");
+
+      // Dispatch storage event to notify other components
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "wedding_photos",
+          storageArea: localStorage,
+        }),
+      );
+
+      // Also dispatch for guest photos
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "wedding_guest_photos",
+          storageArea: localStorage,
+        }),
+      );
+
+      console.log("✅ Gallery cache cleared");
+    } catch (error) {
+      console.error("Error clearing gallery cache:", error);
+    }
+  },
+
+  // Force refresh all photo data
+  async forceRefresh(): Promise<SupabasePhoto[]> {
+    console.log("🔄 Force refreshing photo data...");
+
+    // Clear cache first
+    this.clearGalleryCache();
+
+    // Get fresh data
+    const photos = await this.getAll();
+    console.log(`🔄 Force refresh complete: ${photos.length} photos loaded`);
+
+    return photos;
   },
 
   removeFromLocalStorage(id: string): void {
