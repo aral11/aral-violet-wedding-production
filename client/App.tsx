@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { initPerformanceMonitoring } from "./lib/performance";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -16,37 +18,56 @@ import TestPhotos from "./pages/TestPhotos";
 import SupabaseSetup from "./pages/SupabaseSetup";
 import NotFound from "./pages/NotFound";
 
+// Initialize performance monitoring for production
+initPerformanceMonitoring();
+
+// Register service worker for production caching
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("SW registered: ", registration);
+      })
+      .catch((registrationError) => {
+        console.log("SW registration failed: ", registrationError);
+      });
+  });
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter
-        basename={
-          import.meta.env.PROD &&
-          import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
-            ? "/aral-violet-wedding"
-            : "/"
-        }
-      >
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/guest-upload" element={<GuestUpload />} />
-            <Route path="/debug" element={<Debug />} />
-            <Route path="/test-photos" element={<TestPhotos />} />
-            <Route path="/supabase-setup" element={<SupabaseSetup />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          basename={
+            import.meta.env.PROD &&
+            import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+              ? "/aral-violet-wedding"
+              : "/"
+          }
+        >
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/guest-upload" element={<GuestUpload />} />
+              <Route path="/debug" element={<Debug />} />
+              <Route path="/test-photos" element={<TestPhotos />} />
+              <Route path="/supabase-setup" element={<SupabaseSetup />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 // Prevent createRoot warning during hot reloads

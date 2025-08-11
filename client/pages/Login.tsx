@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Heart, Lock, User } from "lucide-react";
+import { Heart, Lock, User, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -105,7 +106,7 @@ export default function Login() {
                     size={18}
                   />
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={credentials.password}
                     onChange={(e) =>
                       setCredentials({
@@ -113,10 +114,17 @@ export default function Login() {
                         password: e.target.value,
                       })
                     }
-                    placeholder="Enter your password"
-                    className="pl-10 border-sage-300 focus:border-olive-500"
+                    placeholder="Password"
+                    className="pl-10 pr-10 border-sage-300 focus:border-olive-500"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sage-400 hover:text-sage-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 

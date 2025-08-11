@@ -1063,14 +1063,14 @@ export default function AdminDashboard() {
         throw new Error(`Invalid file type: ${file.name}`);
       }
 
-      // Maximum file size limit (25MB as requested)
-      const maxSize = 25 * 1024 * 1024; // 25MB
+      // Maximum file size limit (200MB as requested)
+      const maxSize = 200 * 1024 * 1024; // 200MB
       if (file.size > maxSize) {
         console.error(`File ${file.name} is too large`);
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 200MB.`,
           variant: "destructive",
           duration: 4000,
         });

@@ -5,6 +5,7 @@ import {
   SupabaseWeddingFlow,
   SupabaseInvitation,
 } from "./supabase";
+import { measureAsyncOperation } from "./performance";
 
 // Check if Supabase is properly configured
 const isSupabaseConfigured = () => {

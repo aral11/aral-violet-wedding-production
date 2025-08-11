@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Upload, Camera, ArrowLeft, Check } from "lucide-react";
+import { Heart, Upload, Camera, ArrowLeft, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,47 @@ export default function GuestUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [adminPin, setAdminPin] = useState("");
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Check if current date is on or after December 28, 2025
+  const weddingDate = new Date("2025-12-28T00:00:00");
+  const currentDate = new Date();
+  const isWeddingDateOrAfter = currentDate >= weddingDate;
+
+  const handleAdminPinSubmit = () => {
+    if (adminPin === "0000") {
+      setIsAdminMode(true);
+      toast({
+        title: "Admin Mode Activated! 🔓",
+        description: "You can now upload photos before the wedding date.",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Invalid PIN ❌",
+        description: "Please enter the correct admin PIN to upload photos.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setAdminPin("");
+    }
+  };
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Check upload restrictions
+    if (!isWeddingDateOrAfter && !isAdminMode) {
+      toast({
+        title: "Upload Restricted 🗓️",
+        description:
+          "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
     if (!guestName.trim()) {
       toast({
         title: "Name Required",
@@ -63,11 +101,11 @@ export default function GuestUpload() {
         throw new Error(`Invalid file type: ${file.name}`);
       }
 
-      // Check file size (25MB max)
-      const maxSize = 25 * 1024 * 1024; // 25MB
+      // Check file size (200MB max as requested)
+      const maxSize = 200 * 1024 * 1024; // 200MB
       if (file.size > maxSize) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-        const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`;
+        const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 200MB.`;
         console.error(`❌ ${errorMsg}`);
         toast({
           title: "File Too Large",
@@ -201,6 +239,18 @@ export default function GuestUpload() {
   };
 
   const handleUploadClick = () => {
+    // Check upload restrictions
+    if (!isWeddingDateOrAfter && !isAdminMode) {
+      toast({
+        title: "Upload Restricted 🗓️",
+        description:
+          "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
     if (!guestName.trim()) {
       toast({
         title: "Name Required",
@@ -290,6 +340,73 @@ export default function GuestUpload() {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {/* Upload Restrictions Notice */}
+            {!isWeddingDateOrAfter && !isAdminMode && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-white text-sm font-bold">!</span>
+                  </div>
+                  <h4 className="font-medium text-amber-800">
+                    Photo Uploads Coming Soon!
+                  </h4>
+                </div>
+                <p className="text-amber-700 text-sm mb-3">
+                  Guest photo uploads will be available starting December 28,
+                  2025 (Wedding Day).
+                </p>
+                <details className="mt-3">
+                  <summary className="text-amber-800 font-medium cursor-pointer hover:underline">
+                    Admin Upload (Click to expand)
+                  </summary>
+                  <div className="mt-3 space-y-3">
+                    <p className="text-sm text-amber-700">
+                      If you're an admin, enter the PIN to upload photos before
+                      the wedding date:
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        placeholder="Enter admin PIN"
+                        value={adminPin}
+                        onChange={(e) => setAdminPin(e.target.value)}
+                        className="flex-1 border-amber-300 focus:border-amber-500"
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAdminPinSubmit()
+                        }
+                      />
+                      <Button
+                        onClick={handleAdminPinSubmit}
+                        disabled={!adminPin.trim()}
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        Verify
+                      </Button>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            )}
+
+            {/* Admin Mode Success Notice */}
+            {isAdminMode && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-white text-sm">✓</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-green-800">
+                      Admin Mode Active
+                    </h4>
+                    <p className="text-green-700 text-sm">
+                      You can now upload photos before the wedding date.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Guest Name Input */}
             <div className="space-y-2">
               <Label htmlFor="guestName" className="text-sage-700 font-medium">
@@ -302,7 +419,9 @@ export default function GuestUpload() {
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 className="border-sage-300 focus:border-olive-500 focus:ring-olive-500"
-                disabled={isUploading}
+                disabled={
+                  isUploading || (!isWeddingDateOrAfter && !isAdminMode)
+                }
               />
               <p className="text-sm text-sage-500">
                 We'll use this to identify your photos in the gallery
@@ -317,7 +436,7 @@ export default function GuestUpload() {
               </h3>
               <p className="text-sage-600 mb-6">
                 Share the photos you took of the couple during the wedding (up
-                to 25MB per photo)
+                to 200MB per photo)
               </p>
 
               <input
@@ -332,14 +451,27 @@ export default function GuestUpload() {
 
               <Button
                 onClick={handleUploadClick}
-                disabled={isUploading || !guestName.trim()}
-                className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg"
+                disabled={
+                  isUploading ||
+                  !guestName.trim() ||
+                  (!isWeddingDateOrAfter && !isAdminMode)
+                }
+                className={`px-8 py-3 text-lg ${
+                  !isWeddingDateOrAfter && !isAdminMode
+                    ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                    : "bg-olive-600 hover:bg-olive-700"
+                } text-white`}
                 size="lg"
               >
                 {isUploading ? (
                   <>
                     <Upload className="mr-2 w-5 h-5 animate-spin" />
                     Uploading...
+                  </>
+                ) : !isWeddingDateOrAfter && !isAdminMode ? (
+                  <>
+                    <Lock className="mr-2 w-5 h-5" />
+                    Upload Restricted
                   </>
                 ) : (
                   <>
@@ -351,11 +483,16 @@ export default function GuestUpload() {
 
               <div className="mt-4 space-y-1">
                 <p className="text-sm text-sage-600">
-                  Select multiple photos • Up to 25MB per photo supported
+                  Select multiple photos • Up to 200MB per photo supported
                 </p>
                 <p className="text-xs text-sage-500">
                   Supports: JPG, PNG, GIF, WebP, BMP formats
                 </p>
+                {!isWeddingDateOrAfter && !isAdminMode && (
+                  <p className="text-xs text-amber-600 font-medium">
+                    ⚠️ Uploads available from December 28, 2025
+                  </p>
+                )}
               </div>
             </div>
 
@@ -369,7 +506,7 @@ export default function GuestUpload() {
                 <li>• Make sure to enter your name before uploading</li>
                 <li>• You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>
-                <li>• High-quality photos are welcome (up to 25MB each)</li>
+                <li>• High-quality photos are welcome (up to 200MB each)</li>
               </ul>
             </div>
           </CardContent>

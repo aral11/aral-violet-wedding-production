@@ -10,6 +10,7 @@ import {
   Upload,
   Sparkles,
   Lock,
+  Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -160,7 +161,7 @@ export default function Index() {
     // Also check when the page becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log("📸 Page became visible, refreshing gallery...");
+        console.log("���� Page became visible, refreshing gallery...");
         loadPhotos();
       }
     };
@@ -638,6 +639,61 @@ Made with love ❤️ By Aral D'Souza
     console.log("Wedding flow downloaded");
   };
 
+  const downloadQRCode = async () => {
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(
+        window.location.origin +
+          (import.meta.env.PROD &&
+          import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+            ? "/aral-violet-wedding"
+            : "") +
+          "/guest-upload",
+      )}`;
+
+      // Fetch the QR code image
+      const response = await fetch(qrUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch QR code");
+      }
+
+      const blob = await response.blob();
+
+      // Use mobile-optimized download utility
+      const downloadSuccess = mobileOptimizedDownload(blob, {
+        filename: "aral-violet-wedding-qr-code.png",
+        mimeType: "image/png",
+      });
+
+      if (!downloadSuccess) {
+        // Fallback to original method
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "aral-violet-wedding-qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+
+      toast({
+        title: "QR Code Downloaded! 📱",
+        description: "The QR code for guest photo uploads has been downloaded.",
+        duration: 3000,
+      });
+
+      console.log("QR code downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading QR code:", error);
+      toast({
+        title: "Download Error ❌",
+        description: "Failed to download QR code. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
   const downloadInvitation = async () => {
     try {
       // Mobile detection and utilities
@@ -738,41 +794,19 @@ Made with love ❤️ By Aral D'Souza
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.target = "_blank";
 
-        // Mobile-optimized download
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        // Use mobile-optimized download utility
+        const downloadSuccess = mobileOptimizedDownload(blob, {
+          filename: "Aral-Violet-Wedding-Invitation.pdf",
+          mimeType: "application/pdf",
+        });
 
-        if (isMobile) {
-          // For mobile, use a more reliable download approach
-          try {
-            // Add download attribute for modern mobile browsers
-            link.setAttribute("download", "Aral-Violet-Wedding-Invitation.pdf");
-            link.style.display = "none";
-            document.body.appendChild(link);
-
-            // Trigger click event
-            const clickEvent = new MouseEvent("click", {
-              view: window,
-              bubbles: true,
-              cancelable: false,
-            });
-            link.dispatchEvent(clickEvent);
-
-            document.body.removeChild(link);
-          } catch (mobileError) {
-            console.warn(
-              "Mobile download failed, trying fallback:",
-              mobileError,
-            );
-            // Fallback to standard approach
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        } else {
+        if (!downloadSuccess) {
+          // Fallback to original method
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
         }
+
         window.URL.revokeObjectURL(url);
 
         toast({
@@ -802,45 +836,15 @@ Made with love ❤️ By Aral D'Souza
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-optimized download
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(
-            navigator.userAgent,
-          );
+          // Use mobile-optimized download utility
+          const downloadSuccess = mobileOptimizedDownload(pdfData, {
+            filename:
+              invitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
+            mimeType: "application/pdf",
+          });
 
-          if (isMobile) {
-            // Create blob for mobile compatibility
-            try {
-              if (pdfData.startsWith("data:")) {
-                const base64Data = pdfData.split(",")[1];
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-
-                for (let i = 0; i < byteCharacters.length; i++) {
-                  byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: "application/pdf" });
-                const blobUrl = URL.createObjectURL(blob);
-
-                link.href = blobUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-              } else {
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }
-            } catch (error) {
-              console.warn("Mobile blob creation failed:", error);
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          } else {
+          if (!downloadSuccess) {
+            // Fallback to original method
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -875,39 +879,14 @@ Made with love ❤️ By Aral D'Souza
           link.download = "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-optimized download
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(
-            navigator.userAgent,
-          );
+          // Use mobile-optimized download utility
+          const downloadSuccess = mobileOptimizedDownload(savedInvitation, {
+            filename: "Aral-Violet-Wedding-Invitation.pdf",
+            mimeType: "application/pdf",
+          });
 
-          if (isMobile && savedInvitation.startsWith("data:")) {
-            // Create blob for mobile compatibility
-            try {
-              const base64Data = savedInvitation.split(",")[1];
-              const byteCharacters = atob(base64Data);
-              const byteNumbers = new Array(byteCharacters.length);
-
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-
-              const byteArray = new Uint8Array(byteNumbers);
-              const blob = new Blob([byteArray], { type: "application/pdf" });
-              const blobUrl = URL.createObjectURL(blob);
-
-              link.href = blobUrl;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-            } catch (error) {
-              console.warn("Mobile blob creation failed:", error);
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          } else {
+          if (!downloadSuccess) {
+            // Fallback to original method
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1422,13 +1401,24 @@ Please RSVP at our wedding website
                         )}`}
                         alt="QR Code for Guest Photo Upload"
                         className="w-40 h-40 mb-3 rounded-lg"
+                        loading="lazy"
+                        decoding="async"
                       />
-                      <p className="text-sm font-medium text-olive-700">
+                      <p className="text-sm font-medium text-olive-700 mb-2">
                         📸 Scan to Upload Couple Photos
                       </p>
-                      <p className="text-xs text-sage-500">
+                      <p className="text-xs text-sage-500 mb-3">
                         Point your camera here
                       </p>
+                      <Button
+                        onClick={downloadQRCode}
+                        size="sm"
+                        variant="outline"
+                        className="border-olive-300 text-olive-600 hover:bg-olive-50 text-xs"
+                      >
+                        <Image className="mr-1 w-3 h-3" />
+                        Download QR
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1458,6 +1448,7 @@ Please RSVP at our wedding website
                           alt={`Wedding memory ${actualIndex + 1}`}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     );
