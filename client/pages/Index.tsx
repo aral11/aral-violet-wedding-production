@@ -385,7 +385,7 @@ export default function Index() {
           // Don't fail the RSVP submission if SMS fails
         }
       } else {
-        console.log("📱 SMS service not configured - skipping notifications");
+        console.log("���� SMS service not configured - skipping notifications");
       }
 
       toast({
@@ -664,7 +664,7 @@ Made with love ❤️ By Aral D'Souza
           // Validate PDF data format
           if (!uploadedInvitation.pdf_data.startsWith("data:")) {
             console.log(
-              "❌ Invalid PDF data format, trying server endpoint...",
+              "�� Invalid PDF data format, trying server endpoint...",
             );
             throw new Error("Invalid PDF data format");
           }
@@ -1435,7 +1435,7 @@ Please RSVP at our wedding website
             </Card>
           </div>
 
-          {uploadedPhotos.length > 0 && (
+          {uploadedPhotos.length > 0 ? (
             <>
               {/* Photo Grid with Pagination */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
@@ -1541,6 +1541,19 @@ Please RSVP at our wedding website
                 </p>
               </div>
             </>
+          ) : (
+            <Card className="bg-white/80 backdrop-blur-sm border-sage-200 shadow-lg">
+              <CardContent className="p-12 text-center">
+                <Camera className="mx-auto mb-4 text-sage-400" size={48} />
+                <h3 className="text-2xl font-serif text-sage-600 mb-4">
+                  Photo Gallery
+                </h3>
+                <p className="text-sage-500 mb-6">
+                  We're still preparing our photo gallery. Check back soon to
+                  see our beautiful memories!
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </section>
