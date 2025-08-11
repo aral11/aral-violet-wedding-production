@@ -238,6 +238,17 @@ export default function GuestUpload() {
   };
 
   const handleUploadClick = () => {
+    // Check upload restrictions
+    if (!isWeddingDateOrAfter && !isAdminMode) {
+      toast({
+        title: "Upload Restricted 🗓️",
+        description: "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
     if (!guestName.trim()) {
       toast({
         title: "Name Required",
