@@ -12,11 +12,13 @@ export default function SupabaseSetup() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [testingConnection, setTestingConnection] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'untested' | 'success' | 'failed'>('untested');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "untested" | "success" | "failed"
+  >("untested");
 
   const testConnection = async () => {
     setTestingConnection(true);
-    
+
     try {
       if (!supabase) {
         throw new Error("Supabase client not configured");
@@ -31,14 +33,14 @@ export default function SupabaseSetup() {
         throw error;
       }
 
-      setConnectionStatus('success');
+      setConnectionStatus("success");
       toast({
         title: "Connection Successful! ✅",
         description: "Supabase is properly configured and connected.",
         duration: 5000,
       });
     } catch (error) {
-      setConnectionStatus('failed');
+      setConnectionStatus("failed");
       toast({
         title: "Connection Failed ❌",
         description: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -111,7 +113,8 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
             Configure Supabase Database
           </h1>
           <p className="text-sage-600 text-lg">
-            Set up your Supabase database to enable photo uploads and real-time sync
+            Set up your Supabase database to enable photo uploads and real-time
+            sync
           </p>
         </div>
 
@@ -119,7 +122,7 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {connectionStatus === 'success' ? (
+              {connectionStatus === "success" ? (
                 <CheckCircle className="w-5 h-5 text-green-600" />
               ) : (
                 <div className="w-5 h-5 rounded-full border-2 border-sage-300" />
@@ -135,17 +138,23 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
                   {supabase ? "✅ Configured" : "❌ Not Configured"}
                 </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span>Database Connection:</span>
-                <span className={
-                  connectionStatus === 'success' ? "text-green-600" : 
-                  connectionStatus === 'failed' ? "text-red-600" : 
-                  "text-sage-500"
-                }>
-                  {connectionStatus === 'success' ? "✅ Connected" : 
-                   connectionStatus === 'failed' ? "❌ Failed" : 
-                   "⏳ Not Tested"}
+                <span
+                  className={
+                    connectionStatus === "success"
+                      ? "text-green-600"
+                      : connectionStatus === "failed"
+                        ? "text-red-600"
+                        : "text-sage-500"
+                  }
+                >
+                  {connectionStatus === "success"
+                    ? "✅ Connected"
+                    : connectionStatus === "failed"
+                      ? "❌ Failed"
+                      : "⏳ Not Tested"}
                 </span>
               </div>
 
@@ -198,7 +207,7 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
                 <p className="text-sage-700">
                   Execute this SQL in your Supabase SQL Editor:
                 </p>
-                
+
                 <div className="relative">
                   <pre className="bg-sage-50 p-4 rounded-lg text-sm overflow-x-auto">
                     <code>{sqlSetup}</code>
@@ -215,8 +224,8 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800 text-sm">
-                    <strong>Tip:</strong> Go to your Supabase project → SQL Editor → New query, 
-                    paste the above SQL, and click "Run".
+                    <strong>Tip:</strong> Go to your Supabase project → SQL
+                    Editor → New query, paste the above SQL, and click "Run".
                   </p>
                 </div>
               </div>
@@ -237,8 +246,9 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-yellow-800 text-sm">
-                  <strong>Important:</strong> Never share your service role key publicly. 
-                  Only use the anonymous/public key for this wedding website.
+                  <strong>Important:</strong> Never share your service role key
+                  publicly. Only use the anonymous/public key for this wedding
+                  website.
                 </p>
               </div>
             </CardContent>
@@ -252,23 +262,28 @@ CREATE POLICY "Public can delete photos" ON photos FOR DELETE USING (true);`;
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-sage-700 mb-2">For Local Development:</h4>
+                  <h4 className="font-medium text-sage-700 mb-2">
+                    For Local Development:
+                  </h4>
                   <p className="text-sm text-sage-600 mb-3">
                     Create a `.env.local` file in your project root with:
                   </p>
                   <pre className="bg-sage-50 p-3 rounded text-sm">
-{`VITE_SUPABASE_URL=https://your-project-id.supabase.co
+                    {`VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here`}
                   </pre>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-sage-700 mb-2">For Netlify Production:</h4>
+                  <h4 className="font-medium text-sage-700 mb-2">
+                    For Netlify Production:
+                  </h4>
                   <p className="text-sm text-sage-600 mb-3">
-                    Add these in Netlify Dashboard → Site Settings → Environment Variables:
+                    Add these in Netlify Dashboard → Site Settings → Environment
+                    Variables:
                   </p>
                   <pre className="bg-sage-50 p-3 rounded text-sm">
-{`SUPABASE_URL=https://your-project-id.supabase.co
+                    {`SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_ANON_KEY=your-anon-key-here
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here`}
@@ -285,18 +300,22 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here`}
             </CardHeader>
             <CardContent>
               <ol className="list-decimal list-inside space-y-2 text-sage-700">
-                <li>Restart your development server: <code className="bg-sage-100 px-1 rounded">npm run dev</code></li>
+                <li>
+                  Restart your development server:{" "}
+                  <code className="bg-sage-100 px-1 rounded">npm run dev</code>
+                </li>
                 <li>Click "Test Connection" above to verify the setup</li>
                 <li>Try uploading a photo via the admin panel</li>
                 <li>Try uploading a photo via guest upload</li>
                 <li>Verify photos appear in the gallery</li>
               </ol>
 
-              {connectionStatus === 'success' && (
+              {connectionStatus === "success" && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-green-800">
-                    🎉 <strong>Success!</strong> Your Supabase database is properly configured. 
-                    You can now upload and view photos that sync across all devices.
+                    🎉 <strong>Success!</strong> Your Supabase database is
+                    properly configured. You can now upload and view photos that
+                    sync across all devices.
                   </p>
                 </div>
               )}

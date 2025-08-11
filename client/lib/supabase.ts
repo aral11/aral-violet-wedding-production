@@ -7,12 +7,14 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Only create Supabase client if environment variables are properly configured
 export const supabase = (() => {
   // Check if environment variables are set and not placeholder values
-  const isValidUrl = supabaseUrl &&
+  const isValidUrl =
+    supabaseUrl &&
     supabaseUrl !== "YOUR_SUPABASE_URL" &&
     supabaseUrl !== "https://yourproject.supabase.co" &&
     supabaseUrl.includes("supabase.co");
 
-  const isValidKey = supabaseKey &&
+  const isValidKey =
+    supabaseKey &&
     supabaseKey !== "YOUR_SUPABASE_ANON_KEY" &&
     supabaseKey.length > 50; // Supabase keys are typically longer than 50 chars
 
@@ -30,11 +32,17 @@ export const supabase = (() => {
 
   // Log why Supabase is not configured
   if (!isValidUrl) {
-    console.log("⚠️ Supabase URL not configured properly. Current value:", supabaseUrl || "undefined");
+    console.log(
+      "⚠️ Supabase URL not configured properly. Current value:",
+      supabaseUrl || "undefined",
+    );
     console.log("💡 Add VITE_SUPABASE_URL to your .env.local file");
   }
   if (!isValidKey) {
-    console.log("⚠️ Supabase key not configured properly. Key length:", supabaseKey?.length || 0);
+    console.log(
+      "⚠️ Supabase key not configured properly. Key length:",
+      supabaseKey?.length || 0,
+    );
     console.log("💡 Add VITE_SUPABASE_ANON_KEY to your .env.local file");
   }
 

@@ -132,16 +132,19 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ## Troubleshooting
 
 ### Photos Not Uploading
+
 - Check browser console for Supabase errors
 - Verify environment variables are set correctly
 - Ensure RLS policies allow public access to photos table
 
 ### Photos Not Displaying
+
 - Check that photos table has data
 - Verify environment variables are configured
 - Check network tab for API errors
 
 ### Database Connection Issues
+
 - Verify Supabase URL and key are correct
 - Check Supabase project is active (not paused)
 - Ensure RLS policies are properly configured
@@ -151,11 +154,13 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 The system currently stores photos as base64-encoded data directly in the database. This approach:
 
 ✅ **Pros:**
+
 - Simple to implement
 - No additional storage configuration needed
 - Works immediately with existing setup
 
 ⚠️ **Limitations:**
+
 - Database size grows quickly with many photos
 - Base64 encoding increases file size by ~33%
 

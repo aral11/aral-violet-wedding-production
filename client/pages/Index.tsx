@@ -1362,7 +1362,8 @@ Please RSVP at our wedding website
             </p>
             {uploadedPhotos.length > 0 && (
               <p className="text-sm text-sage-500 mt-2">
-                Gallery updates automatically • {uploadedPhotos.length} photo{uploadedPhotos.length !== 1 ? "s" : ""}
+                Gallery updates automatically • {uploadedPhotos.length} photo
+                {uploadedPhotos.length !== 1 ? "s" : ""}
               </p>
             )}
           </div>
