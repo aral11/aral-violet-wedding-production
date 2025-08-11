@@ -1400,6 +1400,8 @@ Please RSVP at our wedding website
                         )}`}
                         alt="QR Code for Guest Photo Upload"
                         className="w-40 h-40 mb-3 rounded-lg"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <p className="text-sm font-medium text-olive-700 mb-2">
                         📸 Scan to Upload Couple Photos
