@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import GuestUpload from "./pages/GuestUpload";
 import Debug from "./pages/Debug";
 import TestPhotos from "./pages/TestPhotos";
+import SupabaseSetup from "./pages/SupabaseSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/guest-upload" element={<GuestUpload />} />
             <Route path="/debug" element={<Debug />} />
             <Route path="/test-photos" element={<TestPhotos />} />
+            <Route path="/supabase-setup" element={<SupabaseSetup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

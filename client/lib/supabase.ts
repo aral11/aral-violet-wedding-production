@@ -6,22 +6,47 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Only create Supabase client if environment variables are properly configured
 export const supabase = (() => {
-  if (
+  // Check if environment variables are set and not placeholder values
+  const isValidUrl =
     supabaseUrl &&
-    supabaseKey &&
     supabaseUrl !== "YOUR_SUPABASE_URL" &&
-    supabaseKey !== "YOUR_SUPABASE_ANON_KEY"
-  ) {
+    supabaseUrl !== "https://yourproject.supabase.co" &&
+    supabaseUrl.includes("supabase.co");
+
+  const isValidKey =
+    supabaseKey &&
+    supabaseKey !== "YOUR_SUPABASE_ANON_KEY" &&
+    supabaseKey.length > 50; // Supabase keys are typically longer than 50 chars
+
+  if (isValidUrl && isValidKey) {
     try {
-      return createClient(supabaseUrl, supabaseKey);
+      const client = createClient(supabaseUrl, supabaseKey);
+      console.log("✅ Supabase client created successfully");
+      console.log("📊 Supabase URL:", supabaseUrl.substring(0, 30) + "...");
+      return client;
     } catch (error) {
-      console.warn("Failed to create Supabase client:", error);
+      console.warn("❌ Failed to create Supabase client:", error);
       return null;
     }
   }
 
-  // Return null if not configured - database service will handle this gracefully
-  console.log("Supabase not configured - using localStorage fallback");
+  // Log why Supabase is not configured
+  if (!isValidUrl) {
+    console.log(
+      "⚠️ Supabase URL not configured properly. Current value:",
+      supabaseUrl || "undefined",
+    );
+    console.log("💡 Add VITE_SUPABASE_URL to your .env.local file");
+  }
+  if (!isValidKey) {
+    console.log(
+      "⚠️ Supabase key not configured properly. Key length:",
+      supabaseKey?.length || 0,
+    );
+    console.log("💡 Add VITE_SUPABASE_ANON_KEY to your .env.local file");
+  }
+
+  console.log("📝 Using localStorage fallback for data storage");
   return null;
 })();
 

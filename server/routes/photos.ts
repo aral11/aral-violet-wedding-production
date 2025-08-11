@@ -184,73 +184,17 @@ export const getPhotos: RequestHandler = async (req, res) => {
       res.json(photos);
     } else {
       console.log(
-        "📸 No Supabase client - returning enhanced mock data for testing",
+        "📸 No Supabase client configured - returning empty array. Upload photos via admin panel to see them here.",
       );
-      // Return enhanced mock data that shows we're in fallback mode
-      const allMockPhotos = [
-        {
-          id: "mock_admin_1",
-          photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y2ODg1NiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBObyBTdXBhYmFzZSBDb25uZWN0aW9uPC90ZXh0Pjwvc3ZnPg==",
-          uploadedBy: "admin",
-          guestName: null,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "mock_admin_2",
-          photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1OWU5ZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBDb25maWd1cmUgU3VwYWJhc2U8L3RleHQ+PC9zdmc+",
-          uploadedBy: "admin",
-          guestName: null,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "mock_guest_1",
-          photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZiN2I4ZiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+W0ZBTExCQUNLXSBUZXN0IEd1ZXN0IFBob3RvPC90ZXh0Pjwvc3ZnPg==",
-          uploadedBy: "guest_test_user",
-          guestName: "Test Guest",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "mock_no_supabase",
-          photoData:
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VmNDQ0NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gU3VwYWJhc2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Db25maWd1cmF0aW9uPC90ZXh0Pjwvc3ZnPg==",
-          uploadedBy: "system",
-          guestName: null,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-
-      // Filter mock data based on type
-      let filteredPhotos;
-      if (type === "admin") {
-        filteredPhotos = allMockPhotos.filter((p) => p.uploadedBy === "admin");
-        console.log(`📸 Returning ${filteredPhotos.length} admin mock photos`);
-      } else if (type === "guest") {
-        filteredPhotos = allMockPhotos.filter((p) => p.uploadedBy !== "admin");
-        console.log(`📸 Returning ${filteredPhotos.length} guest mock photos`);
-      } else {
-        filteredPhotos = allMockPhotos;
-        console.log(`📸 Returning ${filteredPhotos.length} total mock photos`);
-      }
-
-      res.json(filteredPhotos);
+      // Return empty array when Supabase is not configured
+      // This ensures only real uploaded photos are displayed
+      res.json([]);
     }
   } catch (error) {
     console.error("📸 Error fetching photos:", error);
-    // Return mock data for graceful fallback
-    console.log("📸 Returning fallback mock data due to error");
-    res.json([
-      {
-        id: "fallback_1",
-        photoData:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y2OGU1NiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90bzwvdGV4dD48L3N2Zz4=",
-        uploadedBy: "admin",
-        guestName: null,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    // Return empty array on error - no fallback photos
+    console.log("📸 Returning empty array due to error");
+    res.json([]);
   }
 };
 

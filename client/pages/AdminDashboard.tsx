@@ -1800,6 +1800,18 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              {!database.isUsingSupabase() && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open("/supabase-setup", "_blank")}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50 flex-1 sm:flex-none"
+                  title="Configure Supabase for photo sync across devices"
+                >
+                  <span className="hidden sm:inline">Setup DB</span>
+                  <span className="sm:hidden">DB</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

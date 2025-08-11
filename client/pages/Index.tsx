@@ -385,7 +385,7 @@ export default function Index() {
           // Don't fail the RSVP submission if SMS fails
         }
       } else {
-        console.log("📱 SMS service not configured - skipping notifications");
+        console.log("���� SMS service not configured - skipping notifications");
       }
 
       toast({
@@ -664,7 +664,7 @@ Made with love ❤️ By Aral D'Souza
           // Validate PDF data format
           if (!uploadedInvitation.pdf_data.startsWith("data:")) {
             console.log(
-              "❌ Invalid PDF data format, trying server endpoint...",
+              "�� Invalid PDF data format, trying server endpoint...",
             );
             throw new Error("Invalid PDF data format");
           }
@@ -1362,13 +1362,8 @@ Please RSVP at our wedding website
             </p>
             {uploadedPhotos.length > 0 && (
               <p className="text-sm text-sage-500 mt-2">
-                {uploadedPhotos.some(
-                  (photo) =>
-                    photo.includes("[FALLBACK]") ||
-                    photo.includes("diagnostic"),
-                )
-                  ? `Showing ${uploadedPhotos.length} placeholder photos • Upload photos in admin panel to see real gallery`
-                  : `Gallery updates automatically • ${uploadedPhotos.length} photo${uploadedPhotos.length !== 1 ? "s" : ""}`}
+                Gallery updates automatically • {uploadedPhotos.length} photo
+                {uploadedPhotos.length !== 1 ? "s" : ""}
               </p>
             )}
           </div>
@@ -1443,114 +1438,31 @@ Please RSVP at our wedding website
 
           {uploadedPhotos.length > 0 ? (
             <>
-              {/* Show configuration notice if displaying fallback photos */}
-              {uploadedPhotos.some(
-                (photo) =>
-                  photo.includes("[FALLBACK]") ||
-                  photo.includes("diagnostic") ||
-                  photo.includes("No Photos Found"),
-              ) && (
-                <div className="mb-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                      📸 Configure Supabase to Show Real Photos
-                    </h3>
-                    <p className="text-yellow-700 mb-4">
-                      The photos you see below are placeholders. To display your
-                      actual wedding photos from Supabase:
-                    </p>
-                    <div className="text-left max-w-md mx-auto space-y-2 text-sm text-yellow-700">
-                      <p>
-                        • Update your Supabase URL and API key in environment
-                        variables
-                      </p>
-                      <p>• Restart the development server</p>
-                      <p>• Upload photos through the admin panel</p>
-                    </div>
-                    <div className="mt-4 space-x-4">
-                      <a
-                        href="/debug"
-                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Debug Connection
-                      </a>
-                      <a
-                        href="/test-photos"
-                        className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Test Photos
-                      </a>
-                      <a
-                        href="/login"
-                        className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Admin Panel
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Photo Grid with Pagination */}
-              {uploadedPhotos.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="max-w-md mx-auto">
-                    <Camera className="mx-auto mb-4 text-sage-400" size={64} />
-                    <h3 className="text-xl font-serif text-sage-700 mb-2">
-                      No Photos Yet
-                    </h3>
-                    <p className="text-sage-600 mb-6">
-                      Photos will appear here once they're uploaded by the admin
-                      or guests.
-                    </p>
-                    <div className="space-y-2">
-                      <p className="text-sm text-sage-500">
-                        • Admin can upload photos via the admin panel
-                      </p>
-                      <p className="text-sm text-sage-500">
-                        • Guests can upload photos via the guest upload page
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                  {uploadedPhotos
-                    .slice(
-                      (currentPage - 1) * photosPerPage,
-                      currentPage * photosPerPage,
-                    )
-                    .map((photo, index) => {
-                      const actualIndex =
-                        (currentPage - 1) * photosPerPage + index;
-                      const isPlaceholder =
-                        photo.includes("[FALLBACK]") ||
-                        photo.includes("diagnostic") ||
-                        photo.includes("No Photos Found");
-                      return (
-                        <div
-                          key={actualIndex}
-                          className={`aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
-                            isPlaceholder
-                              ? "border-2 border-dashed border-yellow-300"
-                              : ""
-                          }`}
-                        >
-                          <img
-                            src={photo}
-                            alt={
-                              isPlaceholder
-                                ? `Configuration needed ${actualIndex + 1}`
-                                : `Wedding memory ${actualIndex + 1}`
-                            }
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                {uploadedPhotos
+                  .slice(
+                    (currentPage - 1) * photosPerPage,
+                    currentPage * photosPerPage,
+                  )
+                  .map((photo, index) => {
+                    const actualIndex =
+                      (currentPage - 1) * photosPerPage + index;
+                    return (
+                      <div
+                        key={actualIndex}
+                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Wedding memory ${actualIndex + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
 
               {/* Pagination Controls */}
               {uploadedPhotos.length > photosPerPage && (
