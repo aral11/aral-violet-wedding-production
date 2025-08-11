@@ -2682,6 +2682,8 @@ export default function AdminDashboard() {
                         <Button
                           onClick={async () => {
                             try {
+                              console.log("🔄 Manual guest photos refresh...");
+                              await database.photos.clearGalleryCache();
                               const guestPhotosData =
                                 await database.photos.getGuestPhotos();
                               setGuestPhotos(
@@ -2698,7 +2700,7 @@ export default function AdminDashboard() {
                               toast({
                                 title: "Guest Photos Refreshed",
                                 description:
-                                  "Latest guest uploads loaded successfully!",
+                                  "Guest photo gallery has been updated with fresh data.",
                               });
                             } catch (error) {
                               toast({
@@ -2711,7 +2713,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                         >
-                          Refresh
+                          Clear Cache & Refresh
                         </Button>
                       </div>
 
@@ -3242,7 +3244,7 @@ export default function AdminDashboard() {
                           <ul className="space-y-1 text-sage-600">
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
-                            <li>• Guest experience overview</li>
+                            <li>��� Guest experience overview</li>
                             <li>• Wedding day information</li>
                           </ul>
                         </div>
