@@ -132,6 +132,15 @@ exports.handler = async (event, context) => {
 
     if (error) {
       console.error("❌ Supabase insert error:", error);
+
+      // Clean up uploaded file if database insert fails
+      try {
+        await supabase.storage.from('wedding-photos').remove([filePath]);
+        console.log("🗑️ Cleaned up uploaded file after database error");
+      } catch (cleanupError) {
+        console.warn("⚠️ Failed to clean up uploaded file:", cleanupError);
+      }
+
       return {
         statusCode: 500,
         headers,
