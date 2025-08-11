@@ -30,6 +30,7 @@ import {
 } from "./routes/invitation";
 import { sendRSVPSMSNotification, testSMS } from "./routes/sms";
 import { debugSMS } from "./routes/debug-sms";
+import { debugSupabase } from "./routes/debug-supabase";
 import { downloadInvitation } from "./routes/download-invitation";
 import { testSupabaseConnection } from "./routes/test-connection";
 
