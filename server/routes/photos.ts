@@ -192,18 +192,9 @@ export const getPhotos: RequestHandler = async (req, res) => {
     }
   } catch (error) {
     console.error("📸 Error fetching photos:", error);
-    // Return mock data for graceful fallback
-    console.log("📸 Returning fallback mock data due to error");
-    res.json([
-      {
-        id: "fallback_1",
-        photoData:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y2OGU1NiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBQaG90bzwvdGV4dD48L3N2Zz4=",
-        uploadedBy: "admin",
-        guestName: null,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    // Return empty array on error - no fallback photos
+    console.log("📸 Returning empty array due to error");
+    res.json([]);
   }
 };
 
