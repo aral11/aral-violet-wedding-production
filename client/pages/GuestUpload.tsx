@@ -490,7 +490,7 @@ export default function GuestUpload() {
                 <li>• Make sure to enter your name before uploading</li>
                 <li>• You can select multiple photos at once</li>
                 <li>• Photos will appear in the main wedding gallery</li>
-                <li>• High-quality photos are welcome (up to 25MB each)</li>
+                <li>• High-quality photos are welcome (up to 200MB each)</li>
               </ul>
             </div>
           </CardContent>
