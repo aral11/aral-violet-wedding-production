@@ -407,7 +407,55 @@ export const photoService = {
         ? `guest_${guestName || "anonymous"}_${Date.now()}`
         : uploadedBy;
 
-    if (isSupabaseConfigured()) {
+    // Check if we're on Netlify
+    const isNetlifyDeployment = window.location.hostname.includes('netlify') ||
+                                 window.location.hostname.includes('netlify.app') ||
+                                 import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+
+    // For Netlify deployments, use Netlify Functions
+    if (isNetlifyDeployment) {
+      try {
+        console.log("📸 Using Netlify Functions for photo upload...");
+        const response = await fetch("/.netlify/functions/photos-upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            photoData,
+            uploadedBy,
+            guestName,
+          }),
+        });
+
+        if (response.ok) {
+          const savedPhoto = await response.json();
+          console.log("✅ Photo uploaded via Netlify Functions");
+
+          // Convert response to SupabasePhoto format
+          const photo = {
+            id: savedPhoto.id,
+            photo_data: savedPhoto.photoData || savedPhoto.photo_data,
+            uploaded_by: savedPhoto.uploadedBy || savedPhoto.uploaded_by,
+            guest_name: savedPhoto.guestName || savedPhoto.guest_name,
+            created_at: savedPhoto.createdAt || savedPhoto.created_at,
+          };
+
+          // Also save to localStorage for offline access
+          this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
+          return photo;
+        } else {
+          const errorData = await response.json();
+          console.error("❌ Netlify Functions upload failed:", errorData);
+          throw new Error(errorData.error || "Upload failed");
+        }
+      } catch (error) {
+        console.warn("Netlify Functions unavailable, falling back to localStorage:", error);
+      }
+    }
+
+    // For non-Netlify or fallback, try direct Supabase
+    if (isSupabaseConfigured() && !isNetlifyDeployment) {
       try {
         const { data, error } = await supabase
           .from("photos")
@@ -428,18 +476,12 @@ export const photoService = {
 
         return data;
       } catch (error) {
-        console.warn("Supabase unavailable, saving to localStorage:", error);
-        this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
-        return {
-          id: Date.now().toString(),
-          photo_data: photoData,
-          uploaded_by: actualUploadedBy,
-          guest_name: guestName || null,
-          created_at: new Date().toISOString(),
-        };
+        console.warn("Direct Supabase unavailable, saving to localStorage:", error);
       }
     }
 
+    // Fallback to localStorage only
+    console.log("📸 Saving photo to localStorage as fallback");
     this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
     return {
       id: Date.now().toString(),
