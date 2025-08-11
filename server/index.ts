@@ -88,5 +88,8 @@ export async function createServer() {
   // Download invitation PDF
   app.get("/api/download-invitation", downloadInvitation);
 
+  // Test Supabase connection (for debugging)
+  app.get("/api/test-connection", testSupabaseConnection);
+
   return app;
 }
