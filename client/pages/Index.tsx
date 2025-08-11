@@ -1435,57 +1435,33 @@ Please RSVP at our wedding website
             </Card>
           </div>
 
-          {uploadedPhotos.length > 0 ? (
+          {uploadedPhotos.length > 0 && (
             <>
-
               {/* Photo Grid with Pagination */}
-              {uploadedPhotos.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="max-w-md mx-auto">
-                    <Camera className="mx-auto mb-4 text-sage-400" size={64} />
-                    <h3 className="text-xl font-serif text-sage-700 mb-2">
-                      No Photos Yet
-                    </h3>
-                    <p className="text-sage-600 mb-6">
-                      Photos will appear here once they're uploaded by the admin
-                      or guests.
-                    </p>
-                    <div className="space-y-2">
-                      <p className="text-sm text-sage-500">
-                        • Admin can upload photos via the admin panel
-                      </p>
-                      <p className="text-sm text-sage-500">
-                        • Guests can upload photos via the guest upload page
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                  {uploadedPhotos
-                    .slice(
-                      (currentPage - 1) * photosPerPage,
-                      currentPage * photosPerPage,
-                    )
-                    .map((photo, index) => {
-                      const actualIndex =
-                        (currentPage - 1) * photosPerPage + index;
-                      return (
-                        <div
-                          key={actualIndex}
-                          className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-                        >
-                          <img
-                            src={photo}
-                            alt={`Wedding memory ${actualIndex + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                {uploadedPhotos
+                  .slice(
+                    (currentPage - 1) * photosPerPage,
+                    currentPage * photosPerPage,
+                  )
+                  .map((photo, index) => {
+                    const actualIndex =
+                      (currentPage - 1) * photosPerPage + index;
+                    return (
+                      <div
+                        key={actualIndex}
+                        className="aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Wedding memory ${actualIndex + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
 
               {/* Pagination Controls */}
               {uploadedPhotos.length > photosPerPage && (
@@ -1565,19 +1541,6 @@ Please RSVP at our wedding website
                 </p>
               </div>
             </>
-          ) : (
-            <Card className="bg-white/80 backdrop-blur-sm border-sage-200 shadow-lg">
-              <CardContent className="p-12 text-center">
-                <Camera className="mx-auto mb-4 text-sage-400" size={48} />
-                <h3 className="text-2xl font-serif text-sage-600 mb-4">
-                  Photo Gallery
-                </h3>
-                <p className="text-sage-500 mb-6">
-                  We're still preparing our photo gallery. Check back soon to
-                  see our beautiful memories!
-                </p>
-              </CardContent>
-            </Card>
           )}
         </div>
       </section>
