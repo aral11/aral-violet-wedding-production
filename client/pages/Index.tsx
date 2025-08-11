@@ -1437,53 +1437,6 @@ Please RSVP at our wedding website
 
           {uploadedPhotos.length > 0 ? (
             <>
-              {/* Show configuration notice if displaying fallback photos */}
-              {uploadedPhotos.some(
-                (photo) =>
-                  photo.includes("[FALLBACK]") ||
-                  photo.includes("diagnostic") ||
-                  photo.includes("No Photos Found"),
-              ) && (
-                <div className="mb-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                      📸 Configure Supabase to Show Real Photos
-                    </h3>
-                    <p className="text-yellow-700 mb-4">
-                      The photos you see below are placeholders. To display your
-                      actual wedding photos from Supabase:
-                    </p>
-                    <div className="text-left max-w-md mx-auto space-y-2 text-sm text-yellow-700">
-                      <p>
-                        • Update your Supabase URL and API key in environment
-                        variables
-                      </p>
-                      <p>• Restart the development server</p>
-                      <p>• Upload photos through the admin panel</p>
-                    </div>
-                    <div className="mt-4 space-x-4">
-                      <a
-                        href="/debug"
-                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Debug Connection
-                      </a>
-                      <a
-                        href="/test-photos"
-                        className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Test Photos
-                      </a>
-                      <a
-                        href="/login"
-                        className="inline-block bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                      >
-                        Admin Panel
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Photo Grid with Pagination */}
               {uploadedPhotos.length === 0 ? (
