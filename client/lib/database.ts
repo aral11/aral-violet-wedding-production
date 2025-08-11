@@ -453,7 +453,7 @@ export const photoService = {
           };
 
           // Also save to localStorage for offline access
-          this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
+          this.saveToLocalStorage(photo.photo_data, actualUploadedBy, guestName);
 
           // Trigger gallery refresh
           this.clearGalleryCache();
@@ -466,20 +466,53 @@ export const photoService = {
         }
       } catch (error) {
         console.warn(
-          "Netlify Functions unavailable, falling back to localStorage:",
+          "Netlify Functions unavailable, falling back to direct Supabase:",
           error,
         );
       }
     }
 
-    // For non-Netlify or fallback, try direct Supabase
-    if (isSupabaseConfigured() && !isNetlifyDeployment) {
+    // For non-Netlify or fallback, try direct Supabase with Storage
+    if (isSupabaseConfigured()) {
       try {
+        console.log("📸 Uploading to Supabase Storage...");
+
+        // Convert base64 to blob
+        const response = await fetch(photoData);
+        const blob = await response.blob();
+
+        // Generate unique filename
+        const fileExtension = blob.type.split('/')[1] || 'jpg';
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
+        const filePath = `wedding-photos/${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from('wedding-photos')
+          .upload(filePath, blob, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (storageError) {
+          console.error("Storage upload error:", storageError);
+          throw storageError;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('wedding-photos')
+          .getPublicUrl(filePath);
+
+        const publicUrl = urlData.publicUrl;
+        console.log("✅ Photo uploaded to storage, public URL:", publicUrl);
+
+        // Save photo record to database with public URL
         const { data, error } = await supabase
           .from("photos")
           .insert([
             {
-              photo_data: photoData,
+              photo_data: publicUrl,
               uploaded_by: actualUploadedBy,
               guest_name: guestName || null,
             },
@@ -487,10 +520,16 @@ export const photoService = {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          // If database insert fails, try to clean up the uploaded file
+          await supabase.storage.from('wedding-photos').remove([filePath]);
+          throw error;
+        }
 
-        // Also save to localStorage
-        this.saveToLocalStorage(photoData, actualUploadedBy, guestName);
+        console.log("✅ Photo record saved to database");
+
+        // Also save to localStorage for offline access
+        this.saveToLocalStorage(publicUrl, actualUploadedBy, guestName);
 
         // Trigger gallery refresh
         this.clearGalleryCache();
