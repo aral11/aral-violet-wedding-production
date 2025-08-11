@@ -149,8 +149,72 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // First try direct Supabase connection (prioritize real-time data)
-    if (supabase) {
+    // For Netlify deployments, try API first since Supabase environment variables
+    // are handled server-side via Netlify Functions
+    const isNetlifyDeployment = window.location.hostname.includes('netlify') ||
+                                 import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+
+    if (isNetlifyDeployment) {
+      console.log("📸 Detected Netlify deployment, prioritizing API route...");
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+        const response = await fetch("/api/photos", {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const apiPhotos = await response.json();
+          console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via Netlify API`);
+
+          if (apiPhotos && apiPhotos.length > 0) {
+            // Convert API response to SupabasePhoto format
+            const photos = apiPhotos.map((photo: any) => ({
+              id: photo.id,
+              photo_data: photo.photoData || photo.photo_data,
+              uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
+              guest_name: photo.guestName || photo.guest_name || null,
+              created_at:
+                photo.createdAt || photo.created_at || new Date().toISOString(),
+            }));
+
+            // Validate the photos have proper data (data URLs or HTTP URLs)
+            const validPhotos = photos.filter(
+              (p) =>
+                p.photo_data &&
+                (p.photo_data.startsWith("data:image/") ||
+                  p.photo_data.startsWith("http") ||
+                  p.photo_data.startsWith("blob:")),
+            );
+            console.log(
+              `📸 ${validPhotos.length} photos have valid URLs from Netlify API`,
+            );
+
+            if (validPhotos.length > 0) {
+              console.log("📸 Returning valid photos from Netlify API");
+              // Save to localStorage for offline access
+              this.syncSupabaseToLocalStorage(validPhotos);
+              return validPhotos;
+            }
+          }
+        } else {
+          console.log(`📸 Netlify API returned ${response.status}: ${response.statusText}`);
+        }
+      } catch (apiError) {
+        console.log("📸 Netlify API connection failed:", apiError instanceof Error ? apiError.message : apiError);
+      }
+    }
+
+    // Try direct Supabase connection for non-Netlify environments
+    if (supabase && !isNetlifyDeployment) {
       try {
         console.log("📸 Attempting direct Supabase connection from client...");
 
@@ -186,8 +250,9 @@ export const photoService = {
           const validPhotos = photos.filter(
             (p) =>
               p.photo_data &&
-              (p.photo_data.startsWith("data:") ||
-                p.photo_data.startsWith("http")),
+              (p.photo_data.startsWith("data:image/") ||
+                p.photo_data.startsWith("http") ||
+                p.photo_data.startsWith("blob:")),
           );
           console.log(
             `📸 ${validPhotos.length} photos have valid URLs/data from Supabase`,
@@ -219,105 +284,73 @@ export const photoService = {
       return localPhotos;
     }
 
-    // Try API as backup (but handle fetch errors gracefully)
-    try {
-      console.log("📸 Attempting API connection...");
+    // If Netlify API failed, try it one more time as a fallback
+    if (!isNetlifyDeployment) {
+      try {
+        console.log("📸 Attempting API connection as final fallback...");
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch("/api/photos", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-      });
+        const response = await fetch("/api/photos", {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const apiPhotos = await response.json();
-        console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via API`);
+        if (response.ok) {
+          const apiPhotos = await response.json();
+          console.log(`📸 SUCCESS: Found ${apiPhotos.length} photos via fallback API`);
 
-        if (apiPhotos && apiPhotos.length > 0) {
-          // Convert API response to SupabasePhoto format
-          const photos = apiPhotos.map((photo: any) => ({
-            id: photo.id,
-            photo_data: photo.photoData || photo.photo_data,
-            uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
-            guest_name: photo.guestName || photo.guest_name || null,
-            created_at:
-              photo.createdAt || photo.created_at || new Date().toISOString(),
-          }));
+          if (apiPhotos && apiPhotos.length > 0) {
+            // Convert API response to SupabasePhoto format
+            const photos = apiPhotos.map((photo: any) => ({
+              id: photo.id,
+              photo_data: photo.photoData || photo.photo_data,
+              uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
+              guest_name: photo.guestName || photo.guest_name || null,
+              created_at:
+                photo.createdAt || photo.created_at || new Date().toISOString(),
+            }));
 
-          // Validate the photos have proper data (data URLs or Supabase URLs)
-          const validPhotos = photos.filter(
-            (p) =>
-              p.photo_data &&
-              (p.photo_data.startsWith("data:") ||
-                p.photo_data.startsWith("http")),
-          );
-          console.log(
-            `📸 ${validPhotos.length} photos have valid URLs from API`,
-          );
+            // Validate the photos have proper data (data URLs or HTTP URLs)
+            const validPhotos = photos.filter(
+              (p) =>
+                p.photo_data &&
+                (p.photo_data.startsWith("data:image/") ||
+                  p.photo_data.startsWith("http") ||
+                  p.photo_data.startsWith("blob:")),
+            );
+            console.log(
+              `📸 ${validPhotos.length} photos have valid URLs from fallback API`,
+            );
 
-          if (validPhotos.length > 0) {
-            console.log("📸 Returning valid photos from API");
-            // Save to localStorage for future use
-            this.syncSupabaseToLocalStorage(validPhotos);
-            return validPhotos;
+            if (validPhotos.length > 0) {
+              console.log("📸 Returning valid photos from fallback API");
+              // Save to localStorage for future use
+              this.syncSupabaseToLocalStorage(validPhotos);
+              return validPhotos;
+            }
           }
         }
+      } catch (apiError) {
+        console.log(
+          "📸 Fallback API connection failed:",
+          apiError instanceof Error ? apiError.message : apiError,
+        );
       }
-    } catch (apiError) {
-      console.log(
-        "📸 API connection failed (this is expected if network is limited):",
-        apiError.message,
-      );
     }
 
-    // If everything fails, return diagnostic placeholder photos
+    // If everything fails, return empty array to avoid confusing diagnostic photos
     console.log(
-      "📸 All connections failed, returning diagnostic placeholder photos...",
+      "📸 All photo sources failed, returning empty array. Upload photos to see them here.",
     );
-    const diagnosticPhotos: SupabasePhoto[] = [
-      {
-        id: "diagnostic_1",
-        photo_data:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VmNDQ0NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gUGhvdG9zIEZvdW5kPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q2hlY2sgU3VwYWJhc2U8L3RleHQ+PC9zdmc+",
-        uploaded_by: "system",
-        guest_name: null,
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: "diagnostic_2",
-        photo_data:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y5NzMxNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+RGF0YWJhc2UgSXNzdWU8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5VcGxvYWQgUGhvdG9zPC90ZXh0Pjwvc3ZnPg==",
-        uploaded_by: "system",
-        guest_name: null,
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: "diagnostic_3",
-        photo_data:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzEwYjk4MSIvPjx0ZXh0IHg9IjUwJSIgeT0iNDAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UGhvdG9zIFdpbGwgQXBwZWFyPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QWZ0ZXIgVXBsb2FkPC90ZXh0Pjwvc3ZnPg==",
-        uploaded_by: "system",
-        guest_name: null,
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: "diagnostic_status",
-        photo_data:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzY2NjY2NiIvPjx0ZXh0IHg9IjUwJSIgeT0iMzAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+U3RhdHVzPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gUmVhbCBQaG90b3M8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI3MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Gb3VuZCBZZXQ8L3RleHQ+PC9zdmc+",
-        uploaded_by: "system",
-        guest_name: null,
-        created_at: new Date().toISOString(),
-      },
-    ];
-
-    return diagnosticPhotos;
+    return [];
   },
 
   async getAdminPhotos(): Promise<SupabasePhoto[]> {
