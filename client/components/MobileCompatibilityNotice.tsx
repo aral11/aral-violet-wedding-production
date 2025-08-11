@@ -28,8 +28,8 @@ export default function MobileCompatibilityNotice({
         return {
           title: "Mobile Upload Tips",
           description: isIOS
-            ? 'On iOS: Tap "Select Photos" to choose files from your photo library. Minimum 25MB per photo required.'
-            : "On Android: Tap the upload button to select photos from gallery. Minimum 25MB per photo required.",
+            ? 'On iOS: Tap "Select Photos" to choose files from your photo library. Up to 200MB per photo supported.'
+            : "On Android: Tap the upload button to select photos from gallery. Up to 200MB per photo supported.",
         };
       default:
         return {
