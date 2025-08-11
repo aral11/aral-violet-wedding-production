@@ -48,8 +48,8 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
 };
 
 // Supabase configuration
-const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
 
 let supabase: any = null;
 if (supabaseUrl && supabaseKey) {
