@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import GuestUpload from "./pages/GuestUpload";
 import Debug from "./pages/Debug";
 import TestPhotos from "./pages/TestPhotos";
+import SupabaseSetup from "./pages/SupabaseSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
