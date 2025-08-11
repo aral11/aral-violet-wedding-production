@@ -24,6 +24,25 @@ export default function GuestUpload() {
   const currentDate = new Date();
   const isWeddingDateOrAfter = currentDate >= weddingDate;
 
+  const handleAdminPinSubmit = () => {
+    if (adminPin === "0000") {
+      setIsAdminMode(true);
+      toast({
+        title: "Admin Mode Activated! 🔓",
+        description: "You can now upload photos before the wedding date.",
+        duration: 3000,
+      });
+    } else {
+      toast({
+        title: "Invalid PIN ❌",
+        description: "Please enter the correct admin PIN to upload photos.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      setAdminPin("");
+    }
+  };
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!guestName.trim()) {
       toast({
@@ -50,7 +69,7 @@ export default function GuestUpload() {
     // Process files with proper async handling and improved error management
     const uploadPromises = Array.from(files).map(async (file, index) => {
       console.log(
-        `🔄 Processing file ${index + 1}/${totalFiles}: ${file.name}`,
+        `��� Processing file ${index + 1}/${totalFiles}: ${file.name}`,
       );
 
       // Validate file type
