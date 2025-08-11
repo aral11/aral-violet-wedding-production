@@ -1401,12 +1401,21 @@ Please RSVP at our wedding website
                         alt="QR Code for Guest Photo Upload"
                         className="w-40 h-40 mb-3 rounded-lg"
                       />
-                      <p className="text-sm font-medium text-olive-700">
+                      <p className="text-sm font-medium text-olive-700 mb-2">
                         📸 Scan to Upload Couple Photos
                       </p>
-                      <p className="text-xs text-sage-500">
+                      <p className="text-xs text-sage-500 mb-3">
                         Point your camera here
                       </p>
+                      <Button
+                        onClick={downloadQRCode}
+                        size="sm"
+                        variant="outline"
+                        className="border-olive-300 text-olive-600 hover:bg-olive-50 text-xs"
+                      >
+                        <Image className="mr-1 w-3 h-3" />
+                        Download QR
+                      </Button>
                     </div>
                   </div>
                 </div>
