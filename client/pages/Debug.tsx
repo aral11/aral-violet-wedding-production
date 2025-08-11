@@ -196,15 +196,25 @@ export default function Debug() {
                 <div className="mb-6">
                   <h4 className="font-medium mb-2">Environment Variables</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasUrl ? "bg-green-50" : "bg-red-50"}`}>
-                      <strong>Supabase URL:</strong> {supabaseDebug.debug?.environment?.hasUrl ? "✅ Set" : "❌ Missing"}
+                    <div
+                      className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasUrl ? "bg-green-50" : "bg-red-50"}`}
+                    >
+                      <strong>Supabase URL:</strong>{" "}
+                      {supabaseDebug.debug?.environment?.hasUrl
+                        ? "✅ Set"
+                        : "❌ Missing"}
                       <br />
                       <span className="text-xs text-gray-600">
                         Format: {supabaseDebug.debug?.environment?.urlFormat}
                       </span>
                     </div>
-                    <div className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasKey ? "bg-green-50" : "bg-red-50"}`}>
-                      <strong>Supabase Key:</strong> {supabaseDebug.debug?.environment?.hasKey ? "✅ Set" : "❌ Missing"}
+                    <div
+                      className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasKey ? "bg-green-50" : "bg-red-50"}`}
+                    >
+                      <strong>Supabase Key:</strong>{" "}
+                      {supabaseDebug.debug?.environment?.hasKey
+                        ? "✅ Set"
+                        : "❌ Missing"}
                       <br />
                       <span className="text-xs text-gray-600">
                         Format: {supabaseDebug.debug?.environment?.keyFormat}
@@ -221,12 +231,15 @@ export default function Debug() {
                 {/* Connection Status */}
                 <div className="mb-6">
                   <h4 className="font-medium mb-2">Connection Status</h4>
-                  <div className={`p-3 rounded-lg ${supabaseDebug.debug?.connection?.testResult === "Success" ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
-                    <strong>Result:</strong> {supabaseDebug.debug?.connection?.testResult || "Unknown"}
-
+                  <div
+                    className={`p-3 rounded-lg ${supabaseDebug.debug?.connection?.testResult === "Success" ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+                  >
+                    <strong>Result:</strong>{" "}
+                    {supabaseDebug.debug?.connection?.testResult || "Unknown"}
                     {supabaseDebug.debug?.connection?.error && (
                       <div className="mt-2">
-                        <strong>Error:</strong> {supabaseDebug.debug.connection.error.message}
+                        <strong>Error:</strong>{" "}
+                        {supabaseDebug.debug.connection.error.message}
                         {supabaseDebug.debug.connection.error.hint && (
                           <div className="text-sm text-gray-600 mt-1">
                             Hint: {supabaseDebug.debug.connection.error.hint}
@@ -234,16 +247,16 @@ export default function Debug() {
                         )}
                       </div>
                     )}
-
                     {supabaseDebug.debug?.connection?.connectionError && (
                       <div className="mt-2">
-                        <strong>Connection Error:</strong> {supabaseDebug.debug.connection.connectionError}
+                        <strong>Connection Error:</strong>{" "}
+                        {supabaseDebug.debug.connection.connectionError}
                       </div>
                     )}
-
                     {supabaseDebug.debug?.connection?.missingVars && (
                       <div className="mt-2">
-                        <strong>Missing Variables:</strong> {supabaseDebug.debug.connection.missingVars.join(", ")}
+                        <strong>Missing Variables:</strong>{" "}
+                        {supabaseDebug.debug.connection.missingVars.join(", ")}
                       </div>
                     )}
                   </div>
@@ -255,41 +268,71 @@ export default function Debug() {
                     <h4 className="font-medium mb-2">Database Tables</h4>
 
                     {supabaseDebug.debug.tables.photosTable && (
-                      <div className={`p-3 rounded mb-2 ${supabaseDebug.debug.tables.photosTable.exists ? "bg-green-50" : "bg-red-50"}`}>
-                        <strong>Photos Table:</strong> {supabaseDebug.debug.tables.photosTable.exists ? "✅ Exists" : "❌ Missing"}
-
+                      <div
+                        className={`p-3 rounded mb-2 ${supabaseDebug.debug.tables.photosTable.exists ? "bg-green-50" : "bg-red-50"}`}
+                      >
+                        <strong>Photos Table:</strong>{" "}
+                        {supabaseDebug.debug.tables.photosTable.exists
+                          ? "✅ Exists"
+                          : "❌ Missing"}
                         {supabaseDebug.debug.tables.photosTable.exists && (
                           <div className="mt-1 text-sm">
-                            <div>Has Data: {supabaseDebug.debug.tables.photosTable.hasData ? "Yes" : "No"}</div>
-                            {supabaseDebug.debug.tables.photosTable.sampleColumns?.length > 0 && (
-                              <div>Columns: {supabaseDebug.debug.tables.photosTable.sampleColumns.join(", ")}</div>
+                            <div>
+                              Has Data:{" "}
+                              {supabaseDebug.debug.tables.photosTable.hasData
+                                ? "Yes"
+                                : "No"}
+                            </div>
+                            {supabaseDebug.debug.tables.photosTable
+                              .sampleColumns?.length > 0 && (
+                              <div>
+                                Columns:{" "}
+                                {supabaseDebug.debug.tables.photosTable.sampleColumns.join(
+                                  ", ",
+                                )}
+                              </div>
                             )}
                           </div>
                         )}
-
                         {supabaseDebug.debug.tables.photosTable.error && (
                           <div className="mt-1 text-sm text-red-600">
-                            Error: {supabaseDebug.debug.tables.photosTable.error}
+                            Error:{" "}
+                            {supabaseDebug.debug.tables.photosTable.error}
                           </div>
                         )}
                       </div>
                     )}
 
                     {supabaseDebug.debug.tables.storage && (
-                      <div className={`p-3 rounded ${supabaseDebug.debug.tables.storage.hasWeddingBucket ? "bg-green-50" : "bg-yellow-50"}`}>
+                      <div
+                        className={`p-3 rounded ${supabaseDebug.debug.tables.storage.hasWeddingBucket ? "bg-green-50" : "bg-yellow-50"}`}
+                      >
                         <strong>Storage:</strong>
                         {supabaseDebug.debug.tables.storage.error ? (
-                          <span className="text-red-600"> Error accessing storage</span>
+                          <span className="text-red-600">
+                            {" "}
+                            Error accessing storage
+                          </span>
                         ) : (
                           <span>
-                            {" "}Found {supabaseDebug.debug.tables.storage.bucketsFound} buckets
-                            {supabaseDebug.debug.tables.storage.hasWeddingBucket && " (including wedding-photos)"}
+                            {" "}
+                            Found{" "}
+                            {
+                              supabaseDebug.debug.tables.storage.bucketsFound
+                            }{" "}
+                            buckets
+                            {supabaseDebug.debug.tables.storage
+                              .hasWeddingBucket &&
+                              " (including wedding-photos)"}
                           </span>
                         )}
 
                         {supabaseDebug.debug.tables.storage.bucketNames && (
                           <div className="mt-1 text-sm">
-                            Buckets: {supabaseDebug.debug.tables.storage.bucketNames.join(", ")}
+                            Buckets:{" "}
+                            {supabaseDebug.debug.tables.storage.bucketNames.join(
+                              ", ",
+                            )}
                           </div>
                         )}
                       </div>
@@ -307,7 +350,9 @@ export default function Debug() {
                 </details>
               </div>
             ) : (
-              <div className="text-gray-500">Loading Supabase debug info...</div>
+              <div className="text-gray-500">
+                Loading Supabase debug info...
+              </div>
             )}
           </CardContent>
         </Card>

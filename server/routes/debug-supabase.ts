@@ -4,22 +4,30 @@ import { createClient } from "@supabase/supabase-js";
 export const debugSupabase = async (req: Request, res: Response) => {
   try {
     // Check environment variables
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseKey =
+      process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
     const debug = {
       environment: {
         NODE_ENV: process.env.NODE_ENV,
         hasUrl: !!supabaseUrl,
         hasKey: !!supabaseKey,
-        urlFormat: supabaseUrl ? (
-          supabaseUrl.includes("supabase.co") ? "Valid format" : "Invalid format"
-        ) : "Not set",
-        urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + "..." : "Not set",
+        urlFormat: supabaseUrl
+          ? supabaseUrl.includes("supabase.co")
+            ? "Valid format"
+            : "Invalid format"
+          : "Not set",
+        urlPreview: supabaseUrl
+          ? supabaseUrl.substring(0, 30) + "..."
+          : "Not set",
         keyLength: supabaseKey ? supabaseKey.length : 0,
-        keyFormat: supabaseKey ? (
-          supabaseKey.startsWith("eyJ") ? "Valid JWT format" : "Invalid format"
-        ) : "Not set",
+        keyFormat: supabaseKey
+          ? supabaseKey.startsWith("eyJ")
+            ? "Valid JWT format"
+            : "Invalid format"
+          : "Not set",
       },
       connection: {},
       tables: {},
@@ -67,7 +75,8 @@ export const debugSupabase = async (req: Request, res: Response) => {
             debug.tables.photosTable = {
               exists: true,
               hasData: tableInfo.length > 0,
-              sampleColumns: tableInfo.length > 0 ? Object.keys(tableInfo[0]) : [],
+              sampleColumns:
+                tableInfo.length > 0 ? Object.keys(tableInfo[0]) : [],
             };
           } else if (tableError) {
             debug.tables.photosTable = {
@@ -85,13 +94,16 @@ export const debugSupabase = async (req: Request, res: Response) => {
 
         // Test storage bucket
         try {
-          const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-          
+          const { data: buckets, error: bucketError } =
+            await supabase.storage.listBuckets();
+
           if (!bucketError && buckets) {
-            const weddingBucket = buckets.find(b => b.name === "wedding-photos");
+            const weddingBucket = buckets.find(
+              (b) => b.name === "wedding-photos",
+            );
             debug.tables.storage = {
               bucketsFound: buckets.length,
-              bucketNames: buckets.map(b => b.name),
+              bucketNames: buckets.map((b) => b.name),
               hasWeddingBucket: !!weddingBucket,
               weddingBucketPublic: weddingBucket?.public || false,
             };
@@ -105,7 +117,6 @@ export const debugSupabase = async (req: Request, res: Response) => {
             error: storageError.message,
           };
         }
-
       } catch (clientError: any) {
         debug.connection.clientCreated = false;
         debug.connection.clientError = clientError.message;
@@ -122,7 +133,6 @@ export const debugSupabase = async (req: Request, res: Response) => {
       debug,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error: any) {
     res.status(500).json({
       success: false,

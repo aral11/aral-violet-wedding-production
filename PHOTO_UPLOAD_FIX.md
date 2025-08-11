@@ -7,6 +7,7 @@ Your photos are not uploading or displaying because **Supabase environment varia
 ## Quick Fix Steps 🔧
 
 ### Step 1: Get Your Supabase Credentials
+
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Create a new project (if you don't have one)
 3. Go to **Settings > API** in your project dashboard
@@ -15,6 +16,7 @@ Your photos are not uploading or displaying because **Supabase environment varia
    - **Anonymous Key** (long string starting with `eyJ...`)
 
 ### Step 2: Update Environment Variables
+
 1. Open the `.env.local` file (I just created it for you)
 2. Replace the placeholders with your actual values:
    ```env
@@ -23,6 +25,7 @@ Your photos are not uploading or displaying because **Supabase environment varia
    ```
 
 ### Step 3: Set Up Supabase Database Tables
+
 Run this SQL in your Supabase SQL Editor (Database > SQL Editor):
 
 ```sql
@@ -61,6 +64,7 @@ CREATE POLICY "Allow public to read photos" ON storage.objects
 ```
 
 ### Step 4: Restart Development Server
+
 ```bash
 npm run dev
 ```
@@ -76,6 +80,7 @@ For easier setup, you can connect the **Supabase MCP server** which will help ma
 ## Testing the Fix ✅
 
 After configuration:
+
 1. Go to the guest upload page (`/guest-upload`)
 2. Try uploading a photo
 3. Check the browser console - should see ✅ success messages instead of ❌ errors
@@ -84,11 +89,13 @@ After configuration:
 ## Current Fallback 📱
 
 Right now your app is using **localStorage** as a fallback, which means:
+
 - ✅ Photos work locally on each device
 - ❌ Photos don't sync between devices
 - ❌ Photos are lost when browser cache is cleared
 
 Once Supabase is configured:
+
 - ✅ Photos sync across all devices
 - ✅ Photos are permanently stored
 - ✅ Real-time updates for guests
@@ -96,6 +103,7 @@ Once Supabase is configured:
 ## Need Help? 🆘
 
 If you need assistance with Supabase setup, the **Supabase MCP integration** can help you:
+
 - Create and manage database tables
 - Set up authentication
 - Configure storage buckets
