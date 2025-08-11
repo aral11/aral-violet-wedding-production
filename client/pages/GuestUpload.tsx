@@ -467,11 +467,16 @@ export default function GuestUpload() {
 
               <div className="mt-4 space-y-1">
                 <p className="text-sm text-sage-600">
-                  Select multiple photos • Up to 25MB per photo supported
+                  Select multiple photos • Up to 200MB per photo supported
                 </p>
                 <p className="text-xs text-sage-500">
                   Supports: JPG, PNG, GIF, WebP, BMP formats
                 </p>
+                {!isWeddingDateOrAfter && !isAdminMode && (
+                  <p className="text-xs text-amber-600 font-medium">
+                    ⚠️ Uploads available from December 28, 2025
+                  </p>
+                )}
               </div>
             </div>
 
