@@ -15,7 +15,14 @@ export default function GuestUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [adminPin, setAdminPin] = useState("");
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if current date is on or after December 28, 2025
+  const weddingDate = new Date("2025-12-28T00:00:00");
+  const currentDate = new Date();
+  const isWeddingDateOrAfter = currentDate >= weddingDate;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!guestName.trim()) {
