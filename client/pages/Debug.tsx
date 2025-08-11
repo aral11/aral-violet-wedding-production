@@ -39,6 +39,22 @@ export default function Debug() {
     setIsLoading(false);
   };
 
+  const testSupabaseDebug = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/debug-supabase");
+      const result = await response.json();
+      setSupabaseDebug(result);
+    } catch (error) {
+      setSupabaseDebug({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
+      });
+    }
+    setIsLoading(false);
+  };
+
   const testPhotosLoad = async () => {
     setIsLoading(true);
     try {
