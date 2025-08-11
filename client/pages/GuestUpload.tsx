@@ -424,7 +424,7 @@ export default function GuestUpload() {
               </h3>
               <p className="text-sage-600 mb-6">
                 Share the photos you took of the couple during the wedding (up
-                to 25MB per photo)
+                to 200MB per photo)
               </p>
 
               <input
