@@ -1477,11 +1477,7 @@ Please RSVP at our wedding website
                         >
                           <img
                             src={photo}
-                            alt={
-                              isPlaceholder
-                                ? `Configuration needed ${actualIndex + 1}`
-                                : `Wedding memory ${actualIndex + 1}`
-                            }
+                            alt={`Wedding memory ${actualIndex + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             loading="lazy"
                           />
