@@ -15,6 +15,7 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already authenticated
   if (isAuthenticated) {
