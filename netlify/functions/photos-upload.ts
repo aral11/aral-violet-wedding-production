@@ -75,12 +75,12 @@ exports.handler = async (event, context) => {
         : uploadedBy;
 
     // Convert base64 to buffer for storage
-    const base64Data = photoData.split(',')[1];
-    const buffer = Buffer.from(base64Data, 'base64');
+    const base64Data = photoData.split(",")[1];
+    const buffer = Buffer.from(base64Data, "base64");
 
     // Get MIME type from base64 string
-    const mimeType = photoData.match(/data:([^;]+);/)?.[1] || 'image/jpeg';
-    const fileExtension = mimeType.split('/')[1] || 'jpg';
+    const mimeType = photoData.match(/data:([^;]+);/)?.[1] || "image/jpeg";
+    const fileExtension = mimeType.split("/")[1] || "jpg";
 
     // Generate unique filename
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
@@ -90,11 +90,11 @@ exports.handler = async (event, context) => {
 
     // Upload to Supabase Storage
     const { data: storageData, error: storageError } = await supabase.storage
-      .from('wedding-photos')
+      .from("wedding-photos")
       .upload(filePath, buffer, {
         contentType: mimeType,
-        cacheControl: '3600',
-        upsert: false
+        cacheControl: "3600",
+        upsert: false,
       });
 
     if (storageError) {
@@ -111,7 +111,7 @@ exports.handler = async (event, context) => {
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from('wedding-photos')
+      .from("wedding-photos")
       .getPublicUrl(filePath);
 
     const publicUrl = urlData.publicUrl;
@@ -135,7 +135,7 @@ exports.handler = async (event, context) => {
 
       // Clean up uploaded file if database insert fails
       try {
-        await supabase.storage.from('wedding-photos').remove([filePath]);
+        await supabase.storage.from("wedding-photos").remove([filePath]);
         console.log("🗑️ Cleaned up uploaded file after database error");
       } catch (cleanupError) {
         console.warn("⚠️ Failed to clean up uploaded file:", cleanupError);

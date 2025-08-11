@@ -453,7 +453,11 @@ export const photoService = {
           };
 
           // Also save to localStorage for offline access
-          this.saveToLocalStorage(photo.photo_data, actualUploadedBy, guestName);
+          this.saveToLocalStorage(
+            photo.photo_data,
+            actualUploadedBy,
+            guestName,
+          );
 
           // Trigger gallery refresh
           this.clearGalleryCache();
@@ -482,16 +486,15 @@ export const photoService = {
         const blob = await response.blob();
 
         // Generate unique filename
-        const fileExtension = blob.type.split('/')[1] || 'jpg';
+        const fileExtension = blob.type.split("/")[1] || "jpg";
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
         const filePath = `wedding-photos/${fileName}`;
 
         // Upload to Supabase Storage
-        const { data: storageData, error: storageError } = await supabase.storage
-          .from('wedding-photos')
-          .upload(filePath, blob, {
-            cacheControl: '3600',
-            upsert: false
+        const { data: storageData, error: storageError } =
+          await supabase.storage.from("wedding-photos").upload(filePath, blob, {
+            cacheControl: "3600",
+            upsert: false,
           });
 
         if (storageError) {
@@ -501,7 +504,7 @@ export const photoService = {
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('wedding-photos')
+          .from("wedding-photos")
           .getPublicUrl(filePath);
 
         const publicUrl = urlData.publicUrl;
@@ -522,7 +525,7 @@ export const photoService = {
 
         if (error) {
           // If database insert fails, try to clean up the uploaded file
-          await supabase.storage.from('wedding-photos').remove([filePath]);
+          await supabase.storage.from("wedding-photos").remove([filePath]);
           throw error;
         }
 
