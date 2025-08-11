@@ -31,6 +31,7 @@ import {
 import { sendRSVPSMSNotification, testSMS } from "./routes/sms";
 import { debugSMS } from "./routes/debug-sms";
 import { downloadInvitation } from "./routes/download-invitation";
+import { testSupabaseConnection } from "./routes/test-connection";
 
 export async function createServer() {
   const app = express();
