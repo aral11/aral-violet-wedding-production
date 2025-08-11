@@ -1070,7 +1070,7 @@ export default function AdminDashboard() {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "File Too Large",
-          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`,
+          description: `"${file.name}" is ${sizeMB}MB. Maximum size is 200MB.`,
           variant: "destructive",
           duration: 4000,
         });
