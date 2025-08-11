@@ -639,6 +639,61 @@ Made with love ❤️ By Aral D'Souza
     console.log("Wedding flow downloaded");
   };
 
+  const downloadQRCode = async () => {
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(
+        window.location.origin +
+          (import.meta.env.PROD &&
+          import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+            ? "/aral-violet-wedding"
+            : "") +
+          "/guest-upload",
+      )}`;
+
+      // Fetch the QR code image
+      const response = await fetch(qrUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch QR code");
+      }
+
+      const blob = await response.blob();
+
+      // Use mobile-optimized download utility
+      const downloadSuccess = mobileOptimizedDownload(blob, {
+        filename: "aral-violet-wedding-qr-code.png",
+        mimeType: "image/png",
+      });
+
+      if (!downloadSuccess) {
+        // Fallback to original method
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "aral-violet-wedding-qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+
+      toast({
+        title: "QR Code Downloaded! 📱",
+        description: "The QR code for guest photo uploads has been downloaded.",
+        duration: 3000,
+      });
+
+      console.log("QR code downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading QR code:", error);
+      toast({
+        title: "Download Error ❌",
+        description: "Failed to download QR code. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
   const downloadInvitation = async () => {
     try {
       // Mobile detection and utilities
