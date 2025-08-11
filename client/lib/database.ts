@@ -149,18 +149,20 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // For Netlify deployments, try API first since Supabase environment variables
+    // For Netlify deployments, try Netlify Functions first since Supabase environment variables
     // are handled server-side via Netlify Functions
     const isNetlifyDeployment = window.location.hostname.includes('netlify') ||
+                                 window.location.hostname.includes('netlify.app') ||
                                  import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
 
     if (isNetlifyDeployment) {
-      console.log("📸 Detected Netlify deployment, prioritizing API route...");
+      console.log("📸 Detected Netlify deployment, using Netlify Functions...");
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        const response = await fetch("/api/photos", {
+        // Try the dedicated Netlify function first
+        const response = await fetch("/.netlify/functions/photos-get", {
           method: "GET",
           headers: {
             Accept: "application/json",
