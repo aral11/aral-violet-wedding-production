@@ -670,16 +670,20 @@ export const photoService = {
       console.log("🗑️ Clearing gallery cache...");
 
       // Dispatch storage event to notify other components
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'wedding_photos',
-        storageArea: localStorage
-      }));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "wedding_photos",
+          storageArea: localStorage,
+        }),
+      );
 
       // Also dispatch for guest photos
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'wedding_guest_photos',
-        storageArea: localStorage
-      }));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "wedding_guest_photos",
+          storageArea: localStorage,
+        }),
+      );
 
       console.log("✅ Gallery cache cleared");
     } catch (error) {

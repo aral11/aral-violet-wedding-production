@@ -14,6 +14,7 @@
 **File**: `client/lib/database.ts`
 
 Added new cache management methods:
+
 - `clearGalleryCache()`: Clears cache and dispatches storage events
 - `forceRefresh()`: Forces a complete refresh of photo data
 - Enhanced `saveToLocalStorage()` to automatically clear cache after saving
@@ -21,6 +22,7 @@ Added new cache management methods:
 ### 2. Automatic Cache Clearing
 
 All photo upload operations now automatically:
+
 - Clear gallery cache after successful uploads
 - Dispatch storage events to notify other components
 - Force immediate refresh of gallery data
@@ -30,6 +32,7 @@ All photo upload operations now automatically:
 **File**: `client/pages/AdminDashboard.tsx`
 
 Improvements:
+
 - Added storage event listener for automatic gallery refresh
 - Updated success messages to reflect automatic updates
 - Enhanced refresh buttons with cache clearing
@@ -41,6 +44,7 @@ Improvements:
 **File**: `client/pages/Index.tsx`
 
 Improvements:
+
 - Enhanced storage change listener to handle both admin and guest photos
 - Automatic refresh when photos are added from any source
 
@@ -49,6 +53,7 @@ Improvements:
 **File**: `client/pages/GuestUpload.tsx`
 
 The guest upload already uses the enhanced database service, so it automatically benefits from:
+
 - Cache clearing after uploads
 - Storage event dispatching
 - Immediate gallery refresh
@@ -64,9 +69,9 @@ clearGalleryCache(): void {
     key: 'wedding_photos',
     storageArea: localStorage
   }));
-  
+
   window.dispatchEvent(new StorageEvent('storage', {
-    key: 'wedding_guest_photos', 
+    key: 'wedding_guest_photos',
     storageArea: localStorage
   }));
 }
@@ -78,7 +83,7 @@ clearGalleryCache(): void {
 async forceRefresh(): Promise<SupabasePhoto[]> {
   // Clear cache first
   this.clearGalleryCache();
-  
+
   // Get fresh data
   const photos = await this.getAll();
   return photos;
@@ -91,13 +96,13 @@ All gallery components now listen for storage changes:
 
 ```typescript
 const handleStorageChange = (e: StorageEvent) => {
-  if (e.key === 'wedding_photos' || e.key === 'wedding_guest_photos') {
+  if (e.key === "wedding_photos" || e.key === "wedding_guest_photos") {
     console.log("📷 Storage change detected, reloading gallery...");
     loadData(); // or loadPhotos()
   }
 };
 
-window.addEventListener('storage', handleStorageChange);
+window.addEventListener("storage", handleStorageChange);
 ```
 
 ## Testing Verification
@@ -126,6 +131,7 @@ window.addEventListener('storage', handleStorageChange);
 ## Result
 
 The photo upload system now provides a seamless experience where:
+
 - Admin uploads work correctly and are immediately visible
 - Guest uploads are not cached and show real photos
 - Cache is automatically cleared on every upload

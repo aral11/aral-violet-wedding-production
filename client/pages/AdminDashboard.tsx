@@ -350,17 +350,17 @@ export default function AdminDashboard() {
 
     // Listen for storage changes to auto-refresh gallery
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'wedding_photos' || e.key === 'wedding_guest_photos') {
+      if (e.key === "wedding_photos" || e.key === "wedding_guest_photos") {
         console.log("📷 Storage change detected, reloading admin gallery...");
         loadAllData();
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     // Cleanup listener
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
@@ -1194,7 +1194,9 @@ export default function AdminDashboard() {
             if (refreshedPhotos && refreshedPhotos.length > 0) {
               // Filter for valid photos only
               const validPhotos = refreshedPhotos.filter(
-                (photo) => photo.photo_data && photo.photo_data.startsWith("data:image/")
+                (photo) =>
+                  photo.photo_data &&
+                  photo.photo_data.startsWith("data:image/"),
               );
 
               const photoData = validPhotos.map((photo) => photo.photo_data);
