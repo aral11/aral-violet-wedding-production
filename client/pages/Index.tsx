@@ -780,45 +780,14 @@ Made with love ❤️ By Aral D'Souza
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
-          // Mobile-optimized download
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(
-            navigator.userAgent,
-          );
+          // Use mobile-optimized download utility
+          const downloadSuccess = mobileOptimizedDownload(pdfData, {
+            filename: invitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
+            mimeType: "application/pdf",
+          });
 
-          if (isMobile) {
-            // Create blob for mobile compatibility
-            try {
-              if (pdfData.startsWith("data:")) {
-                const base64Data = pdfData.split(",")[1];
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-
-                for (let i = 0; i < byteCharacters.length; i++) {
-                  byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: "application/pdf" });
-                const blobUrl = URL.createObjectURL(blob);
-
-                link.href = blobUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-              } else {
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }
-            } catch (error) {
-              console.warn("Mobile blob creation failed:", error);
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          } else {
+          if (!downloadSuccess) {
+            // Fallback to original method
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
