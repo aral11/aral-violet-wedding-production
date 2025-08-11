@@ -20,34 +20,36 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter
-        basename={
-          import.meta.env.PROD &&
-          import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
-            ? "/aral-violet-wedding"
-            : "/"
-        }
-      >
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/guest-upload" element={<GuestUpload />} />
-            <Route path="/debug" element={<Debug />} />
-            <Route path="/test-photos" element={<TestPhotos />} />
-            <Route path="/supabase-setup" element={<SupabaseSetup />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          basename={
+            import.meta.env.PROD &&
+            import.meta.env.VITE_DEPLOYMENT_PLATFORM !== "netlify"
+              ? "/aral-violet-wedding"
+              : "/"
+          }
+        >
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/guest-upload" element={<GuestUpload />} />
+              <Route path="/debug" element={<Debug />} />
+              <Route path="/test-photos" element={<TestPhotos />} />
+              <Route path="/supabase-setup" element={<SupabaseSetup />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 // Prevent createRoot warning during hot reloads
