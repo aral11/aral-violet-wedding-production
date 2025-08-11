@@ -1469,10 +1469,16 @@ Please RSVP at our wedding website
                     </div>
                     <div className="mt-4 space-x-4">
                       <a
+                        href="/debug"
+                        className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
+                        Debug Connection
+                      </a>
+                      <a
                         href="/test-photos"
                         className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors"
                       >
-                        Test Connection
+                        Test Photos
                       </a>
                       <a
                         href="/login"
