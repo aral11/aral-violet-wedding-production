@@ -31,6 +31,7 @@ import {
 import { sendRSVPSMSNotification, testSMS } from "./routes/sms";
 import { debugSMS } from "./routes/debug-sms";
 import { downloadInvitation } from "./routes/download-invitation";
+import { testSupabaseConnection } from "./routes/test-connection";
 
 export async function createServer() {
   const app = express();
@@ -86,6 +87,9 @@ export async function createServer() {
 
   // Download invitation PDF
   app.get("/api/download-invitation", downloadInvitation);
+
+  // Test Supabase connection (for debugging)
+  app.get("/api/test-connection", testSupabaseConnection);
 
   return app;
 }

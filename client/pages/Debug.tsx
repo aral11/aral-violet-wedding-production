@@ -1,321 +1,264 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/database";
 
+interface ConnectionTest {
+  success: boolean;
+  message: string;
+  details?: any;
+  timestamp: string;
+}
+
 export default function Debug() {
-  const { toast } = useToast();
-  const [photos, setPhotos] = useState<any[]>([]);
-  const [adminPhotos, setAdminPhotos] = useState<any[]>([]);
-  const [guestPhotos, setGuestPhotos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionTest | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [photoStats, setPhotoStats] = useState<any>(null);
 
-  const testPhotoRetrieval = async () => {
-    setLoading(true);
-    setError(null);
-
+  const testConnection = async () => {
+    setIsLoading(true);
     try {
-      console.log("🔍 Starting photo retrieval test...");
-
-      // Test all photos
-      const allPhotos = await database.photos.getAll();
-      console.log("📸 All photos:", allPhotos);
-      setPhotos(allPhotos);
-
-      // Test admin photos
-      const adminPhotosResult = await database.photos.getAdminPhotos();
-      console.log("👨‍💼 Admin photos:", adminPhotosResult);
-      setAdminPhotos(adminPhotosResult);
-
-      // Test guest photos
-      const guestPhotosResult = await database.photos.getGuestPhotos();
-      console.log("👥 Guest photos:", guestPhotosResult);
-      setGuestPhotos(guestPhotosResult);
-
-      toast({
-        title: "Photo Test Complete",
-        description: `Found ${allPhotos.length} total photos (${adminPhotosResult.length} admin, ${guestPhotosResult.length} guest)`,
-        duration: 5000,
+      const response = await fetch("/api/test-connection");
+      const result = await response.json();
+      setConnectionStatus({
+        success: result.success,
+        message: result.message,
+        details: result,
+        timestamp: new Date().toISOString(),
       });
-    } catch (err) {
-      console.error("❌ Photo test failed:", err);
-      setError(err instanceof Error ? err.message : String(err));
-      toast({
-        title: "Photo Test Failed",
-        description: "Check console for details",
-        variant: "destructive",
-        duration: 5000,
+    } catch (error) {
+      setConnectionStatus({
+        success: false,
+        message: "Failed to connect to API",
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
       });
-    } finally {
-      setLoading(false);
     }
+    setIsLoading(false);
   };
 
-  const testSupabaseConnection = async () => {
+  const testPhotosLoad = async () => {
+    setIsLoading(true);
     try {
-      console.log("🔍 Testing Supabase connection...");
-      const isUsing = database.isUsingSupabase();
-      console.log("📊 Using Supabase:", isUsing);
-
-      const status = database.getStorageStatus();
-      console.log("💾 Storage status:", status);
-
-      // Test direct Supabase connection from browser
-      if (isUsing) {
-        console.log("🔍 Testing direct Supabase query from browser...");
-        // Import supabase directly to test
-        const { supabase } = await import("@/lib/supabase");
-        if (supabase) {
-          console.log("📱 Supabase client exists, testing query...");
-          const { data, error } = await supabase
-            .from("photos")
-            .select("*")
-            .limit(5);
-
-          console.log("📸 Direct Supabase query result:", { data, error });
-
-          if (error) {
-            console.error("❌ Direct Supabase query error:", error);
-            toast({
-              title: "Supabase Query Failed",
-              description: `Error: ${error.message}`,
-              variant: "destructive",
-              duration: 5000,
-            });
-          } else {
-            console.log(
-              "✅ Direct Supabase query successful:",
-              data?.length || 0,
-              "photos",
-            );
-            toast({
-              title: "Direct Supabase Test",
-              description: `Success! Found ${data?.length || 0} photos directly from Supabase`,
-              duration: 5000,
-            });
-          }
-        }
-      }
-
-      toast({
-        title: "Storage Info",
-        description: `Using: ${status.type} | Syncs: ${status.syncsAcrossDevices}`,
-        duration: 5000,
+      const photos = await database.photos.getAll();
+      setPhotoStats({
+        totalPhotos: photos.length,
+        validPhotos: photos.filter(
+          (p) => p.photo_data && p.photo_data.startsWith("data:"),
+        ).length,
+        photos: photos.slice(0, 3), // First 3 for preview
+        timestamp: new Date().toISOString(),
       });
-    } catch (err) {
-      console.error("❌ Supabase test failed:", err);
-      toast({
-        title: "Supabase Test Failed",
-        description: `Error: ${err instanceof Error ? err.message : String(err)}`,
-        variant: "destructive",
-        duration: 5000,
+    } catch (error) {
+      setPhotoStats({
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
       });
     }
-  };
-
-  const checkLocalStorage = () => {
-    console.log("🔍 Checking localStorage...");
-
-    const adminPhotosLS = localStorage.getItem("wedding_photos");
-    const guestPhotosLS = localStorage.getItem("wedding_guest_photos");
-
-    console.log(
-      "👨‍💼 Admin photos in localStorage:",
-      adminPhotosLS ? JSON.parse(adminPhotosLS).length : 0,
-    );
-    console.log(
-      "👥 Guest photos in localStorage:",
-      guestPhotosLS ? JSON.parse(guestPhotosLS).length : 0,
-    );
-
-    if (adminPhotosLS) {
-      console.log("Admin photos data:", JSON.parse(adminPhotosLS));
-    }
-
-    if (guestPhotosLS) {
-      console.log("Guest photos data:", JSON.parse(guestPhotosLS));
-    }
-
-    toast({
-      title: "LocalStorage Check",
-      description: `Admin: ${adminPhotosLS ? JSON.parse(adminPhotosLS).length : 0}, Guest: ${guestPhotosLS ? JSON.parse(guestPhotosLS).length : 0}`,
-      duration: 5000,
-    });
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    // Run tests immediately when page loads
-    const runInitialTests = async () => {
-      console.log("🔍 Debug page loaded, running initial tests...");
-      await testPhotoRetrieval();
-      await testSupabaseConnection();
-    };
-
-    runInitialTests();
+    // Auto-test on page load
+    testConnection();
+    testPhotosLoad();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 via-sage-50 to-olive-50 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-serif text-olive-700 mb-2">
+            Debug & Connection Test
+          </h1>
+          <p className="text-sage-600">
+            Test Supabase connection and photo functionality
+          </p>
+        </div>
+
+        {/* Environment Info */}
+        <Card>
           <CardHeader>
-            <CardTitle>Photo Debug Console</CardTitle>
+            <CardTitle className="text-olive-700">
+              Environment Information
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex gap-4 flex-wrap">
-                <Button onClick={testPhotoRetrieval} disabled={loading}>
-                  {loading ? "Testing..." : "Test Photo Retrieval"}
-                </Button>
-                <Button onClick={testSupabaseConnection}>
-                  Test Storage Connection
-                </Button>
-                <Button onClick={checkLocalStorage}>Check LocalStorage</Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      console.log("🔍 Testing API endpoint...");
-                      const response = await fetch("/api/photos");
-                      const data = await response.json();
-                      console.log("📡 API response:", data);
-                      toast({
-                        title: "API Test",
-                        description: `API returned ${Array.isArray(data) ? data.length : "non-array"} items`,
-                        duration: 5000,
-                      });
-                    } catch (err) {
-                      console.error("❌ API test failed:", err);
-                      toast({
-                        title: "API Test Failed",
-                        description: `Error: ${err instanceof Error ? err.message : String(err)}`,
-                        variant: "destructive",
-                        duration: 5000,
-                      });
-                    }
-                  }}
-                >
-                  Test API Endpoint
-                </Button>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <strong>Platform:</strong>{" "}
+                {window.location.hostname.includes("netlify")
+                  ? "Netlify"
+                  : "Local/Other"}
               </div>
-
-              {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                  Error: {error}
-                </div>
-              )}
+              <div>
+                <strong>Hostname:</strong> {window.location.hostname}
+              </div>
+              <div>
+                <strong>Storage Type:</strong>{" "}
+                {database.isUsingSupabase() ? "Supabase" : "localStorage"}
+              </div>
+              <div>
+                <strong>Deployment Platform:</strong>{" "}
+                {import.meta.env.VITE_DEPLOYMENT_PLATFORM || "Not set"}
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Photos ({photos.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {photos.map((photo, index) => (
-                  <div key={index} className="text-sm border-b pb-2">
-                    <div>
-                      <strong>ID:</strong> {photo.id}
-                    </div>
-                    <div>
-                      <strong>Uploaded by:</strong> {photo.uploaded_by}
-                    </div>
-                    <div>
-                      <strong>Guest:</strong> {photo.guest_name || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Data:</strong> {photo.photo_data.substring(0, 50)}
-                      ...
-                    </div>
-                    <div>
-                      <strong>Created:</strong> {photo.created_at}
-                    </div>
-                  </div>
-                ))}
-                {photos.length === 0 && (
-                  <div className="text-gray-500">No photos found</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Admin Photos ({adminPhotos.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {adminPhotos.map((photo, index) => (
-                  <div key={index} className="text-sm border-b pb-2">
-                    <div>
-                      <strong>ID:</strong> {photo.id}
-                    </div>
-                    <div>
-                      <strong>Data:</strong> {photo.photo_data.substring(0, 30)}
-                      ...
-                    </div>
-                  </div>
-                ))}
-                {adminPhotos.length === 0 && (
-                  <div className="text-gray-500">No admin photos found</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Guest Photos ({guestPhotos.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {guestPhotos.map((photo, index) => (
-                  <div key={index} className="text-sm border-b pb-2">
-                    <div>
-                      <strong>ID:</strong> {photo.id}
-                    </div>
-                    <div>
-                      <strong>Guest:</strong> {photo.guest_name}
-                    </div>
-                    <div>
-                      <strong>Uploaded by:</strong> {photo.uploaded_by}
-                    </div>
-                    <div>
-                      <strong>Data:</strong> {photo.photo_data.substring(0, 30)}
-                      ...
-                    </div>
-                  </div>
-                ))}
-                {guestPhotos.length === 0 && (
-                  <div className="text-gray-500">No guest photos found</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="mt-6">
+        {/* Connection Test */}
+        <Card>
           <CardHeader>
-            <CardTitle>Storage Information</CardTitle>
+            <CardTitle className="text-olive-700 flex items-center justify-between">
+              Supabase Connection Test
+              <Button
+                onClick={testConnection}
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+              >
+                {isLoading ? "Testing..." : "Retest"}
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {connectionStatus ? (
+              <div
+                className={`p-4 rounded-lg ${connectionStatus.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+              >
+                <div className="flex items-center mb-2">
+                  <span
+                    className={`w-3 h-3 rounded-full mr-2 ${connectionStatus.success ? "bg-green-500" : "bg-red-500"}`}
+                  ></span>
+                  <strong>{connectionStatus.message}</strong>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Tested at:{" "}
+                  {new Date(connectionStatus.timestamp).toLocaleString()}
+                </div>
+                {connectionStatus.details && (
+                  <details className="mt-4">
+                    <summary className="cursor-pointer text-sm font-medium">
+                      Show Details
+                    </summary>
+                    <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
+                      {JSON.stringify(connectionStatus.details, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            ) : (
+              <div className="text-gray-500">
+                No connection test results yet...
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Photo Stats */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-olive-700 flex items-center justify-between">
+              Photo Database Test
+              <Button
+                onClick={testPhotosLoad}
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+              >
+                {isLoading ? "Loading..." : "Reload"}
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {photoStats ? (
+              <div>
+                {photoStats.error ? (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <strong>Error loading photos:</strong> {photoStats.error}
+                  </div>
+                ) : (
+                  <div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <strong>Total Photos:</strong> {photoStats.totalPhotos}
+                      </div>
+                      <div>
+                        <strong>Valid Photos:</strong> {photoStats.validPhotos}
+                      </div>
+                    </div>
+
+                    {photoStats.photos && photoStats.photos.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">Sample Photos:</h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          {photoStats.photos.map(
+                            (photo: any, index: number) => (
+                              <div
+                                key={index}
+                                className="border rounded p-2 text-xs"
+                              >
+                                <div>
+                                  <strong>ID:</strong> {photo.id}
+                                </div>
+                                <div>
+                                  <strong>By:</strong> {photo.uploaded_by}
+                                </div>
+                                <div>
+                                  <strong>Data:</strong>{" "}
+                                  {photo.photo_data
+                                    ? photo.photo_data.substring(0, 30) + "..."
+                                    : "No data"}
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4 text-sm text-gray-600">
+                      Last checked:{" "}
+                      {new Date(photoStats.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-gray-500">Loading photo statistics...</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-olive-700">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div>
-                <strong>Using Supabase:</strong>{" "}
-                {database.isUsingSupabase() ? "Yes" : "No"}
-              </div>
-              <div>
-                <strong>Storage Type:</strong>{" "}
-                {database.getStorageStatus().type}
-              </div>
-              <div>
-                <strong>Syncs Across Devices:</strong>{" "}
-                {database.getStorageStatus().syncsAcrossDevices ? "Yes" : "No"}
-              </div>
+              <Button
+                onClick={() => (window.location.href = "/")}
+                variant="outline"
+                className="mr-2"
+              >
+                ← Back to Home
+              </Button>
+              <Button
+                onClick={() => (window.location.href = "/admin")}
+                variant="outline"
+                className="mr-2"
+              >
+                Admin Dashboard
+              </Button>
+              <Button
+                onClick={() => localStorage.clear()}
+                variant="outline"
+                className="mr-2"
+              >
+                Clear localStorage
+              </Button>
             </div>
           </CardContent>
         </Card>

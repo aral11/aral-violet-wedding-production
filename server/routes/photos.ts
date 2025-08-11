@@ -47,23 +47,33 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Supabase configuration - check both server and client env vars
+// Supabase configuration - check all possible environment variable sources
 const supabaseUrl =
-  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL ||
+  process.env.REACT_APP_SUPABASE_URL ||
+  "";
 const supabaseKey =
-  process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.REACT_APP_SUPABASE_ANON_KEY ||
+  "";
 
 let supabase: any = null;
 if (
   supabaseUrl &&
   supabaseKey &&
   supabaseUrl !== "YOUR_SUPABASE_URL" &&
-  supabaseKey !== "YOUR_SUPABASE_ANON_KEY"
+  supabaseKey !== "YOUR_SUPABASE_ANON_KEY" &&
+  supabaseUrl !== "https://yourproject.supabase.co" &&
+  supabaseKey !== "your_anon_key_here" &&
+  supabaseUrl.includes("supabase.co")
 ) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("✅ Supabase client initialized for photos service");
-    console.log("📊 Supabase URL:", supabaseUrl.substring(0, 30) + "...");
+    console.log("📊 Supabase URL:", supabaseUrl.substring(0, 50) + "...");
+    console.log("🔑 Supabase Key:", supabaseKey.substring(0, 20) + "...");
   } catch (error) {
     console.warn("❌ Failed to initialize Supabase for photos:", error);
   }
@@ -71,13 +81,20 @@ if (
   console.warn(
     "⚠️ Supabase credentials not properly configured - photos service will use fallback mock data",
   );
-  console.log("📋 Available env vars:", {
-    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ? "set" : "not set",
-    SUPABASE_URL: process.env.SUPABASE_URL ? "set" : "not set",
+  console.log("📋 Environment check:", {
+    NODE_ENV: process.env.NODE_ENV,
+    SUPABASE_URL: process.env.SUPABASE_URL
+      ? `${process.env.SUPABASE_URL.substring(0, 30)}...`
+      : "not set",
+    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL
+      ? `${process.env.VITE_SUPABASE_URL.substring(0, 30)}...`
+      : "not set",
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
     VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
       ? "set"
       : "not set",
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
+    detectedUrl: supabaseUrl || "none",
+    detectedKey: supabaseKey ? "present" : "missing",
   });
 }
 
@@ -90,23 +107,31 @@ export const getPhotos: RequestHandler = async (req, res) => {
     if (supabase) {
       console.log("📸 Using Supabase for photos");
 
-      // Test Supabase connection first
+      // Test Supabase connection with better error handling
       try {
         const { data: testData, error: testError } = await supabase
           .from("photos")
-          .select("count", { count: "exact", head: true });
+          .select("count", { count: "exact", head: true })
+          .limit(1);
 
         if (testError) {
-          console.error("📸 Supabase connection test failed:", testError);
+          console.error("📸 Supabase connection test failed:", {
+            message: testError.message,
+            details: testError.details,
+            hint: testError.hint,
+            code: testError.code,
+          });
           throw testError;
         }
 
-        console.log(
-          "📸 Supabase connection successful, total photos:",
-          testData?.length || 0,
-        );
+        console.log("📸 Supabase connection successful, query test passed");
       } catch (connectionError) {
-        console.error("📸 Supabase connection failed:", connectionError);
+        console.error("📸 Supabase connection failed:", {
+          message: connectionError.message,
+          details: connectionError.details || connectionError.toString(),
+          hint: connectionError.hint || "",
+          code: connectionError.code || "",
+        });
         throw connectionError;
       }
 
