@@ -74,12 +74,55 @@ exports.handler = async (event, context) => {
         ? `guest_${guestName || "anonymous"}_${Date.now()}`
         : uploadedBy;
 
-    // Insert photo into database
+    // Convert base64 to buffer for storage
+    const base64Data = photoData.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Get MIME type from base64 string
+    const mimeType = photoData.match(/data:([^;]+);/)?.[1] || 'image/jpeg';
+    const fileExtension = mimeType.split('/')[1] || 'jpg';
+
+    // Generate unique filename
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
+    const filePath = `wedding-photos/${fileName}`;
+
+    console.log(`📸 Uploading to storage: ${filePath}`);
+
+    // Upload to Supabase Storage
+    const { data: storageData, error: storageError } = await supabase.storage
+      .from('wedding-photos')
+      .upload(filePath, buffer, {
+        contentType: mimeType,
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (storageError) {
+      console.error("❌ Storage upload error:", storageError);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: "Failed to upload to storage",
+          details: storageError.message,
+        }),
+      };
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('wedding-photos')
+      .getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl;
+    console.log(`✅ Photo uploaded to storage, public URL: ${publicUrl}`);
+
+    // Insert photo record into database with public URL
     const { data, error } = await supabase
       .from("photos")
       .insert([
         {
-          photo_data: photoData,
+          photo_data: publicUrl,
           uploaded_by: actualUploadedBy,
           guest_name: guestName || null,
         },
