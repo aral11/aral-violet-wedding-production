@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
           ui: [
             "@radix-ui/react-accordion",
             "@radix-ui/react-dialog",
-            "@radix-ui/react-button",
+            "@radix-ui/react-slot",
           ],
           utils: ["clsx", "date-fns", "lucide-react"],
         },
