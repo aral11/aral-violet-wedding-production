@@ -439,14 +439,23 @@ export default function GuestUpload() {
 
               <Button
                 onClick={handleUploadClick}
-                disabled={isUploading || !guestName.trim()}
-                className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg"
+                disabled={isUploading || !guestName.trim() || (!isWeddingDateOrAfter && !isAdminMode)}
+                className={`px-8 py-3 text-lg ${
+                  (!isWeddingDateOrAfter && !isAdminMode)
+                    ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                    : "bg-olive-600 hover:bg-olive-700"
+                } text-white`}
                 size="lg"
               >
                 {isUploading ? (
                   <>
                     <Upload className="mr-2 w-5 h-5 animate-spin" />
                     Uploading...
+                  </>
+                ) : (!isWeddingDateOrAfter && !isAdminMode) ? (
+                  <>
+                    <Lock className="mr-2 w-5 h-5" />
+                    Upload Restricted
                   </>
                 ) : (
                   <>
