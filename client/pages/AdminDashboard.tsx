@@ -1767,7 +1767,7 @@ export default function AdminDashboard() {
     </div>
 
     <div class="footer">
-        <div class="logo">❤️ TheVIRALWedding</div>
+        <div class="logo">❤��� TheVIRALWedding</div>
         <div style="font-size: 1.2em; margin: 10px 0;">Aral & Violet �� December 28, 2025</div>
         <div style="color: #718096;">With hearts full of joy and blessings from above</div>
         <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
@@ -2182,7 +2182,7 @@ export default function AdminDashboard() {
                         Upload Wedding Photos
                       </h3>
                       <p className="text-sage-600 mb-6">
-                        Upload high-quality photos (up to 25MB each) for the
+                        Upload high-quality photos (up to 200MB each) for the
                         wedding gallery
                       </p>
                       <input
@@ -2230,12 +2230,12 @@ export default function AdminDashboard() {
                           size="lg"
                         >
                           <Upload className="mr-3" size={24} />
-                          Select Photos (up to 25MB each)
+                          Select Photos (up to 200MB each)
                         </Button>
                         <div className="text-center space-y-2 max-w-md">
                           <p className="text-sm text-sage-600 font-medium">
-                            Select multiple photos • Up to 25MB per photo
-                            supported
+                            Select multiple photos • Up to 200MB per photo
+                          supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
@@ -3340,7 +3340,7 @@ export default function AdminDashboard() {
                           • Keep admin credentials confidential and secure
                         </li>
                         <li>• Download RSVP data regularly as backup</li>
-                        <li>• Photo uploads support up to 25MB per image</li>
+                        <li>• Photo uploads support up to 200MB per image</li>
                         <li>
                           • Wedding timeline download for guests activates on
                           December 28, 2025
