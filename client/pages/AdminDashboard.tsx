@@ -2235,7 +2235,7 @@ export default function AdminDashboard() {
                         <div className="text-center space-y-2 max-w-md">
                           <p className="text-sm text-sage-600 font-medium">
                             Select multiple photos • Up to 200MB per photo
-                          supported
+                            supported
                           </p>
                           <p className="text-xs text-sage-500">
                             Supports: JPG, PNG, GIF, WebP, BMP formats
