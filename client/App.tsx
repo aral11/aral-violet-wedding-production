@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { initPerformanceMonitoring } from "./lib/performance";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -16,6 +17,9 @@ import Debug from "./pages/Debug";
 import TestPhotos from "./pages/TestPhotos";
 import SupabaseSetup from "./pages/SupabaseSetup";
 import NotFound from "./pages/NotFound";
+
+// Initialize performance monitoring for production
+initPerformanceMonitoring();
 
 const queryClient = new QueryClient();
 
