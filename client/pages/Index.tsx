@@ -161,7 +161,7 @@ export default function Index() {
     // Also check when the page becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log("📸 Page became visible, refreshing gallery...");
+        console.log("���� Page became visible, refreshing gallery...");
         loadPhotos();
       }
     };
@@ -1447,6 +1447,7 @@ Please RSVP at our wedding website
                           alt={`Wedding memory ${actualIndex + 1}`}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     );
