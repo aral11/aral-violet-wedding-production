@@ -347,6 +347,21 @@ export default function AdminDashboard() {
     };
 
     loadAllData();
+
+    // Listen for storage changes to auto-refresh gallery
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'wedding_photos' || e.key === 'wedding_guest_photos') {
+        console.log("📷 Storage change detected, reloading admin gallery...");
+        loadAllData();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Data persistence is now handled by the database service (Supabase + localStorage fallback)
