@@ -104,7 +104,7 @@ export default function GuestUpload() {
       const maxSize = 200 * 1024 * 1024; // 200MB
       if (file.size > maxSize) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-        const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`;
+        const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 200MB.`;
         console.error(`❌ ${errorMsg}`);
         toast({
           title: "File Too Large",
