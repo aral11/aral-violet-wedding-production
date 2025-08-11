@@ -47,55 +47,22 @@ export const validateGuestUpload: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Supabase configuration - check all possible environment variable sources
-const supabaseUrl =
-  process.env.SUPABASE_URL ||
-  process.env.VITE_SUPABASE_URL ||
-  process.env.REACT_APP_SUPABASE_URL ||
-  "";
-const supabaseKey =
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  process.env.REACT_APP_SUPABASE_ANON_KEY ||
-  "";
+// Supabase configuration
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || "";
 
 let supabase: any = null;
-if (
-  supabaseUrl &&
-  supabaseKey &&
-  supabaseUrl !== "YOUR_SUPABASE_URL" &&
-  supabaseKey !== "YOUR_SUPABASE_ANON_KEY" &&
-  supabaseUrl !== "https://yourproject.supabase.co" &&
-  supabaseKey !== "your_anon_key_here" &&
-  supabaseUrl.includes("supabase.co")
-) {
+if (supabaseUrl && supabaseKey) {
   try {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("✅ Supabase client initialized for photos service");
-    console.log("📊 Supabase URL:", supabaseUrl.substring(0, 50) + "...");
-    console.log("🔑 Supabase Key:", supabaseKey.substring(0, 20) + "...");
   } catch (error) {
     console.warn("❌ Failed to initialize Supabase for photos:", error);
   }
 } else {
   console.warn(
-    "⚠️ Supabase credentials not properly configured - photos service will use fallback mock data",
+    "⚠️ Supabase credentials not found - photos service will use fallback",
   );
-  console.log("📋 Environment check:", {
-    NODE_ENV: process.env.NODE_ENV,
-    SUPABASE_URL: process.env.SUPABASE_URL
-      ? `${process.env.SUPABASE_URL.substring(0, 30)}...`
-      : "not set",
-    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL
-      ? `${process.env.VITE_SUPABASE_URL.substring(0, 30)}...`
-      : "not set",
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "set" : "not set",
-    VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
-      ? "set"
-      : "not set",
-    detectedUrl: supabaseUrl || "none",
-    detectedKey: supabaseKey ? "present" : "missing",
-  });
 }
 
 // Get all photos with optional filtering by uploader type
