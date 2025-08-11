@@ -13,6 +13,7 @@ interface ConnectionTest {
 export default function Debug() {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionTest | null>(null);
+  const [supabaseDebug, setSupabaseDebug] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [photoStats, setPhotoStats] = useState<any>(null);
 
