@@ -738,41 +738,19 @@ Made with love ❤️ By Aral D'Souza
         link.download = "Aral-Violet-Wedding-Invitation.pdf";
         link.target = "_blank";
 
-        // Mobile-optimized download
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        // Use mobile-optimized download utility
+        const downloadSuccess = mobileOptimizedDownload(blob, {
+          filename: "Aral-Violet-Wedding-Invitation.pdf",
+          mimeType: "application/pdf",
+        });
 
-        if (isMobile) {
-          // For mobile, use a more reliable download approach
-          try {
-            // Add download attribute for modern mobile browsers
-            link.setAttribute("download", "Aral-Violet-Wedding-Invitation.pdf");
-            link.style.display = "none";
-            document.body.appendChild(link);
-
-            // Trigger click event
-            const clickEvent = new MouseEvent("click", {
-              view: window,
-              bubbles: true,
-              cancelable: false,
-            });
-            link.dispatchEvent(clickEvent);
-
-            document.body.removeChild(link);
-          } catch (mobileError) {
-            console.warn(
-              "Mobile download failed, trying fallback:",
-              mobileError,
-            );
-            // Fallback to standard approach
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        } else {
+        if (!downloadSuccess) {
+          // Fallback to original method
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
         }
+
         window.URL.revokeObjectURL(url);
 
         toast({
