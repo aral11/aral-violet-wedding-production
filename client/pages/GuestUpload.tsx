@@ -100,8 +100,8 @@ export default function GuestUpload() {
         throw new Error(`Invalid file type: ${file.name}`);
       }
 
-      // Check file size (25MB max)
-      const maxSize = 25 * 1024 * 1024; // 25MB
+      // Check file size (200MB max as requested)
+      const maxSize = 200 * 1024 * 1024; // 200MB
       if (file.size > maxSize) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         const errorMsg = `"${file.name}" is ${sizeMB}MB. Maximum size is 25MB.`;
