@@ -1185,23 +1185,31 @@ export default function AdminDashboard() {
           return newPhotos;
         });
 
-        // Force refresh of gallery data from database
+        // Force refresh of gallery data from database with cache clearing
         setTimeout(async () => {
           try {
-            const refreshedPhotos = await database.photos.getAll();
+            console.log("🔄 Auto-refreshing gallery after admin upload...");
+            const refreshedPhotos = await database.photos.forceRefresh();
+
             if (refreshedPhotos && refreshedPhotos.length > 0) {
-              const photoData = refreshedPhotos.map(
-                (photo) => photo.photo_data,
+              // Filter for valid photos only
+              const validPhotos = refreshedPhotos.filter(
+                (photo) => photo.photo_data && photo.photo_data.startsWith("data:image/")
               );
+
+              const photoData = validPhotos.map((photo) => photo.photo_data);
               setUploadedPhotos(photoData);
+
               console.log(
-                `📷 Gallery refreshed with ${refreshedPhotos.length} total photos`,
+                `📷 Admin gallery auto-refreshed: ${validPhotos.length} total photos (${refreshedPhotos.length} raw from DB)`,
               );
+            } else {
+              console.log("📷 No photos found after refresh");
             }
           } catch (error) {
-            console.log("Gallery refresh failed:", error);
+            console.log("Auto gallery refresh failed:", error);
           }
-        }, 1000);
+        }, 500);
       }
 
       // Show final message
@@ -3244,7 +3252,7 @@ export default function AdminDashboard() {
                           <ul className="space-y-1 text-sage-600">
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
-                            <li>��� Guest experience overview</li>
+                            <li>• Guest experience overview</li>
                             <li>• Wedding day information</li>
                           </ul>
                         </div>
