@@ -48,7 +48,8 @@ export default function GuestUpload() {
     if (!isWeddingDateOrAfter && !isAdminMode) {
       toast({
         title: "Upload Restricted 🗓️",
-        description: "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
+        description:
+          "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
         variant: "destructive",
         duration: 5000,
       });
@@ -242,7 +243,8 @@ export default function GuestUpload() {
     if (!isWeddingDateOrAfter && !isAdminMode) {
       toast({
         title: "Upload Restricted 🗓️",
-        description: "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
+        description:
+          "Photo uploads will be available starting December 28, 2025. Admin can upload with PIN.",
         variant: "destructive",
         duration: 5000,
       });
@@ -350,7 +352,8 @@ export default function GuestUpload() {
                   </h4>
                 </div>
                 <p className="text-amber-700 text-sm mb-3">
-                  Guest photo uploads will be available starting December 28, 2025 (Wedding Day).
+                  Guest photo uploads will be available starting December 28,
+                  2025 (Wedding Day).
                 </p>
                 <details className="mt-3">
                   <summary className="text-amber-800 font-medium cursor-pointer hover:underline">
@@ -358,7 +361,8 @@ export default function GuestUpload() {
                   </summary>
                   <div className="mt-3 space-y-3">
                     <p className="text-sm text-amber-700">
-                      If you're an admin, enter the PIN to upload photos before the wedding date:
+                      If you're an admin, enter the PIN to upload photos before
+                      the wedding date:
                     </p>
                     <div className="flex gap-2">
                       <Input
@@ -367,7 +371,9 @@ export default function GuestUpload() {
                         value={adminPin}
                         onChange={(e) => setAdminPin(e.target.value)}
                         className="flex-1 border-amber-300 focus:border-amber-500"
-                        onKeyPress={(e) => e.key === "Enter" && handleAdminPinSubmit()}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleAdminPinSubmit()
+                        }
                       />
                       <Button
                         onClick={handleAdminPinSubmit}
@@ -390,8 +396,12 @@ export default function GuestUpload() {
                     <span className="text-white text-sm">✓</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-green-800">Admin Mode Active</h4>
-                    <p className="text-green-700 text-sm">You can now upload photos before the wedding date.</p>
+                    <h4 className="font-medium text-green-800">
+                      Admin Mode Active
+                    </h4>
+                    <p className="text-green-700 text-sm">
+                      You can now upload photos before the wedding date.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -409,7 +419,9 @@ export default function GuestUpload() {
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
                 className="border-sage-300 focus:border-olive-500 focus:ring-olive-500"
-                disabled={isUploading || (!isWeddingDateOrAfter && !isAdminMode)}
+                disabled={
+                  isUploading || (!isWeddingDateOrAfter && !isAdminMode)
+                }
               />
               <p className="text-sm text-sage-500">
                 We'll use this to identify your photos in the gallery
@@ -439,9 +451,13 @@ export default function GuestUpload() {
 
               <Button
                 onClick={handleUploadClick}
-                disabled={isUploading || !guestName.trim() || (!isWeddingDateOrAfter && !isAdminMode)}
-                className={`px-8 py-3 text-lg ${
+                disabled={
+                  isUploading ||
+                  !guestName.trim() ||
                   (!isWeddingDateOrAfter && !isAdminMode)
+                }
+                className={`px-8 py-3 text-lg ${
+                  !isWeddingDateOrAfter && !isAdminMode
                     ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
                     : "bg-olive-600 hover:bg-olive-700"
                 } text-white`}
@@ -452,7 +468,7 @@ export default function GuestUpload() {
                     <Upload className="mr-2 w-5 h-5 animate-spin" />
                     Uploading...
                   </>
-                ) : (!isWeddingDateOrAfter && !isAdminMode) ? (
+                ) : !isWeddingDateOrAfter && !isAdminMode ? (
                   <>
                     <Lock className="mr-2 w-5 h-5" />
                     Upload Restricted

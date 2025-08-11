@@ -838,7 +838,8 @@ Made with love ❤️ By Aral D'Souza
 
           // Use mobile-optimized download utility
           const downloadSuccess = mobileOptimizedDownload(pdfData, {
-            filename: invitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
+            filename:
+              invitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
             mimeType: "application/pdf",
           });
 
