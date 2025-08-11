@@ -79,6 +79,7 @@ export default function Debug() {
   useEffect(() => {
     // Auto-test on page load
     testConnection();
+    testSupabaseDebug();
     testPhotosLoad();
   }, []);
 
