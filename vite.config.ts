@@ -23,6 +23,21 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist",
+    // Enable production optimizations
+    minify: true,
+    sourcemap: false,
+    // Optimize chunks for better loading
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          ui: ["@radix-ui/react-accordion", "@radix-ui/react-dialog", "@radix-ui/react-button"],
+          utils: ["clsx", "date-fns", "lucide-react"],
+        },
+      },
+    },
+    // Increase chunk size warnings
+    chunkSizeWarningLimit: 1000,
   },
   plugins: [react(), expressPlugin()],
   resolve: {
