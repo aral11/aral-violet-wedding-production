@@ -1211,7 +1211,7 @@ export default function AdminDashboard() {
           : "local storage";
         toast({
           title: "Admin Photos Uploaded Successfully! 📷",
-          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType}. Refresh gallery to see updates!`,
+          description: `${successCount} photo${successCount !== 1 ? "s" : ""} saved to ${storageType}. Gallery updating automatically!`,
           duration: 5000,
         });
       }
