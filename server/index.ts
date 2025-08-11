@@ -91,6 +91,7 @@ export async function createServer() {
 
   // Test Supabase connection (for debugging)
   app.get("/api/test-connection", testSupabaseConnection);
+  app.get("/api/debug-supabase", debugSupabase);
 
   return app;
 }
