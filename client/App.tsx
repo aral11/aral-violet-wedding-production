@@ -39,6 +39,7 @@ const App = () => (
             <Route path="/guest-upload" element={<GuestUpload />} />
             <Route path="/debug" element={<Debug />} />
             <Route path="/test-photos" element={<TestPhotos />} />
+            <Route path="/supabase-setup" element={<SupabaseSetup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
