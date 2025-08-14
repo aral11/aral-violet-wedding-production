@@ -39,6 +39,8 @@ import {
   trackRSVPSubmission,
 } from "@/lib/analytics";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
+import VioletHaldi from "@/components/VioletHaldi";
+import AralRoce from "@/components/AralRoce";
 
 interface Guest {
   id: string;
@@ -85,6 +87,77 @@ export default function Index() {
   const photosPerPage = 12; // Show 12 photos per page
 
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
+  const weddingEndTime = new Date("2025-12-28T17:00:00+05:30"); // 5 PM IST
+  const postWeddingDate = new Date("2025-12-29T00:00:00+05:30"); // Day after wedding
+
+  // Get current dynamic message based on date
+  const getCurrentMessage = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const haldiDay = new Date(2025, 11, 26); // December 26, 2025
+    const roceDay = new Date(2025, 11, 27); // December 27, 2025
+    const weddingDay = new Date(2025, 11, 28); // December 28, 2025
+    const postWeddingDay = new Date(2025, 11, 29); // December 29, 2025
+
+    // Check if it's Violet's Haldi day (Dec 26, 2025)
+    if (today.getTime() === haldiDay.getTime()) {
+      return {
+        title: "Violet's Haldi Day",
+        subtitle:
+          "A beautiful pre-wedding tradition filled with joy and blessings 💛",
+        showCountdown: false,
+      };
+    }
+
+    // Check if it's Aral's Roce day (Dec 27, 2025)
+    if (today.getTime() === roceDay.getTime()) {
+      return {
+        title: "Aral's Roce Day",
+        subtitle: "A cherished Mangalorean tradition celebrating the groom 🌊",
+        showCountdown: false,
+      };
+    }
+
+    // Check if it's wedding day (Dec 28, 2025)
+    if (today.getTime() === weddingDay.getTime()) {
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTime = currentHour * 60 + currentMinutes; // Convert to minutes
+      const fivePM = 17 * 60; // 5 PM in minutes
+
+      if (currentTime < fivePM) {
+        return {
+          title: "Aral Weds Violet Today",
+          subtitle: "The big day is finally here! 🎉",
+          showCountdown: false,
+        };
+      } else {
+        return {
+          title: "We Are Hitched",
+          subtitle: "Just married! Thanks for celebrating with us! 💒",
+          showCountdown: false,
+        };
+      }
+    }
+
+    // Check if it's post-wedding day (Dec 29, 2025)
+    if (today.getTime() === postWeddingDay.getTime()) {
+      return {
+        title: "Wedding is done — we'll be back soon with something exciting!",
+        subtitle: "Thank you for celebrating with us! 💕",
+        showCountdown: false,
+      };
+    }
+
+    // Default - before wedding day
+    return {
+      title: "Aral & Violet",
+      subtitle: "Sunday, December 28, 2025 • Udupi, Karnataka, India",
+      showCountdown: true,
+    };
+  };
+
+  const [currentMessage, setCurrentMessage] = useState(getCurrentMessage());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -99,6 +172,9 @@ export default function Index() {
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
       setTimeLeft({ days, hours, minutes, seconds });
+
+      // Update message dynamically every minute
+      setCurrentMessage(getCurrentMessage());
     }, 1000);
 
     return () => clearInterval(timer);
@@ -1012,10 +1088,16 @@ Please RSVP at our wedding website
 
           <div className="mb-12">
             <h1 className="text-6xl md:text-8xl font-serif text-white mb-4 drop-shadow-lg">
-              Aral <span className="text-sage-200">&</span> Violet
+              {currentMessage.title === "Aral & Violet" ? (
+                <>
+                  Aral <span className="text-sage-200">&</span> Violet
+                </>
+              ) : (
+                currentMessage.title
+              )}
             </h1>
             <p className="text-xl md:text-2xl text-cream-100 mb-6 drop-shadow-md">
-              Sunday, December 28, 2025 • Udupi, Karnataka, India
+              {currentMessage.subtitle}
             </p>
           </div>
 
@@ -1056,7 +1138,7 @@ Please RSVP at our wedding website
                     downloadWeddingFlow();
                   } else {
                     toast({
-                      title: "Wedding Timeline Coming Soon! ��",
+                      title: "Wedding Timeline Coming Soon! 📅",
                       description:
                         "The reception timeline will be available for download on December 28, 2025. Please check back on our wedding day!",
                       duration: 5000,
@@ -1086,38 +1168,77 @@ Please RSVP at our wedding website
             </div>
           </div>
 
-          {/* Countdown */}
-          <div className="mb-16">
-            <h3 className="text-2xl md:text-3xl text-white mb-6 font-serif drop-shadow-md">
-              Days To Go!
-            </h3>
-            <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.days}
+          {/* Countdown - Only show if before wedding day */}
+          {currentMessage.showCountdown && (
+            <div className="mb-16">
+              <h3 className="text-2xl md:text-3xl text-white mb-6 font-serif drop-shadow-md">
+                Days To Go!
+              </h3>
+              <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.days}
+                  </div>
+                  <div className="text-sm text-sage-600">Days</div>
                 </div>
-                <div className="text-sm text-sage-600">Days</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.hours}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.hours}
+                  </div>
+                  <div className="text-sm text-sage-600">Hours</div>
                 </div>
-                <div className="text-sm text-sage-600">Hours</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.minutes}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.minutes}
+                  </div>
+                  <div className="text-sm text-sage-600">Minutes</div>
                 </div>
-                <div className="text-sm text-sage-600">Minutes</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.seconds}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.seconds}
+                  </div>
+                  <div className="text-sm text-sage-600">Seconds</div>
                 </div>
-                <div className="text-sm text-sage-600">Seconds</div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Special message for post-wedding */}
+          {!currentMessage.showCountdown &&
+            currentMessage.title.includes("we'll be back soon") && (
+              <div className="mb-16">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                  <div className="text-center">
+                    <Heart className="mx-auto mb-4 text-olive-600" size={48} />
+                    <p className="text-lg text-sage-700 mb-4">
+                      Our wedding day was absolutely magical! Thank you to
+                      everyone who celebrated with us.
+                    </p>
+                    <p className="text-sm text-sage-600">
+                      Stay tuned for some exciting updates coming soon! 💕
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          {/* Special message for wedding day */}
+          {!currentMessage.showCountdown &&
+            !currentMessage.title.includes("we'll be back soon") && (
+              <div className="mb-16">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                  <div className="text-center">
+                    <Sparkles
+                      className="mx-auto mb-4 text-olive-600"
+                      size={48}
+                    />
+                    <p className="text-lg text-sage-700">
+                      This is the day we've been waiting for! 🎉
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
       </section>
 
@@ -1231,6 +1352,10 @@ Please RSVP at our wedding website
           </div>
         </div>
       </section>
+
+      {/* Pre-Wedding Events */}
+      <VioletHaldi />
+      <AralRoce />
 
       {/* Wedding Details */}
       <section className="py-20 px-4">
