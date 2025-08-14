@@ -787,10 +787,26 @@ Made with love ❤️ By Aral D'Souza
 
       // First priority: Check if there's a custom invitation PDF uploaded from admin
       console.log("🔍 Checking for uploaded invitation from admin...");
+      console.log("📊 Database status:", {
+        isUsingSupabase: database.isUsingSupabase(),
+        storageStatus: database.getStorageStatus(),
+      });
 
       try {
         const uploadedInvitation = await database.invitation.get();
         console.log("📋 Database invitation result:", uploadedInvitation);
+
+        if (uploadedInvitation) {
+          console.log("✅ Invitation found in database:", {
+            id: uploadedInvitation.id,
+            filename: uploadedInvitation.filename,
+            hasData: !!uploadedInvitation.pdf_data,
+            dataLength: uploadedInvitation.pdf_data?.length,
+            dataPreview: uploadedInvitation.pdf_data?.substring(0, 50) + "...",
+          });
+        } else {
+          console.log("❌ No invitation found in database");
+        }
 
         if (uploadedInvitation && uploadedInvitation.pdf_data) {
           console.log(
@@ -811,34 +827,43 @@ Made with love ❤️ By Aral D'Souza
           }
 
           // Download the uploaded PDF invitation - Mobile-friendly approach
-          const link = document.createElement("a");
-          link.href = uploadedInvitation.pdf_data;
-          link.download =
+          console.log(
+            "📱 Attempting mobile-optimized download from database...",
+          );
+
+          const filename =
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
-          link.target = "_blank";
 
           // Use mobile-optimized download utility
           const downloadSuccess = mobileOptimizedDownload(
             uploadedInvitation.pdf_data,
             {
-              filename:
-                uploadedInvitation.filename ||
-                "Aral-Violet-Wedding-Invitation.pdf",
+              filename: filename,
               mimeType: "application/pdf",
             },
           );
 
+          console.log("📱 Mobile download result:", downloadSuccess);
+
           if (!downloadSuccess) {
-            // Fallback to original method
+            // Fallback to standard download method
+            console.log("📱 Mobile download failed, using standard method...");
             const link = document.createElement("a");
             link.href = uploadedInvitation.pdf_data;
-            link.download =
-              uploadedInvitation.filename ||
-              "Aral-Violet-Wedding-Invitation.pdf";
+            link.download = filename;
             link.target = "_blank";
+
+            // For mobile devices, add additional attributes
+            if (isMobile) {
+              link.rel = "noopener noreferrer";
+              // Try to force download on mobile
+              link.setAttribute("download", filename);
+            }
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            console.log("📱 Standard download method executed");
           }
 
           toast({
@@ -857,7 +882,11 @@ Made with love ❤️ By Aral D'Souza
           console.log("❌ No uploaded invitation found in database");
         }
       } catch (dbError) {
-        console.log("�� Database error, trying server endpoint...", dbError);
+        console.log("⚠️ Database error, trying server endpoint...", {
+          error: dbError,
+          errorMessage:
+            dbError instanceof Error ? dbError.message : String(dbError),
+        });
         toast({
           title: "Database Access Issue",
           description: "Trying alternative download method...",
@@ -866,10 +895,12 @@ Made with love ❤️ By Aral D'Souza
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
+      console.log("🌐 Trying server endpoint as fallback...");
       const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
       const downloadEndpoint = isNetlify
         ? "/.netlify/functions/download-invitation"
         : "/api/download-invitation";
+      console.log("📡 Server endpoint:", downloadEndpoint);
       const response = await fetch(downloadEndpoint);
       if (response.ok) {
         const blob = await response.blob();
@@ -957,7 +988,16 @@ Made with love ❤️ By Aral D'Souza
         });
 
         // Fourth priority: Direct localStorage fallback
+        console.log("💾 Checking localStorage for saved invitation...");
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
+        const savedFilename = localStorage.getItem(
+          "wedding_invitation_filename",
+        );
+        console.log("📦 localStorage check:", {
+          hasInvitation: !!savedInvitation,
+          filename: savedFilename,
+          dataLength: savedInvitation?.length,
+        });
         if (savedInvitation) {
           const link = document.createElement("a");
           link.href = savedInvitation;

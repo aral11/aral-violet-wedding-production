@@ -48,12 +48,23 @@ export function mobileOptimizedDownload(
   data: string | Blob,
   options: DownloadOptions,
 ): boolean {
-  const { isMobile, isIOS, isAndroid } = detectMobile();
+  const { isMobile, isIOS, isAndroid, browser } = detectMobile();
   const {
     filename,
     mimeType = "application/pdf",
     forceDownload = true,
   } = options;
+
+  console.log("📱 Mobile download starting:", {
+    isMobile,
+    isIOS,
+    isAndroid,
+    browser,
+    filename,
+    mimeType,
+    dataType: typeof data,
+    dataLength: typeof data === "string" ? data.length : data.size,
+  });
 
   try {
     let blob: Blob;
@@ -62,9 +73,20 @@ export function mobileOptimizedDownload(
     // Create blob from data
     if (typeof data === "string") {
       if (data.startsWith("data:")) {
-        // Handle data URLs
+        // Handle data URLs - convert to blob for better mobile compatibility
+        console.log("📱 Processing data URL, length:", data.length);
+
+        // For mobile devices, large data URLs can cause issues
+        // Convert data URL to blob for better handling
         const [header, base64Data] = data.split(",");
         const actualMimeType = header.split(":")[1]?.split(";")[0] || mimeType;
+
+        console.log("📱 Data URL details:", {
+          mimeType: actualMimeType,
+          base64Length: base64Data.length,
+          estimatedSize: Math.round(base64Data.length * 0.75), // Rough size estimate
+        });
+
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
 
@@ -74,6 +96,11 @@ export function mobileOptimizedDownload(
 
         const byteArray = new Uint8Array(byteNumbers);
         blob = new Blob([byteArray], { type: actualMimeType });
+
+        console.log("📱 Converted data URL to blob:", {
+          blobSize: blob.size,
+          blobType: blob.type,
+        });
       } else if (data.startsWith("blob:")) {
         // Handle blob URLs
         url = data;
@@ -97,28 +124,46 @@ export function mobileOptimizedDownload(
 
     // Mobile-specific download strategies
     if (isMobile) {
+      console.log("📱 Using mobile download strategy");
       if (isIOS) {
+        console.log("📱 iOS detected, using iOS fallback strategy");
         // iOS strategy: Try download link first, fallback to new window
         return downloadWithIOSFallback(url, filename);
       } else if (isAndroid) {
+        console.log("📱 Android detected, using Android optimization");
         // Android strategy: Use download attribute with click event
         return downloadWithAndroidOptimization(url, filename);
       } else {
+        console.log("📱 Generic mobile detected, using mobile fallback");
         // Generic mobile strategy
         return downloadWithMobileFallback(url, filename);
       }
     } else {
+      console.log("💻 Desktop detected, using desktop optimization");
       // Desktop strategy
       return downloadWithDesktopOptimization(url, filename);
     }
   } catch (error) {
-    console.error("Mobile download failed:", error);
+    console.error("📱 Mobile download failed:", {
+      error: error instanceof Error ? error.message : String(error),
+      filename,
+      mimeType,
+      isMobile,
+      isIOS,
+      isAndroid,
+      browser,
+    });
     return false;
   }
 }
 
 function downloadWithIOSFallback(url: string, filename: string): boolean {
   try {
+    console.log("🍎 iOS download attempt starting:", {
+      filename,
+      urlType: url.startsWith("data:") ? "data URL" : "blob URL",
+    });
+
     // Method 1: Try standard download approach
     const link = document.createElement("a");
     link.href = url;
@@ -139,7 +184,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
     const clicked = link.dispatchEvent(clickEvent);
     document.body.removeChild(link);
 
+    console.log("🍎 iOS Method 1 (programmatic click) result:", clicked);
+
     if (clicked) {
+      console.log("🍎 iOS Method 1 succeeded, cleaning up...");
       setTimeout(() => {
         if (url.startsWith("blob:")) {
           URL.revokeObjectURL(url);
@@ -149,8 +197,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
     }
 
     // Method 2: Fallback to new window (iOS Safari often blocks downloads)
+    console.log("🍎 iOS Method 1 failed, trying Method 2 (new window)...");
     const newWindow = window.open(url, "_blank");
     if (newWindow) {
+      console.log("🍎 iOS Method 2 succeeded, new window opened");
       setTimeout(() => {
         if (url.startsWith("blob:")) {
           URL.revokeObjectURL(url);
@@ -159,9 +209,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
       return true;
     }
 
+    console.log("🍎 iOS Method 2 failed, both methods exhausted");
     return false;
   } catch (error) {
-    console.error("iOS download failed:", error);
+    console.error("🍎 iOS download failed:", error);
     return false;
   }
 }
@@ -171,6 +222,11 @@ function downloadWithAndroidOptimization(
   filename: string,
 ): boolean {
   try {
+    console.log("🤖 Android download attempt starting:", {
+      filename,
+      urlType: url.startsWith("data:") ? "data URL" : "blob URL",
+    });
+
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -186,13 +242,23 @@ function downloadWithAndroidOptimization(
 
     document.body.appendChild(link);
 
+    console.log(
+      "🤖 Android: Link created and added to DOM, attempting clicks...",
+    );
+
     // Try multiple click methods for Android compatibility
     link.focus();
     link.click();
 
     // Also try direct event dispatch
     const event = new Event("click", { bubbles: true, cancelable: true });
-    link.dispatchEvent(event);
+    const eventResult = link.dispatchEvent(event);
+
+    console.log("🤖 Android: Click methods executed", {
+      eventDispatched: eventResult,
+      linkDownload: link.download,
+      linkHref: link.href.substring(0, 50) + "...",
+    });
 
     // Clean up
     setTimeout(() => {
@@ -200,11 +266,13 @@ function downloadWithAndroidOptimization(
       if (url.startsWith("blob:")) {
         URL.revokeObjectURL(url);
       }
+      console.log("🤖 Android: Cleanup completed");
     }, 1000);
 
+    console.log("🤖 Android download method completed successfully");
     return true;
   } catch (error) {
-    console.error("Android download failed:", error);
+    console.error("🤖 Android download failed:", error);
     return false;
   }
 }
