@@ -3,40 +3,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Camera, 
-  Upload, 
-  Heart, 
-  Calendar, 
-  Clock, 
+import {
+  Camera,
+  Upload,
+  Heart,
+  Calendar,
+  Clock,
   MapPin,
   User,
   MessageSquare,
   Waves
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { database } from "@/lib/database";
-
-interface RocePhoto {
-  id: string;
-  photo_data: string;
-  guest_name: string;
-  message?: string;
-  created_at: string;
-}
+import { eventDatabase, EventPhoto } from "@/lib/event-database";
+import PinAccess from "./PinAccess";
 
 export default function AralRoce() {
   const { toast } = useToast();
-  const [photos, setPhotos] = useState<RocePhoto[]>([]);
+  const [photos, setPhotos] = useState<EventPhoto[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
   const photosPerPage = 8;
-  
+
   const [uploadForm, setUploadForm] = useState({
     guestName: "",
     message: "",
   });
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load Roce photos on component mount
