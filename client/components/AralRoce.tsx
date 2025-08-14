@@ -335,72 +335,89 @@ export default function AralRoce() {
           </Card>
         </div>
 
-        {/* Photo Upload Section */}
-        <Card className="bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-200 shadow-xl mb-12">
-          <CardHeader>
-            <CardTitle className="text-teal-700 flex items-center gap-2">
-              <Camera className="w-6 h-6" />
-              Share Your Roce Moments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-teal-600 mb-4">
-                Capture the traditions and celebrations of Aral's Roce ceremony! Share your photos and messages to preserve these precious memories.
+        {/* Photo Upload Section - Only show if not in view-only mode */}
+        {accessMode !== 'view-only' && (
+          <Card className="bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-200 shadow-xl mb-12">
+            <CardHeader>
+              <CardTitle className="text-teal-700 flex items-center gap-2">
+                <Camera className="w-6 h-6" />
+                Share Your Roce Moments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-teal-600 mb-4">
+                  Capture the traditions and celebrations of Aral's Roce ceremony! Share your photos and messages to preserve these precious memories.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-teal-700 mb-2">
+                      <User className="inline w-4 h-4 mr-1" />
+                      Your Name *
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={uploadForm.guestName}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
+                      className="border-teal-300 focus:border-teal-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-teal-700 mb-2">
+                      <MessageSquare className="inline w-4 h-4 mr-1" />
+                      Message (Optional)
+                    </label>
+                    <Textarea
+                      placeholder="Share a message with your photo..."
+                      value={uploadForm.message}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
+                      className="border-teal-300 focus:border-teal-500"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleUploadClick}
+                    disabled={isUploading || !isSupabaseConnected}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3"
+                  >
+                    <Upload className="mr-2 w-5 h-5" />
+                    {isUploading ? 'Uploading...' : 'Upload Roce Photos'}
+                  </Button>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* View-only mode indicator */}
+        {accessMode === 'view-only' && (
+          <Card className="bg-gradient-to-r from-teal-50 to-blue-50 border-2 border-teal-200 shadow-xl mb-12">
+            <CardContent className="p-6 text-center">
+              <Heart className="mx-auto mb-4 text-teal-600" size={48} />
+              <h3 className="text-xl font-serif text-teal-700 mb-2">
+                Aral's Roce Memories
+              </h3>
+              <p className="text-teal-600">
+                Special moments from Aral's Roce ceremony, shared by family and friends.
               </p>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-teal-700 mb-2">
-                    <User className="inline w-4 h-4 mr-1" />
-                    Your Name *
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Enter your name"
-                    value={uploadForm.guestName}
-                    onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
-                    className="border-teal-300 focus:border-teal-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-teal-700 mb-2">
-                    <MessageSquare className="inline w-4 h-4 mr-1" />
-                    Message (Optional)
-                  </label>
-                  <Textarea
-                    placeholder="Share a message with your photo..."
-                    value={uploadForm.message}
-                    onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
-                    className="border-teal-300 focus:border-teal-500"
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <Button
-                  onClick={handleUploadClick}
-                  disabled={isUploading || !isSupabaseConnected}
-                  className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3"
-                >
-                  <Upload className="mr-2 w-5 h-5" />
-                  {isUploading ? 'Uploading...' : 'Upload Roce Photos'}
-                </Button>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Photo Gallery */}
         {photos.length > 0 ? (
