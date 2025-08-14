@@ -270,7 +270,7 @@ export default function VioletHaldi() {
           <PinAccess
             onAccessGranted={handleAccessGranted}
             eventName="Violet's Haldi"
-            eventDate="December 26, 2025 (Night)"
+            eventDate="Thursday, December 26, 2025 (Evening)"
           />
         </div>
       </section>
