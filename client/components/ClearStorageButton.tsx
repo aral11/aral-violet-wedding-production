@@ -8,9 +8,9 @@ interface ClearStorageButtonProps {
   size?: "sm" | "default" | "lg";
 }
 
-export default function ClearStorageButton({ 
-  variant = "outline", 
-  size = "sm" 
+export default function ClearStorageButton({
+  variant = "outline",
+  size = "sm",
 }: ClearStorageButtonProps) {
   const { toast } = useToast();
 
@@ -19,12 +19,13 @@ export default function ClearStorageButton({
       // Clear invitation-related localStorage items
       localStorage.removeItem("wedding_invitation_pdf");
       localStorage.removeItem("wedding_invitation_filename");
-      
+
       console.log("🗑️ Cleared invitation localStorage items");
-      
+
       toast({
         title: "Storage Cleared! 🗑️",
-        description: "Invitation localStorage items have been cleared. Try downloading again.",
+        description:
+          "Invitation localStorage items have been cleared. Try downloading again.",
         duration: 3000,
       });
     } catch (error) {

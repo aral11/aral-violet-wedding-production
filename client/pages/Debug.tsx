@@ -82,8 +82,12 @@ export default function Debug() {
       }
 
       // 4. Check localStorage
-      const localStorageInvitation = localStorage.getItem("wedding_invitation_pdf");
-      const localStorageFilename = localStorage.getItem("wedding_invitation_filename");
+      const localStorageInvitation = localStorage.getItem(
+        "wedding_invitation_pdf",
+      );
+      const localStorageFilename = localStorage.getItem(
+        "wedding_invitation_filename",
+      );
       addDebugResult("Local Storage Check", !!localStorageInvitation, {
         found: !!localStorageInvitation,
         filename: localStorageFilename,
@@ -96,11 +100,12 @@ export default function Debug() {
 
       // 5. Test server endpoint
       try {
-        const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+        const isNetlify =
+          import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
         const downloadEndpoint = isNetlify
           ? "/.netlify/functions/download-invitation"
           : "/api/download-invitation";
-        
+
         const response = await fetch(downloadEndpoint, { method: "HEAD" });
         addDebugResult("Server Endpoint Test", response.ok, {
           status: response.status,
@@ -119,7 +124,8 @@ export default function Debug() {
 
       toast({
         title: "Debug Complete! 🔍",
-        description: "Check the results below to see what's happening with invitation download.",
+        description:
+          "Check the results below to see what's happening with invitation download.",
         duration: 3000,
       });
     } catch (error) {
@@ -153,7 +159,8 @@ export default function Debug() {
         // Actually try to download it
         const link = document.createElement("a");
         link.href = uploadedInvitation.pdf_data;
-        link.download = uploadedInvitation.filename || "debug-invitation-test.pdf";
+        link.download =
+          uploadedInvitation.filename || "debug-invitation-test.pdf";
         link.target = "_blank";
         document.body.appendChild(link);
         link.click();
@@ -161,7 +168,8 @@ export default function Debug() {
       } else {
         toast({
           title: "No Database Invitation Found ❌",
-          description: "No invitation found in database - will fall back to other methods.",
+          description:
+            "No invitation found in database - will fall back to other methods.",
           variant: "destructive",
           duration: 5000,
         });
@@ -191,7 +199,9 @@ export default function Debug() {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-olive-700">Invitation Download Debug</CardTitle>
+            <CardTitle className="text-olive-700">
+              Invitation Download Debug
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-4">
@@ -221,7 +231,9 @@ export default function Debug() {
 
             {debugResults.length > 0 && (
               <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold text-olive-700">Debug Results:</h3>
+                <h3 className="text-lg font-semibold text-olive-700">
+                  Debug Results:
+                </h3>
                 {debugResults.map((result, index) => (
                   <Card
                     key={index}
@@ -265,9 +277,16 @@ export default function Debug() {
                   If Supabase is not configured:
                 </h4>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Check your .env.local file has VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY</li>
-                  <li>• Restart the dev server after adding environment variables</li>
-                  <li>• Verify your Supabase project is active and accessible</li>
+                  <li>
+                    • Check your .env.local file has VITE_SUPABASE_URL and
+                    VITE_SUPABASE_ANON_KEY
+                  </li>
+                  <li>
+                    • Restart the dev server after adding environment variables
+                  </li>
+                  <li>
+                    • Verify your Supabase project is active and accessible
+                  </li>
                 </ul>
               </div>
 

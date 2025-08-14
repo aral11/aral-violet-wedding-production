@@ -875,7 +875,8 @@ Made with love ❤️ By Aral D'Souza
       } catch (dbError) {
         console.log("⚠️ Database error, trying server endpoint...", {
           error: dbError,
-          errorMessage: dbError instanceof Error ? dbError.message : String(dbError),
+          errorMessage:
+            dbError instanceof Error ? dbError.message : String(dbError),
         });
         toast({
           title: "Database Access Issue",
@@ -980,7 +981,9 @@ Made with love ❤️ By Aral D'Souza
         // Fourth priority: Direct localStorage fallback
         console.log("💾 Checking localStorage for saved invitation...");
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-        const savedFilename = localStorage.getItem("wedding_invitation_filename");
+        const savedFilename = localStorage.getItem(
+          "wedding_invitation_filename",
+        );
         console.log("📦 localStorage check:", {
           hasInvitation: !!savedInvitation,
           filename: savedFilename,
