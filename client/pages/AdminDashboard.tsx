@@ -865,7 +865,7 @@ export default function AdminDashboard() {
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
             <div><strong>Church Nuptials:</strong> Mother of Sorrows Church, Udupi • 4:00 PM</div>
-            <div><strong>Reception:</strong> Sai Radha Heritage Beach Resort, Kaup • 7:00 PM</div>
+            <div><strong>Reception:</strong> Sai Radha Heritage Beach Resort, Kaup �� 7:00 PM</div>
         </div>
         <div class="report-date">RSVP Report Generated: ${currentDate}</div>
     </div>
@@ -2250,6 +2250,55 @@ export default function AdminDashboard() {
                         >
                           <Upload className="mr-3" size={24} />
                           Select Photos (up to 200MB each)
+                        </Button>
+
+                        {/* Developer test button */}
+                        <Button
+                          onClick={async () => {
+                            try {
+                              // Create a simple test image (1x1 red pixel)
+                              const canvas = document.createElement('canvas');
+                              canvas.width = 100;
+                              canvas.height = 100;
+                              const ctx = canvas.getContext('2d');
+                              if (ctx) {
+                                ctx.fillStyle = '#84a178';
+                                ctx.fillRect(0, 0, 100, 100);
+                                ctx.fillStyle = 'white';
+                                ctx.font = '16px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.fillText('TEST', 50, 55);
+                              }
+
+                              const testImageData = canvas.toDataURL('image/png');
+                              console.log("🧪 Created test image, uploading...");
+
+                              // Save directly to database to test the system
+                              const savedPhoto = await database.photos.create(testImageData, "admin");
+                              console.log("🧪 Test photo saved:", savedPhoto);
+
+                              // Update the UI
+                              setUploadedPhotos(prev => [...prev, testImageData]);
+
+                              toast({
+                                title: "Test Photo Added! 🧪",
+                                description: "Test image successfully uploaded to verify photo system.",
+                                duration: 3000,
+                              });
+                            } catch (error) {
+                              console.error("Test photo upload failed:", error);
+                              toast({
+                                title: "Test Failed",
+                                description: "Test photo upload failed. Check console for details.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                        >
+                          🧪 Add Test Photo
                         </Button>
                         <div className="text-center space-y-2 max-w-md">
                           <p className="text-sm text-sage-600 font-medium">
