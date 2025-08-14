@@ -62,16 +62,43 @@ export default function AralRoce() {
     }
   };
 
-  const checkAccess = () => {
+  const checkAccess = async () => {
     const now = new Date();
     const roceDate = new Date('2025-12-27'); // Dec 27, 2025
     const weddingDate = new Date('2025-12-29'); // Dec 29, 2025 (allow until day after wedding)
 
-    // Check if it's the event period (allow from Roce day until day after wedding)
-    const isEventPeriod = now >= roceDate && now < weddingDate;
-
-    if (isEventPeriod) {
+    // Check if it's before the event date
+    if (now < roceDate) {
+      // Before event: Admin access only
+      setAccessMode('admin');
+      setHasAccess(false);
+    }
+    // Check if it's during the event period
+    else if (now >= roceDate && now < weddingDate) {
+      // During event: Guest access
+      setAccessMode('guest');
       setHasAccess(true);
+    }
+    // After event date
+    else {
+      // Check if photos exist in Supabase
+      try {
+        const rocePhotos = await eventDatabase.photos.getByEventType('aral_roce');
+        if (rocePhotos.length > 0) {
+          // Photos exist: Show view-only mode
+          setAccessMode('view-only');
+          setHasAccess(true);
+        } else {
+          // No photos: Hide section completely
+          setAccessMode('hidden');
+          setHasAccess(false);
+        }
+      } catch (error) {
+        console.error('Error checking for existing photos:', error);
+        // If we can't check, default to hidden
+        setAccessMode('hidden');
+        setHasAccess(false);
+      }
     }
   };
 
