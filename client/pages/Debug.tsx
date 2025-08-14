@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/database";
 import { invitationApi } from "@/lib/api";
+import ClearStorageButton from "@/components/ClearStorageButton";
 
 export default function Debug() {
   const [debugResults, setDebugResults] = useState<any[]>([]);
