@@ -3,19 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Camera, 
-  Upload, 
-  Heart, 
-  Calendar, 
-  Clock, 
+import {
+  Camera,
+  Upload,
+  Heart,
+  Calendar,
+  Clock,
   MapPin,
   User,
   MessageSquare,
   Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { database } from "@/lib/database";
+import { eventDatabase, EventPhoto } from "@/lib/event-database";
+import PinAccess from "./PinAccess";
 
 interface HaldiPhoto {
   id: string;
