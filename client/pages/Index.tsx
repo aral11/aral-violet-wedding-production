@@ -100,7 +100,7 @@ export default function Index() {
     // Check if it's post-wedding day (Dec 29, 2025)
     if (today.getTime() === postWeddingDay.getTime()) {
       return {
-        title: "Wedding is done — we'll be back soon with something exciting!",
+        title: "Wedding is done �� we'll be back soon with something exciting!",
         subtitle: "Thank you for celebrating with us! 💕",
         showCountdown: false
       };
@@ -1325,6 +1325,10 @@ Please RSVP at our wedding website
           </div>
         </div>
       </section>
+
+      {/* Pre-Wedding Events */}
+      <VioletHaldi />
+      <AralRoce />
 
       {/* Wedding Details */}
       <section className="py-20 px-4">
