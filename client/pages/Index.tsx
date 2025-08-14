@@ -198,7 +198,7 @@ export default function Index() {
             setUploadedPhotos([]);
           }
         } else {
-          console.log("�� No photos returned from database");
+          console.log("📸 No photos returned from database");
           setUploadedPhotos([]);
         }
       } catch (error) {
@@ -674,7 +674,7 @@ export default function Index() {
 🎵 Open dance floor for all guests
 
 11:30 PM | Send-off
-���� Farewell and thank you to all guests`;
+💒 Farewell and thank you to all guests`;
 
     const weddingFlowContent = `
 WEDDING RECEPTION TIMELINE
@@ -1065,10 +1065,16 @@ Please RSVP at our wedding website
 
           <div className="mb-12">
             <h1 className="text-6xl md:text-8xl font-serif text-white mb-4 drop-shadow-lg">
-              Aral <span className="text-sage-200">&</span> Violet
+              {currentMessage.title === "Aral & Violet" ? (
+                <>
+                  Aral <span className="text-sage-200">&</span> Violet
+                </>
+              ) : (
+                currentMessage.title
+              )}
             </h1>
             <p className="text-xl md:text-2xl text-cream-100 mb-6 drop-shadow-md">
-              Sunday, December 28, 2025 • Udupi, Karnataka, India
+              {currentMessage.subtitle}
             </p>
           </div>
 
