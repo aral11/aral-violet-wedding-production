@@ -104,6 +104,10 @@ export default function AralRoce() {
 
   const handleAccessGranted = () => {
     setHasAccess(true);
+    // If admin PIN was used, set to admin mode
+    if (accessMode === 'admin') {
+      setAccessMode('admin');
+    }
   };
 
   const loadRocePhotos = async () => {
