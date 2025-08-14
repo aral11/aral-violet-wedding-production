@@ -18,26 +18,20 @@ import { useToast } from "@/hooks/use-toast";
 import { eventDatabase, EventPhoto } from "@/lib/event-database";
 import PinAccess from "./PinAccess";
 
-interface HaldiPhoto {
-  id: string;
-  photo_data: string;
-  guest_name: string;
-  message?: string;
-  created_at: string;
-}
-
 export default function VioletHaldi() {
   const { toast } = useToast();
-  const [photos, setPhotos] = useState<HaldiPhoto[]>([]);
+  const [photos, setPhotos] = useState<EventPhoto[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
   const photosPerPage = 8;
-  
+
   const [uploadForm, setUploadForm] = useState({
     guestName: "",
     message: "",
   });
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load Haldi photos on component mount
