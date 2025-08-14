@@ -163,6 +163,27 @@ export const analytics = {
     }
   },
 
+  // Clear ALL localStorage (for fixing database issues)
+  clearAllLocalStorage() {
+    try {
+      // Clear all wedding-related localStorage keys
+      localStorage.removeItem("wedding_analytics_pageviews");
+      localStorage.removeItem("wedding_analytics_events");
+      localStorage.removeItem("wedding_analytics_sessions");
+      localStorage.removeItem("wedding_guests");
+      localStorage.removeItem("wedding_photos");
+      localStorage.removeItem("wedding_guest_photos");
+      localStorage.removeItem("wedding_flow");
+      localStorage.removeItem("wedding_invitation_pdf");
+      localStorage.removeItem("wedding_invitation_filename");
+      sessionStorage.removeItem("wedding_session_id");
+
+      console.log("🗑️ All wedding localStorage data cleared - analytics should now use database only");
+    } catch (error) {
+      console.warn("Failed to clear localStorage:", error);
+    }
+  },
+
   // Export analytics data - return empty since no localStorage
   exportAnalytics() {
     try {
