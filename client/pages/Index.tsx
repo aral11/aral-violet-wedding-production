@@ -714,7 +714,7 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.filename,
           );
           console.log(
-            "📄 PDF data length:",
+            "���� PDF data length:",
             uploadedInvitation.pdf_data.length,
           );
 
@@ -1015,7 +1015,10 @@ Please RSVP at our wedding website
           <div className="mb-12 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
-                onClick={downloadInvitation}
+                onClick={() => {
+                  trackClick('download_invitation_button', 'hero_section');
+                  downloadInvitation();
+                }}
                 className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg font-medium shadow-lg"
               >
                 <Download className="mr-2" size={20} />
