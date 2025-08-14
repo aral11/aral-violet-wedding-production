@@ -787,10 +787,26 @@ Made with love ❤️ By Aral D'Souza
 
       // First priority: Check if there's a custom invitation PDF uploaded from admin
       console.log("🔍 Checking for uploaded invitation from admin...");
+      console.log("📊 Database status:", {
+        isUsingSupabase: database.isUsingSupabase(),
+        storageStatus: database.getStorageStatus(),
+      });
 
       try {
         const uploadedInvitation = await database.invitation.get();
         console.log("📋 Database invitation result:", uploadedInvitation);
+
+        if (uploadedInvitation) {
+          console.log("✅ Invitation found in database:", {
+            id: uploadedInvitation.id,
+            filename: uploadedInvitation.filename,
+            hasData: !!uploadedInvitation.pdf_data,
+            dataLength: uploadedInvitation.pdf_data?.length,
+            dataPreview: uploadedInvitation.pdf_data?.substring(0, 50) + "...",
+          });
+        } else {
+          console.log("❌ No invitation found in database");
+        }
 
         if (uploadedInvitation && uploadedInvitation.pdf_data) {
           console.log(
