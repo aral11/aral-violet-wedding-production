@@ -85,6 +85,56 @@ export default function Index() {
   const photosPerPage = 12; // Show 12 photos per page
 
   const weddingDate = new Date("2025-12-28T16:00:00+05:30");
+  const weddingEndTime = new Date("2025-12-28T17:00:00+05:30"); // 5 PM IST
+  const postWeddingDate = new Date("2025-12-29T00:00:00+05:30"); // Day after wedding
+
+  // Get current dynamic message based on date
+  const getCurrentMessage = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weddingDay = new Date(2025, 11, 28); // December 28, 2025
+    const postWeddingDay = new Date(2025, 11, 29); // December 29, 2025
+
+    // Check if it's post-wedding day (Dec 29, 2025)
+    if (today.getTime() === postWeddingDay.getTime()) {
+      return {
+        title: "Wedding is done — we'll be back soon with something exciting!",
+        subtitle: "Thank you for celebrating with us! 💕",
+        showCountdown: false
+      };
+    }
+
+    // Check if it's wedding day (Dec 28, 2025)
+    if (today.getTime() === weddingDay.getTime()) {
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTime = currentHour * 60 + currentMinutes; // Convert to minutes
+      const fivePM = 17 * 60; // 5 PM in minutes
+
+      if (currentTime < fivePM) {
+        return {
+          title: "Aral Weds Violet Today",
+          subtitle: "The big day is finally here! 🎉",
+          showCountdown: false
+        };
+      } else {
+        return {
+          title: "We Are Hitched",
+          subtitle: "Just married! Thanks for celebrating with us! 💒",
+          showCountdown: false
+        };
+      }
+    }
+
+    // Default - before wedding day
+    return {
+      title: "Aral & Violet",
+      subtitle: "Sunday, December 28, 2025 • Udupi, Karnataka, India",
+      showCountdown: true
+    };
+  };
+
+  const [currentMessage, setCurrentMessage] = useState(getCurrentMessage());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -99,6 +149,9 @@ export default function Index() {
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
       setTimeLeft({ days, hours, minutes, seconds });
+
+      // Update message dynamically every minute
+      setCurrentMessage(getCurrentMessage());
     }, 1000);
 
     return () => clearInterval(timer);
@@ -145,7 +198,7 @@ export default function Index() {
             setUploadedPhotos([]);
           }
         } else {
-          console.log("📸 No photos returned from database");
+          console.log("�� No photos returned from database");
           setUploadedPhotos([]);
         }
       } catch (error) {
@@ -621,7 +674,7 @@ export default function Index() {
 🎵 Open dance floor for all guests
 
 11:30 PM | Send-off
-💒 Farewell and thank you to all guests`;
+���� Farewell and thank you to all guests`;
 
     const weddingFlowContent = `
 WEDDING RECEPTION TIMELINE
