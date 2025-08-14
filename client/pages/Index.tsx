@@ -25,7 +25,7 @@ import {
   weddingFlowApi,
   handleApiError,
 } from "@/lib/api";
-import { database } from "@/lib/database";
+import { database } from "@/lib/database-simple";
 import { sendRSVPNotification, isSMSConfigured } from "@/lib/sms-service";
 import {
   mobileOptimizedDownload,
@@ -688,7 +688,7 @@ export default function Index() {
 🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
-���� Traditional dance and music performances
+������ Traditional dance and music performances
 
 10:00 PM | Cake Cutting (15 min)
 ✨ Wedding cake cutting ceremony
