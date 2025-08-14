@@ -517,10 +517,8 @@ export const photoService = {
   },
 
   getFromLocalStorage(): SupabasePhoto[] {
-    console.log("📸 Loading photos from localStorage...");
-    const saved = localStorage.getItem("wedding_photos");
-    const guestSaved = localStorage.getItem("wedding_guest_photos");
-    const photos: SupabasePhoto[] = [];
+    console.log("📸 localStorage disabled for analytics fix - returning empty array");
+    return [];
 
     console.log("📸 localStorage check:", {
       adminPhotos: saved ? "found" : "not found",
