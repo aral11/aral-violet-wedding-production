@@ -247,6 +247,9 @@ export const trackRSVPSubmission = (
 
 // Auto-initialize page tracking
 if (typeof window !== "undefined") {
+  // Clear localStorage on first load to fix database analytics issues
+  analytics.clearAllLocalStorage();
+
   // Track initial page load
   analytics.trackPageView();
 
