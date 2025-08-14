@@ -335,72 +335,89 @@ export default function VioletHaldi() {
           </Card>
         </div>
 
-        {/* Photo Upload Section */}
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 shadow-xl mb-12">
-          <CardHeader>
-            <CardTitle className="text-purple-700 flex items-center gap-2">
-              <Camera className="w-6 h-6" />
-              Share Your Haldi Moments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-purple-600 mb-4">
-                Capture the joy and traditions of Violet's Haldi ceremony! Share your photos and messages to create lasting memories.
+        {/* Photo Upload Section - Only show if not in view-only mode */}
+        {accessMode !== 'view-only' && (
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 shadow-xl mb-12">
+            <CardHeader>
+              <CardTitle className="text-purple-700 flex items-center gap-2">
+                <Camera className="w-6 h-6" />
+                Share Your Haldi Moments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-purple-600 mb-4">
+                  Capture the joy and traditions of Violet's Haldi ceremony! Share your photos and messages to create lasting memories.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-700 mb-2">
+                      <User className="inline w-4 h-4 mr-1" />
+                      Your Name *
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={uploadForm.guestName}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
+                      className="border-purple-300 focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-purple-700 mb-2">
+                      <MessageSquare className="inline w-4 h-4 mr-1" />
+                      Message (Optional)
+                    </label>
+                    <Textarea
+                      placeholder="Share a message with your photo..."
+                      value={uploadForm.message}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
+                      className="border-purple-300 focus:border-purple-500"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleUploadClick}
+                    disabled={isUploading || !isSupabaseConnected}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+                  >
+                    <Upload className="mr-2 w-5 h-5" />
+                    {isUploading ? 'Uploading...' : 'Upload Haldi Photos'}
+                  </Button>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* View-only mode indicator */}
+        {accessMode === 'view-only' && (
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 shadow-xl mb-12">
+            <CardContent className="p-6 text-center">
+              <Heart className="mx-auto mb-4 text-purple-600" size={48} />
+              <h3 className="text-xl font-serif text-purple-700 mb-2">
+                Violet's Haldi Memories
+              </h3>
+              <p className="text-purple-600">
+                Beautiful moments from Violet's Haldi ceremony, shared by family and friends.
               </p>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-purple-700 mb-2">
-                    <User className="inline w-4 h-4 mr-1" />
-                    Your Name *
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Enter your name"
-                    value={uploadForm.guestName}
-                    onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
-                    className="border-purple-300 focus:border-purple-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-purple-700 mb-2">
-                    <MessageSquare className="inline w-4 h-4 mr-1" />
-                    Message (Optional)
-                  </label>
-                  <Textarea
-                    placeholder="Share a message with your photo..."
-                    value={uploadForm.message}
-                    onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
-                    className="border-purple-300 focus:border-purple-500"
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <Button
-                  onClick={handleUploadClick}
-                  disabled={isUploading || !isSupabaseConnected}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
-                >
-                  <Upload className="mr-2 w-5 h-5" />
-                  {isUploading ? 'Uploading...' : 'Upload Haldi Photos'}
-                </Button>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Photo Gallery */}
         {photos.length > 0 ? (
