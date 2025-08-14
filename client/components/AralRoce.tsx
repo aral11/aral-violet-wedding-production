@@ -34,38 +34,64 @@ export default function AralRoce() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load Roce photos on component mount
+  // Check access and load photos on component mount
   useEffect(() => {
-    loadRocePhotos();
+    checkAccess();
+    checkSupabaseConnection();
   }, []);
 
-  const loadRocePhotos = async () => {
-    try {
-      // Get all photos and filter for Aral's Roce
-      const allPhotos = await database.photos.getAll();
-      const rocePhotos = allPhotos
-        .filter(photo => photo.uploaded_by?.includes('aral_roce'))
-        .map(photo => ({
-          id: photo.id || '',
-          photo_data: photo.photo_data,
-          guest_name: photo.guest_name || 'Anonymous',
-          message: extractMessageFromUploadedBy(photo.uploaded_by),
-          created_at: photo.created_at || new Date().toISOString()
-        }));
-      
-      setPhotos(rocePhotos);
-    } catch (error) {
-      console.error('Error loading Roce photos:', error);
+  // Load photos when access is granted
+  useEffect(() => {
+    if (hasAccess && isSupabaseConnected) {
+      loadRocePhotos();
+    }
+  }, [hasAccess, isSupabaseConnected]);
+
+  const checkSupabaseConnection = async () => {
+    const connected = await eventDatabase.testConnection();
+    setIsSupabaseConnected(connected);
+
+    if (!connected) {
+      toast({
+        title: "Supabase Connection Required ⚠️",
+        description: "Event photos require Supabase database connection. Please configure Supabase to use this feature.",
+        variant: "destructive",
+        duration: 6000,
+      });
     }
   };
 
-  const extractMessageFromUploadedBy = (uploadedBy: string): string => {
-    // Extract message from uploadedBy format: guest_aral_roce_guestName_timestamp_message
-    const parts = uploadedBy.split('_');
-    if (parts.length > 5) {
-      return parts.slice(5).join('_');
+  const checkAccess = () => {
+    const now = new Date();
+    const roceDate = new Date('2025-12-27'); // Dec 27, 2025
+    const weddingDate = new Date('2025-12-29'); // Dec 29, 2025 (allow until day after wedding)
+
+    // Check if it's the event period (allow from Roce day until day after wedding)
+    const isEventPeriod = now >= roceDate && now < weddingDate;
+
+    if (isEventPeriod) {
+      setHasAccess(true);
     }
-    return '';
+  };
+
+  const handleAccessGranted = () => {
+    setHasAccess(true);
+  };
+
+  const loadRocePhotos = async () => {
+    try {
+      const rocePhotos = await eventDatabase.photos.getByEventType('aral_roce');
+      setPhotos(rocePhotos);
+      console.log(`📸 Loaded ${rocePhotos.length} Roce photos from Supabase`);
+    } catch (error) {
+      console.error('Error loading Roce photos:', error);
+      toast({
+        title: "Error Loading Photos",
+        description: "Failed to load Roce photos. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    }
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
