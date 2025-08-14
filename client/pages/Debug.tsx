@@ -195,16 +195,15 @@ export default function Debug() {
         const { mobileOptimizedDownload } = await import("@/lib/mobile-utils");
 
         console.log("📱 Starting mobile download test...");
-        const success = mobileOptimizedDownload(
-          uploadedInvitation.pdf_data,
-          {
-            filename: uploadedInvitation.filename || "mobile-test-invitation.pdf",
-            mimeType: "application/pdf",
-          }
-        );
+        const success = mobileOptimizedDownload(uploadedInvitation.pdf_data, {
+          filename: uploadedInvitation.filename || "mobile-test-invitation.pdf",
+          mimeType: "application/pdf",
+        });
 
         toast({
-          title: success ? "Mobile Download Test Success! 📱✅" : "Mobile Download Test Failed! 📱❌",
+          title: success
+            ? "Mobile Download Test Success! 📱✅"
+            : "Mobile Download Test Failed! 📱❌",
           description: success
             ? "Mobile download worked correctly"
             : "Mobile download failed - check console for details",
@@ -214,7 +213,8 @@ export default function Debug() {
       } else {
         toast({
           title: "No Invitation for Mobile Test ❌",
-          description: "No invitation found in database to test mobile download.",
+          description:
+            "No invitation found in database to test mobile download.",
           variant: "destructive",
           duration: 5000,
         });

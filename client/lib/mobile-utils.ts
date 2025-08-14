@@ -159,7 +159,10 @@ export function mobileOptimizedDownload(
 
 function downloadWithIOSFallback(url: string, filename: string): boolean {
   try {
-    console.log("🍎 iOS download attempt starting:", { filename, urlType: url.startsWith("data:") ? "data URL" : "blob URL" });
+    console.log("🍎 iOS download attempt starting:", {
+      filename,
+      urlType: url.startsWith("data:") ? "data URL" : "blob URL",
+    });
 
     // Method 1: Try standard download approach
     const link = document.createElement("a");
@@ -219,7 +222,10 @@ function downloadWithAndroidOptimization(
   filename: string,
 ): boolean {
   try {
-    console.log("🤖 Android download attempt starting:", { filename, urlType: url.startsWith("data:") ? "data URL" : "blob URL" });
+    console.log("🤖 Android download attempt starting:", {
+      filename,
+      urlType: url.startsWith("data:") ? "data URL" : "blob URL",
+    });
 
     const link = document.createElement("a");
     link.href = url;
@@ -236,7 +242,9 @@ function downloadWithAndroidOptimization(
 
     document.body.appendChild(link);
 
-    console.log("🤖 Android: Link created and added to DOM, attempting clicks...");
+    console.log(
+      "🤖 Android: Link created and added to DOM, attempting clicks...",
+    );
 
     // Try multiple click methods for Android compatibility
     link.focus();
@@ -249,7 +257,7 @@ function downloadWithAndroidOptimization(
     console.log("🤖 Android: Click methods executed", {
       eventDispatched: eventResult,
       linkDownload: link.download,
-      linkHref: link.href.substring(0, 50) + "..."
+      linkHref: link.href.substring(0, 50) + "...",
     });
 
     // Clean up
