@@ -150,18 +150,25 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // For Netlify deployments, try Netlify Functions first since Supabase environment variables
-    // are handled server-side via Netlify Functions
+    // Check deployment environment more carefully
+    const hostname = window.location.hostname;
     const isNetlifyDeployment =
-      window.location.hostname.includes("netlify") ||
-      window.location.hostname.includes("netlify.app") ||
+      hostname.includes("netlify") ||
+      hostname.includes("netlify.app") ||
       import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
 
+    console.log("📸 Environment check:", {
+      hostname,
+      isNetlifyDeployment,
+      deploymentPlatform: import.meta.env.VITE_DEPLOYMENT_PLATFORM
+    });
+
+    // Only try Netlify functions if we're actually on Netlify
     if (isNetlifyDeployment) {
       console.log("📸 Detected Netlify deployment, using Netlify Functions...");
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced timeout
 
         // Try the dedicated Netlify function first
         const response = await fetch("/.netlify/functions/photos-get", {
@@ -206,8 +213,6 @@ export const photoService = {
 
             if (validPhotos.length > 0) {
               console.log("📸 Returning valid photos from Netlify API");
-              // Save to localStorage for offline access
-              this.syncSupabaseToLocalStorage(validPhotos);
               return validPhotos;
             }
           }
