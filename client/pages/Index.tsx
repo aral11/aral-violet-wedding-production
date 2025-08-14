@@ -1145,38 +1145,71 @@ Please RSVP at our wedding website
             </div>
           </div>
 
-          {/* Countdown */}
-          <div className="mb-16">
-            <h3 className="text-2xl md:text-3xl text-white mb-6 font-serif drop-shadow-md">
-              Days To Go!
-            </h3>
-            <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.days}
+          {/* Countdown - Only show if before wedding day */}
+          {currentMessage.showCountdown && (
+            <div className="mb-16">
+              <h3 className="text-2xl md:text-3xl text-white mb-6 font-serif drop-shadow-md">
+                Days To Go!
+              </h3>
+              <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.days}
+                  </div>
+                  <div className="text-sm text-sage-600">Days</div>
                 </div>
-                <div className="text-sm text-sage-600">Days</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.hours}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.hours}
+                  </div>
+                  <div className="text-sm text-sage-600">Hours</div>
                 </div>
-                <div className="text-sm text-sage-600">Hours</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.minutes}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.minutes}
+                  </div>
+                  <div className="text-sm text-sage-600">Minutes</div>
                 </div>
-                <div className="text-sm text-sage-600">Minutes</div>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
-                <div className="text-2xl md:text-3xl font-bold text-olive-700">
-                  {timeLeft.seconds}
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-sage-200 shadow-lg">
+                  <div className="text-2xl md:text-3xl font-bold text-olive-700">
+                    {timeLeft.seconds}
+                  </div>
+                  <div className="text-sm text-sage-600">Seconds</div>
                 </div>
-                <div className="text-sm text-sage-600">Seconds</div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Special message for post-wedding */}
+          {!currentMessage.showCountdown && currentMessage.title.includes("we'll be back soon") && (
+            <div className="mb-16">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                <div className="text-center">
+                  <Heart className="mx-auto mb-4 text-olive-600" size={48} />
+                  <p className="text-lg text-sage-700 mb-4">
+                    Our wedding day was absolutely magical! Thank you to everyone who celebrated with us.
+                  </p>
+                  <p className="text-sm text-sage-600">
+                    Stay tuned for some exciting updates coming soon! 💕
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Special message for wedding day */}
+          {!currentMessage.showCountdown && !currentMessage.title.includes("we'll be back soon") && (
+            <div className="mb-16">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                <div className="text-center">
+                  <Sparkles className="mx-auto mb-4 text-olive-600" size={48} />
+                  <p className="text-lg text-sage-700">
+                    This is the day we've been waiting for! 🎉
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
