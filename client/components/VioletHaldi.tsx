@@ -307,73 +307,61 @@ export default function VioletHaldi() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isEventActive() ? (
-              <div className="space-y-4">
-                <p className="text-purple-600 mb-4">
-                  Capture the joy and traditions of Violet's Haldi ceremony! Share your photos and messages to create lasting memories.
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-purple-700 mb-2">
-                      <User className="inline w-4 h-4 mr-1" />
-                      Your Name *
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="Enter your name"
-                      value={uploadForm.guestName}
-                      onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
-                      className="border-purple-300 focus:border-purple-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-purple-700 mb-2">
-                      <MessageSquare className="inline w-4 h-4 mr-1" />
-                      Message (Optional)
-                    </label>
-                    <Textarea
-                      placeholder="Share a message with your photo..."
-                      value={uploadForm.message}
-                      onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
-                      className="border-purple-300 focus:border-purple-500"
-                      rows={2}
-                    />
-                  </div>
+            <div className="space-y-4">
+              <p className="text-purple-600 mb-4">
+                Capture the joy and traditions of Violet's Haldi ceremony! Share your photos and messages to create lasting memories.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-purple-700 mb-2">
+                    <User className="inline w-4 h-4 mr-1" />
+                    Your Name *
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={uploadForm.guestName}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
+                    className="border-purple-300 focus:border-purple-500"
+                  />
                 </div>
-                
-                <div className="flex justify-center">
-                  <Button
-                    onClick={handleUploadClick}
-                    disabled={isUploading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
-                  >
-                    <Upload className="mr-2 w-5 h-5" />
-                    {isUploading ? 'Uploading...' : 'Upload Haldi Photos'}
-                  </Button>
+
+                <div>
+                  <label className="block text-sm font-medium text-purple-700 mb-2">
+                    <MessageSquare className="inline w-4 h-4 mr-1" />
+                    Message (Optional)
+                  </label>
+                  <Textarea
+                    placeholder="Share a message with your photo..."
+                    value={uploadForm.message}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="border-purple-300 focus:border-purple-500"
+                    rows={2}
+                  />
                 </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calendar className="mx-auto mb-4 text-purple-400" size={48} />
-                <p className="text-purple-600 text-lg mb-2">
-                  Photo uploads will be available on December 26, 2025
-                </p>
-                <p className="text-purple-500 text-sm">
-                  Come back during Violet's Haldi ceremony to share your photos!
-                </p>
+
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleUploadClick}
+                  disabled={isUploading || !isSupabaseConnected}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+                >
+                  <Upload className="mr-2 w-5 h-5" />
+                  {isUploading ? 'Uploading...' : 'Upload Haldi Photos'}
+                </Button>
               </div>
-            )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+            </div>
           </CardContent>
         </Card>
 
