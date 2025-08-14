@@ -265,6 +265,13 @@ export default function Debug() {
                 Test Direct Download
               </Button>
               <Button
+                onClick={testMobileDownload}
+                variant="outline"
+                className="border-purple-600 text-purple-700"
+              >
+                📱 Test Mobile Download
+              </Button>
+              <Button
                 onClick={clearResults}
                 variant="outline"
                 className="border-sage-400 text-sage-600"
