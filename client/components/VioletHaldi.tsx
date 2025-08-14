@@ -34,38 +34,64 @@ export default function VioletHaldi() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load Haldi photos on component mount
+  // Check access and load photos on component mount
   useEffect(() => {
-    loadHaldiPhotos();
+    checkAccess();
+    checkSupabaseConnection();
   }, []);
 
-  const loadHaldiPhotos = async () => {
-    try {
-      // Get all photos and filter for Violet's Haldi
-      const allPhotos = await database.photos.getAll();
-      const haldiPhotos = allPhotos
-        .filter(photo => photo.uploaded_by?.includes('violet_haldi'))
-        .map(photo => ({
-          id: photo.id || '',
-          photo_data: photo.photo_data,
-          guest_name: photo.guest_name || 'Anonymous',
-          message: extractMessageFromUploadedBy(photo.uploaded_by),
-          created_at: photo.created_at || new Date().toISOString()
-        }));
-      
-      setPhotos(haldiPhotos);
-    } catch (error) {
-      console.error('Error loading Haldi photos:', error);
+  // Load photos when access is granted
+  useEffect(() => {
+    if (hasAccess && isSupabaseConnected) {
+      loadHaldiPhotos();
+    }
+  }, [hasAccess, isSupabaseConnected]);
+
+  const checkSupabaseConnection = async () => {
+    const connected = await eventDatabase.testConnection();
+    setIsSupabaseConnected(connected);
+
+    if (!connected) {
+      toast({
+        title: "Supabase Connection Required ⚠️",
+        description: "Event photos require Supabase database connection. Please configure Supabase to use this feature.",
+        variant: "destructive",
+        duration: 6000,
+      });
     }
   };
 
-  const extractMessageFromUploadedBy = (uploadedBy: string): string => {
-    // Extract message from uploadedBy format: guest_violet_haldi_guestName_timestamp_message
-    const parts = uploadedBy.split('_');
-    if (parts.length > 5) {
-      return parts.slice(5).join('_');
+  const checkAccess = () => {
+    const now = new Date();
+    const haldiDate = new Date('2025-12-26'); // Dec 26, 2025
+    const dayAfterHaldi = new Date('2025-12-28'); // Dec 28, 2025 (allow until wedding day)
+
+    // Check if it's the event date (allow from Haldi day until wedding day)
+    const isEventPeriod = now >= haldiDate && now < dayAfterHaldi;
+
+    if (isEventPeriod) {
+      setHasAccess(true);
     }
-    return '';
+  };
+
+  const handleAccessGranted = () => {
+    setHasAccess(true);
+  };
+
+  const loadHaldiPhotos = async () => {
+    try {
+      const haldiPhotos = await eventDatabase.photos.getByEventType('violet_haldi');
+      setPhotos(haldiPhotos);
+      console.log(`📸 Loaded ${haldiPhotos.length} Haldi photos from Supabase`);
+    } catch (error) {
+      console.error('Error loading Haldi photos:', error);
+      toast({
+        title: "Error Loading Photos",
+        description: "Failed to load Haldi photos. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    }
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
