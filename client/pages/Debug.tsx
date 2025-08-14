@@ -185,6 +185,51 @@ export default function Debug() {
     }
   };
 
+  const testMobileDownload = async () => {
+    try {
+      console.log("📱 Testing mobile-optimized download...");
+
+      const uploadedInvitation = await database.invitation.get();
+
+      if (uploadedInvitation && uploadedInvitation.pdf_data) {
+        const { mobileOptimizedDownload } = await import("@/lib/mobile-utils");
+
+        console.log("📱 Starting mobile download test...");
+        const success = mobileOptimizedDownload(
+          uploadedInvitation.pdf_data,
+          {
+            filename: uploadedInvitation.filename || "mobile-test-invitation.pdf",
+            mimeType: "application/pdf",
+          }
+        );
+
+        toast({
+          title: success ? "Mobile Download Test Success! 📱✅" : "Mobile Download Test Failed! 📱❌",
+          description: success
+            ? "Mobile download worked correctly"
+            : "Mobile download failed - check console for details",
+          variant: success ? "default" : "destructive",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "No Invitation for Mobile Test ❌",
+          description: "No invitation found in database to test mobile download.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Mobile download test error:", error);
+      toast({
+        title: "Mobile Download Test Error ❌",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-50 p-4">
       <div className="max-w-4xl mx-auto">
