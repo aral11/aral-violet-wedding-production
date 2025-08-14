@@ -98,7 +98,7 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
               ) : (
                 <>
                   <Unlock className="mr-2 w-4 h-4" />
-                  Access Testing Mode
+                  Admin Access
                 </>
               )}
             </Button>
