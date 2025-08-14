@@ -711,7 +711,7 @@ Generated on: ${currentDate}
 
 ${scheduleContent}
 
-Made with love ❤�� By Aral D'Souza
+Made with love ❤️ By Aral D'Souza
     `;
 
     const blob = new Blob([weddingFlowContent], { type: "text/plain" });
@@ -978,7 +978,14 @@ Made with love ❤�� By Aral D'Souza
         });
 
         // Fourth priority: Direct localStorage fallback
+        console.log("💾 Checking localStorage for saved invitation...");
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
+        const savedFilename = localStorage.getItem("wedding_invitation_filename");
+        console.log("📦 localStorage check:", {
+          hasInvitation: !!savedInvitation,
+          filename: savedFilename,
+          dataLength: savedInvitation?.length,
+        });
         if (savedInvitation) {
           const link = document.createElement("a");
           link.href = savedInvitation;
