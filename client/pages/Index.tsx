@@ -711,7 +711,7 @@ Generated on: ${currentDate}
 
 ${scheduleContent}
 
-Made with love ❤️ By Aral D'Souza
+Made with love ❤�� By Aral D'Souza
     `;
 
     const blob = new Blob([weddingFlowContent], { type: "text/plain" });
@@ -885,10 +885,12 @@ Made with love ❤️ By Aral D'Souza
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
+      console.log("🌐 Trying server endpoint as fallback...");
       const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
       const downloadEndpoint = isNetlify
         ? "/.netlify/functions/download-invitation"
         : "/api/download-invitation";
+      console.log("📡 Server endpoint:", downloadEndpoint);
       const response = await fetch(downloadEndpoint);
       if (response.ok) {
         const blob = await response.blob();
