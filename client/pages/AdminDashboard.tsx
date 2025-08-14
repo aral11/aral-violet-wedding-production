@@ -3292,6 +3292,11 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Website Analytics */}
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+
           {/* Documentation */}
           <TabsContent value="documentation" className="space-y-6">
             <Card className="bg-white/80 backdrop-blur-sm border-sage-200">
