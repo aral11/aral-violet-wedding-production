@@ -269,7 +269,7 @@ export default function AralRoce() {
           <PinAccess
             onAccessGranted={handleAccessGranted}
             eventName="Aral's Roce"
-            eventDate="December 27, 2025 (Night)"
+            eventDate="Friday, December 27, 2025 (Evening)"
           />
         </div>
       </section>

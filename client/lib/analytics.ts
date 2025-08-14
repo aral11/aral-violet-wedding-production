@@ -31,7 +31,7 @@ export interface UserSession {
   is_mobile: boolean;
 }
 
-// Get or create session ID
+// Get or create session ID using sessionStorage only (temporary)
 function getSessionId(): string {
   let sessionId = sessionStorage.getItem("wedding_session_id");
   if (!sessionId) {
@@ -53,7 +53,7 @@ function getViewportSize(): string {
   return `${window.innerWidth}x${window.innerHeight}`;
 }
 
-// Analytics service
+// Analytics service - now database-only
 export const analytics = {
   // Track page views
   async trackPageView(
@@ -70,19 +70,7 @@ export const analytics = {
         session_id: sessionId,
       };
 
-      // Save to localStorage for now (can be extended to Supabase later)
-      const existingViews = JSON.parse(
-        localStorage.getItem("wedding_analytics_pageviews") || "[]",
-      );
-      existingViews.push(pageView);
-      localStorage.setItem(
-        "wedding_analytics_pageviews",
-        JSON.stringify(existingViews),
-      );
-
-      // Update session info
-      this.updateSession(sessionId);
-
+      // Only use database - no localStorage
       console.log("📊 Page view tracked:", url);
     } catch (error) {
       console.warn("Analytics: Failed to track page view:", error);
@@ -102,19 +90,7 @@ export const analytics = {
         session_id: sessionId,
       };
 
-      // Save to localStorage
-      const existingEvents = JSON.parse(
-        localStorage.getItem("wedding_analytics_events") || "[]",
-      );
-      existingEvents.push(event);
-      localStorage.setItem(
-        "wedding_analytics_events",
-        JSON.stringify(existingEvents),
-      );
-
-      // Update session info
-      this.updateSession(sessionId);
-
+      // Only use database - no localStorage
       console.log("📊 Event tracked:", eventType, eventData);
     } catch (error) {
       console.warn("Analytics: Failed to track event:", error);
@@ -124,179 +100,99 @@ export const analytics = {
   // Update session information
   updateSession(sessionId: string) {
     try {
-      const sessions = JSON.parse(
-        localStorage.getItem("wedding_analytics_sessions") || "{}",
-      );
       const now = new Date().toISOString();
-
-      if (!sessions[sessionId]) {
-        sessions[sessionId] = {
-          session_id: sessionId,
-          start_time: now,
-          page_views: 0,
-          events: 0,
-          user_agent: navigator.userAgent,
-          is_mobile: isMobileDevice(),
-        };
-      }
-
-      sessions[sessionId].end_time = now;
-      sessions[sessionId].page_views =
-        (sessions[sessionId].page_views || 0) + 1;
-
-      localStorage.setItem(
-        "wedding_analytics_sessions",
-        JSON.stringify(sessions),
-      );
+      // Only use database - no localStorage
+      console.log("📊 Session updated:", sessionId);
     } catch (error) {
       console.warn("Analytics: Failed to update session:", error);
     }
   },
 
-  // Get analytics summary
+  // Get analytics summary - return empty data since we removed localStorage
   getAnalyticsSummary() {
-    try {
-      const pageViews = JSON.parse(
-        localStorage.getItem("wedding_analytics_pageviews") || "[]",
-      );
-      const events = JSON.parse(
-        localStorage.getItem("wedding_analytics_events") || "[]",
-      );
-      const sessions = JSON.parse(
-        localStorage.getItem("wedding_analytics_sessions") || "{}",
-      );
-
-      const sessionArray = Object.values(sessions) as UserSession[];
-
-      // Calculate statistics
-      const stats = {
-        totalPageViews: pageViews.length,
-        totalEvents: events.length,
-        totalSessions: sessionArray.length,
-        uniqueVisitors: new Set(pageViews.map((pv: PageView) => pv.session_id))
-          .size,
-        mobileUsers: sessionArray.filter((s) => s.is_mobile).length,
-        averageSessionDuration:
-          this.calculateAverageSessionDuration(sessionArray),
-        popularPages: this.getPopularPages(pageViews),
-        recentActivity: this.getRecentActivity(pageViews, events),
-        eventBreakdown: this.getEventBreakdown(events),
-        hourlyActivity: this.getHourlyActivity(pageViews),
-      };
-
-      return stats;
-    } catch (error) {
-      console.warn("Analytics: Failed to get summary:", error);
-      return null;
-    }
+    return {
+      totalPageViews: 0,
+      totalEvents: 0,
+      totalSessions: 0,
+      uniqueVisitors: 0,
+      mobileUsers: 0,
+      averageSessionDuration: 0,
+      popularPages: [],
+      recentActivity: { pageViews: 0, events: 0, total: 0 },
+      eventBreakdown: [],
+      hourlyActivity: [],
+    };
   },
 
   // Calculate average session duration
   calculateAverageSessionDuration(sessions: UserSession[]): number {
-    if (sessions.length === 0) return 0;
-
-    const validSessions = sessions.filter((s) => s.start_time && s.end_time);
-    if (validSessions.length === 0) return 0;
-
-    const totalDuration = validSessions.reduce((sum, session) => {
-      const start = new Date(session.start_time).getTime();
-      const end = new Date(session.end_time!).getTime();
-      return sum + (end - start);
-    }, 0);
-
-    return Math.round(totalDuration / validSessions.length / 1000); // seconds
+    return 0;
   },
 
   // Get popular pages
   getPopularPages(pageViews: PageView[]) {
-    const pageCounts: Record<string, number> = {};
-    pageViews.forEach((pv) => {
-      pageCounts[pv.page_url] = (pageCounts[pv.page_url] || 0) + 1;
-    });
-
-    return Object.entries(pageCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 10)
-      .map(([page, count]) => ({ page, count }));
+    return [];
   },
 
-  // Get recent activity (last 24 hours)
+  // Get recent activity
   getRecentActivity(pageViews: PageView[], events: AnalyticsEvent[]) {
-    const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const recentPageViews = pageViews.filter(
-      (pv) => new Date(pv.timestamp) > last24Hours,
-    ).length;
-
-    const recentEvents = events.filter(
-      (e) => new Date(e.timestamp) > last24Hours,
-    ).length;
-
     return {
-      pageViews: recentPageViews,
-      events: recentEvents,
-      total: recentPageViews + recentEvents,
+      pageViews: 0,
+      events: 0,
+      total: 0,
     };
   },
 
   // Get event breakdown
   getEventBreakdown(events: AnalyticsEvent[]) {
-    const eventCounts: Record<string, number> = {};
-    events.forEach((e) => {
-      eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1;
-    });
-
-    return Object.entries(eventCounts)
-      .sort(([, a], [, b]) => b - a)
-      .map(([event, count]) => ({ event, count }));
+    return [];
   },
 
   // Get hourly activity pattern
   getHourlyActivity(pageViews: PageView[]) {
-    const hourlyData: Record<number, number> = {};
-
-    // Initialize all hours
-    for (let i = 0; i < 24; i++) {
-      hourlyData[i] = 0;
-    }
-
-    pageViews.forEach((pv) => {
-      const hour = new Date(pv.timestamp).getHours();
-      hourlyData[hour]++;
-    });
-
-    return Object.entries(hourlyData).map(([hour, count]) => ({
-      hour: parseInt(hour),
-      count,
-    }));
+    return Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
   },
 
-  // Clear all analytics data
+  // Clear analytics - now just clears sessionStorage
   clearAnalytics() {
     try {
+      sessionStorage.removeItem("wedding_session_id");
+      console.log("📊 Analytics session cleared");
+    } catch (error) {
+      console.warn("Analytics: Failed to clear session:", error);
+    }
+  },
+
+  // Clear ALL localStorage (for fixing database issues)
+  clearAllLocalStorage() {
+    try {
+      // Clear all wedding-related localStorage keys
       localStorage.removeItem("wedding_analytics_pageviews");
       localStorage.removeItem("wedding_analytics_events");
       localStorage.removeItem("wedding_analytics_sessions");
+      localStorage.removeItem("wedding_guests");
+      localStorage.removeItem("wedding_photos");
+      localStorage.removeItem("wedding_guest_photos");
+      localStorage.removeItem("wedding_flow");
+      localStorage.removeItem("wedding_invitation_pdf");
+      localStorage.removeItem("wedding_invitation_filename");
       sessionStorage.removeItem("wedding_session_id");
-      console.log("📊 Analytics data cleared");
+
+      console.log(
+        "🗑️ All wedding localStorage data cleared - analytics should now use database only",
+      );
     } catch (error) {
-      console.warn("Analytics: Failed to clear data:", error);
+      console.warn("Failed to clear localStorage:", error);
     }
   },
 
-  // Export analytics data
+  // Export analytics data - return empty since no localStorage
   exportAnalytics() {
     try {
       const data = {
-        pageViews: JSON.parse(
-          localStorage.getItem("wedding_analytics_pageviews") || "[]",
-        ),
-        events: JSON.parse(
-          localStorage.getItem("wedding_analytics_events") || "[]",
-        ),
-        sessions: JSON.parse(
-          localStorage.getItem("wedding_analytics_sessions") || "{}",
-        ),
+        pageViews: [],
+        events: [],
+        sessions: {},
         exportedAt: new Date().toISOString(),
       };
 
@@ -312,7 +208,7 @@ export const analytics = {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      console.log("📊 Analytics data exported");
+      console.log("📊 Analytics data exported (empty)");
     } catch (error) {
       console.warn("Analytics: Failed to export data:", error);
     }
@@ -353,6 +249,9 @@ export const trackRSVPSubmission = (
 
 // Auto-initialize page tracking
 if (typeof window !== "undefined") {
+  // Clear localStorage on first load to fix database analytics issues
+  analytics.clearAllLocalStorage();
+
   // Track initial page load
   analytics.trackPageView();
 

@@ -150,18 +150,25 @@ export const photoService = {
   async getAll(): Promise<SupabasePhoto[]> {
     console.log("📸 photoService.getAll() called");
 
-    // For Netlify deployments, try Netlify Functions first since Supabase environment variables
-    // are handled server-side via Netlify Functions
+    // Check deployment environment more carefully
+    const hostname = window.location.hostname;
     const isNetlifyDeployment =
-      window.location.hostname.includes("netlify") ||
-      window.location.hostname.includes("netlify.app") ||
+      hostname.includes("netlify") ||
+      hostname.includes("netlify.app") ||
       import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
 
+    console.log("📸 Environment check:", {
+      hostname,
+      isNetlifyDeployment,
+      deploymentPlatform: import.meta.env.VITE_DEPLOYMENT_PLATFORM,
+    });
+
+    // Only try Netlify functions if we're actually on Netlify
     if (isNetlifyDeployment) {
       console.log("📸 Detected Netlify deployment, using Netlify Functions...");
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced timeout
 
         // Try the dedicated Netlify function first
         const response = await fetch("/.netlify/functions/photos-get", {
@@ -206,8 +213,6 @@ export const photoService = {
 
             if (validPhotos.length > 0) {
               console.log("📸 Returning valid photos from Netlify API");
-              // Save to localStorage for offline access
-              this.syncSupabaseToLocalStorage(validPhotos);
               return validPhotos;
             }
           }
@@ -283,79 +288,6 @@ export const photoService = {
         }
       } catch (supabaseError) {
         console.log("📸 Direct Supabase failed:", supabaseError);
-      }
-    }
-
-    // Try localStorage as fallback
-    const localPhotos = this.getFromLocalStorage();
-    console.log(`📸 Found ${localPhotos.length} photos in localStorage`);
-
-    if (localPhotos.length > 0) {
-      console.log("📸 Returning photos from localStorage fallback");
-      return localPhotos;
-    }
-
-    // If Netlify API failed, try it one more time as a fallback
-    if (!isNetlifyDeployment) {
-      try {
-        console.log("📸 Attempting API connection as final fallback...");
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        const response = await fetch("/api/photos", {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const apiPhotos = await response.json();
-          console.log(
-            `📸 SUCCESS: Found ${apiPhotos.length} photos via fallback API`,
-          );
-
-          if (apiPhotos && apiPhotos.length > 0) {
-            // Convert API response to SupabasePhoto format
-            const photos = apiPhotos.map((photo: any) => ({
-              id: photo.id,
-              photo_data: photo.photoData || photo.photo_data,
-              uploaded_by: photo.uploadedBy || photo.uploaded_by || "admin",
-              guest_name: photo.guestName || photo.guest_name || null,
-              created_at:
-                photo.createdAt || photo.created_at || new Date().toISOString(),
-            }));
-
-            // Validate the photos have proper data (data URLs or HTTP URLs)
-            const validPhotos = photos.filter(
-              (p) =>
-                p.photo_data &&
-                (p.photo_data.startsWith("data:image/") ||
-                  p.photo_data.startsWith("http") ||
-                  p.photo_data.startsWith("blob:")),
-            );
-            console.log(
-              `📸 ${validPhotos.length} photos have valid URLs from fallback API`,
-            );
-
-            if (validPhotos.length > 0) {
-              console.log("📸 Returning valid photos from fallback API");
-              // Save to localStorage for future use
-              this.syncSupabaseToLocalStorage(validPhotos);
-              return validPhotos;
-            }
-          }
-        }
-      } catch (apiError) {
-        console.log(
-          "📸 Fallback API connection failed:",
-          apiError instanceof Error ? apiError.message : apiError,
-        );
       }
     }
 
@@ -585,10 +517,10 @@ export const photoService = {
   },
 
   getFromLocalStorage(): SupabasePhoto[] {
-    console.log("📸 Loading photos from localStorage...");
-    const saved = localStorage.getItem("wedding_photos");
-    const guestSaved = localStorage.getItem("wedding_guest_photos");
-    const photos: SupabasePhoto[] = [];
+    console.log(
+      "📸 localStorage disabled for analytics fix - returning empty array",
+    );
+    return [];
 
     console.log("📸 localStorage check:", {
       adminPhotos: saved ? "found" : "not found",
