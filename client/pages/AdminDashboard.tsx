@@ -127,10 +127,13 @@ export default function AdminDashboard() {
         console.log("📷 Admin raw photos from database:", photos);
 
         if (photos && photos.length > 0) {
-          // Filter for valid photos only
+          // Filter for valid photos (accept both data URLs and HTTP URLs)
           const validPhotos = photos.filter(
             (photo) =>
-              photo.photo_data && photo.photo_data.startsWith("data:image/"),
+              photo.photo_data &&
+              (photo.photo_data.startsWith("data:image/") ||
+               photo.photo_data.startsWith("http") ||
+               photo.photo_data.startsWith("blob:")),
           );
 
           console.log(
@@ -146,17 +149,32 @@ export default function AdminDashboard() {
           console.log(
             `📷 Admin gallery: ${validPhotos.length} photos loaded from ${storageType}`,
           );
+
+          // Force re-render to ensure display updates
+          setTimeout(() => {
+            console.log("📷 Current uploadedPhotos state after load:", uploadedPhotos.length);
+          }, 100);
         } else {
           setUploadedPhotos([]);
           console.log("📷 No photos found in admin database");
+
+          // Additional debugging - check localStorage directly
+          const localPhotos = localStorage.getItem("wedding_photos");
+          const guestPhotos = localStorage.getItem("wedding_guest_photos");
+          console.log("📷 Direct localStorage check:", {
+            adminPhotos: localPhotos ? JSON.parse(localPhotos).length : 0,
+            guestPhotos: guestPhotos ? JSON.parse(guestPhotos).length : 0
+          });
         }
       } catch (error) {
         console.log("Error loading photos:", error);
-        // Try localStorage fallback
+        // Try localStorage fallback with more robust checking
         try {
           const fallbackPhotos = JSON.parse(
             localStorage.getItem("wedding_photos") || "[]",
           );
+          console.log("📷 Fallback photos from localStorage:", fallbackPhotos);
+
           if (fallbackPhotos.length > 0) {
             setUploadedPhotos(fallbackPhotos);
             console.log(
@@ -164,6 +182,7 @@ export default function AdminDashboard() {
             );
           } else {
             setUploadedPhotos([]);
+            console.log("📷 No fallback photos found in localStorage");
           }
         } catch (fallbackError) {
           console.log("Admin fallback photo loading failed:", fallbackError);
