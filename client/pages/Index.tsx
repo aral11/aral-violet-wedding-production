@@ -873,7 +873,10 @@ Made with love ❤️ By Aral D'Souza
           console.log("❌ No uploaded invitation found in database");
         }
       } catch (dbError) {
-        console.log("�� Database error, trying server endpoint...", dbError);
+        console.log("⚠️ Database error, trying server endpoint...", {
+          error: dbError,
+          errorMessage: dbError instanceof Error ? dbError.message : String(dbError),
+        });
         toast({
           title: "Database Access Issue",
           description: "Trying alternative download method...",
