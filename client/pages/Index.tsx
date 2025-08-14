@@ -94,14 +94,25 @@ export default function Index() {
   const getCurrentMessage = () => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const haldiDay = new Date(2025, 11, 26); // December 26, 2025
+    const roceDay = new Date(2025, 11, 27); // December 27, 2025
     const weddingDay = new Date(2025, 11, 28); // December 28, 2025
     const postWeddingDay = new Date(2025, 11, 29); // December 29, 2025
 
-    // Check if it's post-wedding day (Dec 29, 2025)
-    if (today.getTime() === postWeddingDay.getTime()) {
+    // Check if it's Violet's Haldi day (Dec 26, 2025)
+    if (today.getTime() === haldiDay.getTime()) {
       return {
-        title: "Wedding is done �� we'll be back soon with something exciting!",
-        subtitle: "Thank you for celebrating with us! 💕",
+        title: "Violet's Haldi Day",
+        subtitle: "A beautiful pre-wedding tradition filled with joy and blessings 💛",
+        showCountdown: false
+      };
+    }
+
+    // Check if it's Aral's Roce day (Dec 27, 2025)
+    if (today.getTime() === roceDay.getTime()) {
+      return {
+        title: "Aral's Roce Day",
+        subtitle: "A cherished Mangalorean tradition celebrating the groom 🌊",
         showCountdown: false
       };
     }
@@ -126,6 +137,15 @@ export default function Index() {
           showCountdown: false
         };
       }
+    }
+
+    // Check if it's post-wedding day (Dec 29, 2025)
+    if (today.getTime() === postWeddingDay.getTime()) {
+      return {
+        title: "Wedding is done — we'll be back soon with something exciting!",
+        subtitle: "Thank you for celebrating with us! 💕",
+        showCountdown: false
+      };
     }
 
     // Default - before wedding day
