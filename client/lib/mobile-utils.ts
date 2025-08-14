@@ -203,6 +203,8 @@ function downloadWithAndroidOptimization(
   filename: string,
 ): boolean {
   try {
+    console.log("🤖 Android download attempt starting:", { filename, urlType: url.startsWith("data:") ? "data URL" : "blob URL" });
+
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -218,13 +220,21 @@ function downloadWithAndroidOptimization(
 
     document.body.appendChild(link);
 
+    console.log("🤖 Android: Link created and added to DOM, attempting clicks...");
+
     // Try multiple click methods for Android compatibility
     link.focus();
     link.click();
 
     // Also try direct event dispatch
     const event = new Event("click", { bubbles: true, cancelable: true });
-    link.dispatchEvent(event);
+    const eventResult = link.dispatchEvent(event);
+
+    console.log("🤖 Android: Click methods executed", {
+      eventDispatched: eventResult,
+      linkDownload: link.download,
+      linkHref: link.href.substring(0, 50) + "..."
+    });
 
     // Clean up
     setTimeout(() => {
@@ -232,11 +242,13 @@ function downloadWithAndroidOptimization(
       if (url.startsWith("blob:")) {
         URL.revokeObjectURL(url);
       }
+      console.log("🤖 Android: Cleanup completed");
     }, 1000);
 
+    console.log("🤖 Android download method completed successfully");
     return true;
   } catch (error) {
-    console.error("Android download failed:", error);
+    console.error("🤖 Android download failed:", error);
     return false;
   }
 }
