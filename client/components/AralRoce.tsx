@@ -212,15 +212,56 @@ export default function AralRoce() {
     fileInputRef.current?.click();
   };
 
-  // Check if Aral's Roce event has passed
-  const isEventActive = () => {
-    const now = new Date();
-    const roceDate = new Date('2025-12-27'); // Dec 27, 2025
-    const dayAfterRoce = new Date('2025-12-28'); // Dec 28, 2025
-    
-    // Allow uploads on Roce day and the day after (until wedding day)
-    return now >= roceDate && now < dayAfterRoce;
-  };
+  // Show PIN access screen if no access
+  if (!hasAccess) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-br from-teal-50 to-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-5xl font-serif text-teal-700 mb-4">
+              Aral's Roce
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-teal-600 to-blue-600 mx-auto mb-6"></div>
+          </div>
+          <PinAccess
+            onAccessGranted={handleAccessGranted}
+            eventName="Aral's Roce"
+            eventDate="December 27, 2025 (Night)"
+          />
+        </div>
+      </section>
+    );
+  }
+
+  // Show Supabase requirement if not connected
+  if (!isSupabaseConnected) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-br from-teal-50 to-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-5xl font-serif text-teal-700 mb-4">
+              Aral's Roce
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-teal-600 to-blue-600 mx-auto mb-6"></div>
+          </div>
+          <Card className="max-w-md mx-auto bg-white/90 backdrop-blur-sm border-2 border-teal-200 shadow-xl">
+            <CardContent className="p-8 text-center">
+              <Waves className="mx-auto mb-4 text-teal-400" size={48} />
+              <h3 className="text-xl font-serif text-teal-700 mb-4">
+                Supabase Connection Required
+              </h3>
+              <p className="text-teal-600 mb-4">
+                Event photos and messages are stored securely in Supabase. Please configure your Supabase connection to access this feature.
+              </p>
+              <p className="text-sm text-teal-500">
+                Contact the admin for database configuration.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 px-4 bg-gradient-to-br from-teal-50 to-blue-50">
