@@ -337,7 +337,7 @@ export default function VioletHaldi() {
                 </p>
                 <p className="flex items-center justify-center gap-2">
                   <MapPin size={16} />
-                  At Violet's Home
+                  Ocean Pearl, Udupi
                 </p>
               </div>
             </CardContent>
