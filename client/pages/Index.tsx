@@ -714,7 +714,7 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.filename,
           );
           console.log(
-            "���� PDF data length:",
+            "📄 PDF data length:",
             uploadedInvitation.pdf_data.length,
           );
 
@@ -1026,6 +1026,7 @@ Please RSVP at our wedding website
               </Button>
               <Button
                 onClick={() => {
+                  trackClick('rsvp_button', 'hero_section');
                   const rsvpSection = document.getElementById("rsvp-section");
                   rsvpSection?.scrollIntoView({ behavior: "smooth" });
                 }}
