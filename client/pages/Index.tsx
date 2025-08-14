@@ -188,6 +188,9 @@ export default function Index() {
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Track RSVP form attempt
+    trackClick('rsvp_form_submit', 'rsvp_section');
+
     // Basic form validation
     if (!rsvpForm.name.trim()) {
       toast({
