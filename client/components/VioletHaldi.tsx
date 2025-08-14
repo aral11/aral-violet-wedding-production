@@ -25,6 +25,7 @@ export default function VioletHaldi() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasAccess, setHasAccess] = useState(false);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
+  const [accessMode, setAccessMode] = useState<'none' | 'admin' | 'guest' | 'view-only' | 'hidden'>('none');
   const photosPerPage = 8;
 
   const [uploadForm, setUploadForm] = useState({
