@@ -98,6 +98,16 @@ export default function AralRoce() {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    if (!isSupabaseConnected) {
+      toast({
+        title: "Supabase Required ⚠️",
+        description: "Event photos require Supabase database connection.",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+
     if (!uploadForm.guestName.trim()) {
       toast({
         title: "Name Required! ✋",
@@ -111,6 +121,7 @@ export default function AralRoce() {
     setIsUploading(true);
 
     try {
+      let successCount = 0;
       for (const file of files) {
         if (!file.type.startsWith('image/')) {
           toast({
@@ -137,26 +148,22 @@ export default function AralRoce() {
         reader.onload = async (e) => {
           if (e.target?.result) {
             const photoData = e.target.result as string;
-            
-            // Create unique uploaded_by identifier for Aral's Roce with message
-            const timestamp = Date.now();
-            const uploadedBy = `guest_aral_roce_${uploadForm.guestName.replace(/\s+/g, '')}_${timestamp}_${uploadForm.message.replace(/\s+/g, '_')}`;
-            
-            try {
-              await database.photos.create(
-                photoData,
-                uploadedBy,
-                uploadForm.guestName
-              );
 
-              // Reload photos
-              await loadRocePhotos();
-              
-              toast({
-                title: "Photo Uploaded! 📸",
-                description: `Your wonderful Roce memory has been added to Aral's collection!`,
-                duration: 4000,
+            try {
+              const result = await eventDatabase.photos.create({
+                event_type: 'aral_roce',
+                photo_data: photoData,
+                guest_name: uploadForm.guestName.trim(),
+                message: uploadForm.message.trim() || undefined,
+                uploaded_by: 'guest'
               });
+
+              if (result) {
+                successCount++;
+                console.log('✅ Roce photo uploaded to Supabase');
+              } else {
+                throw new Error('Failed to create photo record');
+              }
             } catch (uploadError) {
               console.error('Photo upload error:', uploadError);
               toast({
@@ -170,6 +177,19 @@ export default function AralRoce() {
         };
         reader.readAsDataURL(file);
       }
+
+      // Wait a moment for uploads to complete, then reload
+      setTimeout(async () => {
+        await loadRocePhotos();
+        if (successCount > 0) {
+          toast({
+            title: "Photos Uploaded! 📸",
+            description: `${successCount} wonderful Roce memor${successCount === 1 ? 'y' : 'ies'} added to Aral's collection!`,
+            duration: 4000,
+          });
+        }
+      }, 1000);
+
     } catch (error) {
       console.error('Upload process error:', error);
       toast({
