@@ -143,6 +143,8 @@ export function mobileOptimizedDownload(
 
 function downloadWithIOSFallback(url: string, filename: string): boolean {
   try {
+    console.log("🍎 iOS download attempt starting:", { filename, urlType: url.startsWith("data:") ? "data URL" : "blob URL" });
+
     // Method 1: Try standard download approach
     const link = document.createElement("a");
     link.href = url;
@@ -163,7 +165,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
     const clicked = link.dispatchEvent(clickEvent);
     document.body.removeChild(link);
 
+    console.log("🍎 iOS Method 1 (programmatic click) result:", clicked);
+
     if (clicked) {
+      console.log("🍎 iOS Method 1 succeeded, cleaning up...");
       setTimeout(() => {
         if (url.startsWith("blob:")) {
           URL.revokeObjectURL(url);
@@ -173,8 +178,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
     }
 
     // Method 2: Fallback to new window (iOS Safari often blocks downloads)
+    console.log("🍎 iOS Method 1 failed, trying Method 2 (new window)...");
     const newWindow = window.open(url, "_blank");
     if (newWindow) {
+      console.log("🍎 iOS Method 2 succeeded, new window opened");
       setTimeout(() => {
         if (url.startsWith("blob:")) {
           URL.revokeObjectURL(url);
@@ -183,9 +190,10 @@ function downloadWithIOSFallback(url: string, filename: string): boolean {
       return true;
     }
 
+    console.log("🍎 iOS Method 2 failed, both methods exhausted");
     return false;
   } catch (error) {
-    console.error("iOS download failed:", error);
+    console.error("🍎 iOS download failed:", error);
     return false;
   }
 }
