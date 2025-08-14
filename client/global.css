@@ -145,5 +145,15 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Ensure proper emoji support for toast notifications */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+
+  /* Ensure toast notifications display emojis properly */
+  [data-radix-toast-title],
+  [data-radix-toast-description],
+  .toast-title,
+  .toast-description {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
   }
 }
