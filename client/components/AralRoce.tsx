@@ -307,73 +307,61 @@ export default function AralRoce() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isEventActive() ? (
-              <div className="space-y-4">
-                <p className="text-teal-600 mb-4">
-                  Capture the traditions and celebrations of Aral's Roce ceremony! Share your photos and messages to preserve these precious memories.
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-teal-700 mb-2">
-                      <User className="inline w-4 h-4 mr-1" />
-                      Your Name *
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="Enter your name"
-                      value={uploadForm.guestName}
-                      onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
-                      className="border-teal-300 focus:border-teal-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-teal-700 mb-2">
-                      <MessageSquare className="inline w-4 h-4 mr-1" />
-                      Message (Optional)
-                    </label>
-                    <Textarea
-                      placeholder="Share a message with your photo..."
-                      value={uploadForm.message}
-                      onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
-                      className="border-teal-300 focus:border-teal-500"
-                      rows={2}
-                    />
-                  </div>
+            <div className="space-y-4">
+              <p className="text-teal-600 mb-4">
+                Capture the traditions and celebrations of Aral's Roce ceremony! Share your photos and messages to preserve these precious memories.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-teal-700 mb-2">
+                    <User className="inline w-4 h-4 mr-1" />
+                    Your Name *
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={uploadForm.guestName}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, guestName: e.target.value }))}
+                    className="border-teal-300 focus:border-teal-500"
+                  />
                 </div>
-                
-                <div className="flex justify-center">
-                  <Button
-                    onClick={handleUploadClick}
-                    disabled={isUploading}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3"
-                  >
-                    <Upload className="mr-2 w-5 h-5" />
-                    {isUploading ? 'Uploading...' : 'Upload Roce Photos'}
-                  </Button>
+
+                <div>
+                  <label className="block text-sm font-medium text-teal-700 mb-2">
+                    <MessageSquare className="inline w-4 h-4 mr-1" />
+                    Message (Optional)
+                  </label>
+                  <Textarea
+                    placeholder="Share a message with your photo..."
+                    value={uploadForm.message}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="border-teal-300 focus:border-teal-500"
+                    rows={2}
+                  />
                 </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calendar className="mx-auto mb-4 text-teal-400" size={48} />
-                <p className="text-teal-600 text-lg mb-2">
-                  Photo uploads will be available on December 27, 2025
-                </p>
-                <p className="text-teal-500 text-sm">
-                  Come back during Aral's Roce ceremony to share your photos!
-                </p>
+
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleUploadClick}
+                  disabled={isUploading || !isSupabaseConnected}
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3"
+                >
+                  <Upload className="mr-2 w-5 h-5" />
+                  {isUploading ? 'Uploading...' : 'Upload Roce Photos'}
+                </Button>
               </div>
-            )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+            </div>
           </CardContent>
         </Card>
 
