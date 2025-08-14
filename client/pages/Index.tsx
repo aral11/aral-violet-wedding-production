@@ -32,6 +32,7 @@ import {
   detectMobile,
   getDownloadInstructions,
 } from "@/lib/mobile-utils";
+import { trackClick, trackFormSubmit, trackDownload, trackRSVPSubmission } from "@/lib/analytics";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
 
 interface Guest {
