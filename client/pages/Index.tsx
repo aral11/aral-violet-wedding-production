@@ -39,6 +39,8 @@ import {
   trackRSVPSubmission,
 } from "@/lib/analytics";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
+import VioletHaldi from "@/components/VioletHaldi";
+import AralRoce from "@/components/AralRoce";
 
 interface Guest {
   id: string;
