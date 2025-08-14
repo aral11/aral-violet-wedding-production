@@ -61,14 +61,14 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
         <CardContent className="space-y-6">
           <div className="text-center">
             <p className="text-sage-700 mb-4">
-              This section is available during the event or with a testing PIN.
+              This section is available during the event or with admin access.
             </p>
             <div className="bg-sage-50 p-4 rounded-lg border border-sage-200">
               <p className="text-sm text-sage-600 mb-2">
                 <strong>For Guests:</strong> This section will be accessible on {eventDate}
               </p>
               <p className="text-sm text-sage-600">
-                <strong>For Testing:</strong> Enter the testing PIN below
+                <strong>Only admins can access before event dates</strong>
               </p>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
           <form onSubmit={handlePinSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-sage-700 mb-2">
-                Enter Testing PIN
+                Enter Admin PIN
               </label>
               <Input
                 type="password"
