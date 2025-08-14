@@ -48,12 +48,23 @@ export function mobileOptimizedDownload(
   data: string | Blob,
   options: DownloadOptions,
 ): boolean {
-  const { isMobile, isIOS, isAndroid } = detectMobile();
+  const { isMobile, isIOS, isAndroid, browser } = detectMobile();
   const {
     filename,
     mimeType = "application/pdf",
     forceDownload = true,
   } = options;
+
+  console.log("📱 Mobile download starting:", {
+    isMobile,
+    isIOS,
+    isAndroid,
+    browser,
+    filename,
+    mimeType,
+    dataType: typeof data,
+    dataLength: typeof data === "string" ? data.length : data.size,
+  });
 
   try {
     let blob: Blob;
