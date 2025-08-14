@@ -2036,6 +2036,16 @@ export default function AdminDashboard() {
                 <span className="hidden lg:inline">Invitation</span>
               </TabsTrigger>
               <TabsTrigger
+                value="analytics"
+                className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
+                title="Website Analytics"
+              >
+                <BarChart3 size={16} className="sm:hidden" />
+                <BarChart3 size={14} className="hidden sm:inline" />
+                <span className="hidden sm:inline lg:hidden">Stats</span>
+                <span className="hidden lg:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger
                 value="documentation"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
                 title="Documentation"
