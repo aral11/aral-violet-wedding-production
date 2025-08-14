@@ -128,7 +128,15 @@ export function mobileOptimizedDownload(
       return downloadWithDesktopOptimization(url, filename);
     }
   } catch (error) {
-    console.error("Mobile download failed:", error);
+    console.error("📱 Mobile download failed:", {
+      error: error instanceof Error ? error.message : String(error),
+      filename,
+      mimeType,
+      isMobile,
+      isIOS,
+      isAndroid,
+      browser,
+    });
     return false;
   }
 }
