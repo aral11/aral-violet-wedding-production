@@ -32,6 +32,7 @@ import {
 import { database } from "@/lib/database";
 import { getMobileFileAccept } from "@/lib/mobile-utils";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 interface Guest {
   id: string;
