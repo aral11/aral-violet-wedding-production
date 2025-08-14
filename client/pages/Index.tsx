@@ -827,34 +827,40 @@ Made with love ❤️ By Aral D'Souza
           }
 
           // Download the uploaded PDF invitation - Mobile-friendly approach
-          const link = document.createElement("a");
-          link.href = uploadedInvitation.pdf_data;
-          link.download =
-            uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
-          link.target = "_blank";
+          console.log("📱 Attempting mobile-optimized download from database...");
+
+          const filename = uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
 
           // Use mobile-optimized download utility
           const downloadSuccess = mobileOptimizedDownload(
             uploadedInvitation.pdf_data,
             {
-              filename:
-                uploadedInvitation.filename ||
-                "Aral-Violet-Wedding-Invitation.pdf",
+              filename: filename,
               mimeType: "application/pdf",
             },
           );
 
+          console.log("📱 Mobile download result:", downloadSuccess);
+
           if (!downloadSuccess) {
-            // Fallback to original method
+            // Fallback to standard download method
+            console.log("📱 Mobile download failed, using standard method...");
             const link = document.createElement("a");
             link.href = uploadedInvitation.pdf_data;
-            link.download =
-              uploadedInvitation.filename ||
-              "Aral-Violet-Wedding-Invitation.pdf";
+            link.download = filename;
             link.target = "_blank";
+
+            // For mobile devices, add additional attributes
+            if (isMobile) {
+              link.rel = "noopener noreferrer";
+              // Try to force download on mobile
+              link.setAttribute("download", filename);
+            }
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            console.log("📱 Standard download method executed");
           }
 
           toast({
