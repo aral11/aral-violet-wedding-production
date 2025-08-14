@@ -13,6 +13,7 @@ import {
   Plus,
   Edit,
   FileText,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ import {
 import { database } from "@/lib/database";
 import { getMobileFileAccept } from "@/lib/mobile-utils";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 interface Guest {
   id: string;
@@ -127,10 +129,13 @@ export default function AdminDashboard() {
         console.log("📷 Admin raw photos from database:", photos);
 
         if (photos && photos.length > 0) {
-          // Filter for valid photos only
+          // Filter for valid photos (accept both data URLs and HTTP URLs)
           const validPhotos = photos.filter(
             (photo) =>
-              photo.photo_data && photo.photo_data.startsWith("data:image/"),
+              photo.photo_data &&
+              (photo.photo_data.startsWith("data:image/") ||
+                photo.photo_data.startsWith("http") ||
+                photo.photo_data.startsWith("blob:")),
           );
 
           console.log(
@@ -146,17 +151,35 @@ export default function AdminDashboard() {
           console.log(
             `📷 Admin gallery: ${validPhotos.length} photos loaded from ${storageType}`,
           );
+
+          // Force re-render to ensure display updates
+          setTimeout(() => {
+            console.log(
+              "📷 Current uploadedPhotos state after load:",
+              uploadedPhotos.length,
+            );
+          }, 100);
         } else {
           setUploadedPhotos([]);
           console.log("📷 No photos found in admin database");
+
+          // Additional debugging - check localStorage directly
+          const localPhotos = localStorage.getItem("wedding_photos");
+          const guestPhotos = localStorage.getItem("wedding_guest_photos");
+          console.log("📷 Direct localStorage check:", {
+            adminPhotos: localPhotos ? JSON.parse(localPhotos).length : 0,
+            guestPhotos: guestPhotos ? JSON.parse(guestPhotos).length : 0,
+          });
         }
       } catch (error) {
         console.log("Error loading photos:", error);
-        // Try localStorage fallback
+        // Try localStorage fallback with more robust checking
         try {
           const fallbackPhotos = JSON.parse(
             localStorage.getItem("wedding_photos") || "[]",
           );
+          console.log("📷 Fallback photos from localStorage:", fallbackPhotos);
+
           if (fallbackPhotos.length > 0) {
             setUploadedPhotos(fallbackPhotos);
             console.log(
@@ -164,6 +187,7 @@ export default function AdminDashboard() {
             );
           } else {
             setUploadedPhotos([]);
+            console.log("📷 No fallback photos found in localStorage");
           }
         } catch (fallbackError) {
           console.log("Admin fallback photo loading failed:", fallbackError);
@@ -846,7 +870,7 @@ export default function AdminDashboard() {
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
             <div><strong>Church Nuptials:</strong> Mother of Sorrows Church, Udupi • 4:00 PM</div>
-            <div><strong>Reception:</strong> Sai Radha Heritage Beach Resort, Kaup • 7:00 PM</div>
+            <div><strong>Reception:</strong> Sai Radha Heritage Beach Resort, Kaup �� 7:00 PM</div>
         </div>
         <div class="report-date">RSVP Report Generated: ${currentDate}</div>
     </div>
@@ -1963,7 +1987,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <Tabs defaultValue="rsvp" className="space-y-6">
           <div className="w-full overflow-x-auto scrollbar-hide">
-            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-6 gap-1 h-auto p-1">
+            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-7 gap-1 h-auto p-1">
               <TabsTrigger
                 value="rsvp"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
@@ -2013,6 +2037,16 @@ export default function AdminDashboard() {
                 <FileText size={14} className="hidden sm:inline" />
                 <span className="hidden sm:inline lg:hidden">PDF</span>
                 <span className="hidden lg:inline">Invitation</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="analytics"
+                className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
+                title="Website Analytics"
+              >
+                <BarChart3 size={16} className="sm:hidden" />
+                <BarChart3 size={14} className="hidden sm:inline" />
+                <span className="hidden sm:inline lg:hidden">Stats</span>
+                <span className="hidden lg:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger
                 value="documentation"
@@ -2231,6 +2265,66 @@ export default function AdminDashboard() {
                         >
                           <Upload className="mr-3" size={24} />
                           Select Photos (up to 200MB each)
+                        </Button>
+
+                        {/* Developer test button */}
+                        <Button
+                          onClick={async () => {
+                            try {
+                              // Create a simple test image (1x1 red pixel)
+                              const canvas = document.createElement("canvas");
+                              canvas.width = 100;
+                              canvas.height = 100;
+                              const ctx = canvas.getContext("2d");
+                              if (ctx) {
+                                ctx.fillStyle = "#84a178";
+                                ctx.fillRect(0, 0, 100, 100);
+                                ctx.fillStyle = "white";
+                                ctx.font = "16px Arial";
+                                ctx.textAlign = "center";
+                                ctx.fillText("TEST", 50, 55);
+                              }
+
+                              const testImageData =
+                                canvas.toDataURL("image/png");
+                              console.log(
+                                "🧪 Created test image, uploading...",
+                              );
+
+                              // Save directly to database to test the system
+                              const savedPhoto = await database.photos.create(
+                                testImageData,
+                                "admin",
+                              );
+                              console.log("🧪 Test photo saved:", savedPhoto);
+
+                              // Update the UI
+                              setUploadedPhotos((prev) => [
+                                ...prev,
+                                testImageData,
+                              ]);
+
+                              toast({
+                                title: "Test Photo Added! 🧪",
+                                description:
+                                  "Test image successfully uploaded to verify photo system.",
+                                duration: 3000,
+                              });
+                            } catch (error) {
+                              console.error("Test photo upload failed:", error);
+                              toast({
+                                title: "Test Failed",
+                                description:
+                                  "Test photo upload failed. Check console for details.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                        >
+                          🧪 Add Test Photo
                         </Button>
                         <div className="text-center space-y-2 max-w-md">
                           <p className="text-sm text-sage-600 font-medium">
@@ -3210,6 +3304,11 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Website Analytics */}
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard />
           </TabsContent>
 
           {/* Documentation */}
