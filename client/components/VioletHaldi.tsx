@@ -244,8 +244,13 @@ export default function VioletHaldi() {
     fileInputRef.current?.click();
   };
 
-  // Show PIN access screen if no access
-  if (!hasAccess) {
+  // Hide section completely if no photos exist after event
+  if (accessMode === 'hidden') {
+    return null;
+  }
+
+  // Show PIN access screen for admin access before event
+  if (!hasAccess && accessMode === 'admin') {
     return (
       <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="max-w-6xl mx-auto">
