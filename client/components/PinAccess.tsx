@@ -20,13 +20,13 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
     e.preventDefault();
     setIsVerifying(true);
 
-    // PIN for testing mode
-    const TESTING_PIN = "0000";
+    // PIN for admin access
+    const ADMIN_PIN = "0000";
 
-    if (pin === TESTING_PIN) {
+    if (pin === ADMIN_PIN) {
       toast({
-        title: "Testing Mode Activated! 🧪",
-        description: `You now have access to ${eventName} in testing mode.`,
+        title: "Admin Access Granted! 🔓",
+        description: `You now have admin access to ${eventName}.`,
         duration: 3000,
       });
       onAccessGranted();
