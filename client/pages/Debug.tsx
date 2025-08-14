@@ -1,465 +1,295 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import { database } from "@/lib/database";
-
-interface ConnectionTest {
-  success: boolean;
-  message: string;
-  details?: any;
-  timestamp: string;
-}
+import { invitationApi } from "@/lib/api";
 
 export default function Debug() {
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionTest | null>(null);
-  const [supabaseDebug, setSupabaseDebug] = useState<any>(null);
+  const [debugResults, setDebugResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [photoStats, setPhotoStats] = useState<any>(null);
+  const { toast } = useToast();
 
-  const testConnection = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/test-connection");
-      const result = await response.json();
-      setConnectionStatus({
-        success: result.success,
-        message: result.message,
-        details: result,
+  const addDebugResult = (step: string, success: boolean, data: any) => {
+    setDebugResults((prev) => [
+      ...prev,
+      {
+        step,
+        success,
+        data,
         timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      setConnectionStatus({
-        success: false,
-        message: "Failed to connect to API",
-        details: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      });
-    }
-    setIsLoading(false);
+      },
+    ]);
   };
 
-  const testSupabaseDebug = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/debug-supabase");
-      const result = await response.json();
-      setSupabaseDebug(result);
-    } catch (error) {
-      setSupabaseDebug({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      });
-    }
-    setIsLoading(false);
+  const clearResults = () => {
+    setDebugResults([]);
   };
 
-  const testPhotosLoad = async () => {
+  const debugInvitationDownload = async () => {
     setIsLoading(true);
+    clearResults();
+
     try {
-      const photos = await database.photos.getAll();
-      setPhotoStats({
-        totalPhotos: photos.length,
-        validPhotos: photos.filter(
-          (p) => p.photo_data && p.photo_data.startsWith("data:"),
-        ).length,
-        photos: photos.slice(0, 3), // First 3 for preview
-        timestamp: new Date().toISOString(),
+      // 1. Check Supabase configuration
+      addDebugResult("Supabase Configuration", database.isUsingSupabase(), {
+        isConfigured: database.isUsingSupabase(),
+        storageType: database.getStorageStatus(),
+      });
+
+      // 2. Check database invitation service
+      try {
+        const dbInvitation = await database.invitation.get();
+        addDebugResult("Database Invitation Service", !!dbInvitation, {
+          found: !!dbInvitation,
+          invitation: dbInvitation
+            ? {
+                id: dbInvitation.id,
+                filename: dbInvitation.filename,
+                hasData: !!dbInvitation.pdf_data,
+                dataLength: dbInvitation.pdf_data?.length,
+                dataType: dbInvitation.pdf_data?.startsWith("data:")
+                  ? "Data URL"
+                  : "Unknown",
+              }
+            : null,
+        });
+      } catch (error) {
+        addDebugResult("Database Invitation Service", false, {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // 3. Check API invitation service
+      try {
+        const apiInvitation = await invitationApi.get();
+        addDebugResult("API Invitation Service", !!apiInvitation, {
+          found: !!apiInvitation,
+          invitation: apiInvitation
+            ? {
+                id: apiInvitation.id,
+                filename: apiInvitation.filename,
+                hasData: !!apiInvitation.pdfData,
+                dataLength: apiInvitation.pdfData?.length,
+              }
+            : null,
+        });
+      } catch (error) {
+        addDebugResult("API Invitation Service", false, {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // 4. Check localStorage
+      const localStorageInvitation = localStorage.getItem("wedding_invitation_pdf");
+      const localStorageFilename = localStorage.getItem("wedding_invitation_filename");
+      addDebugResult("Local Storage Check", !!localStorageInvitation, {
+        found: !!localStorageInvitation,
+        filename: localStorageFilename,
+        hasData: !!localStorageInvitation,
+        dataLength: localStorageInvitation?.length,
+        dataType: localStorageInvitation?.startsWith("data:")
+          ? "Data URL"
+          : "Unknown",
+      });
+
+      // 5. Test server endpoint
+      try {
+        const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
+        const downloadEndpoint = isNetlify
+          ? "/.netlify/functions/download-invitation"
+          : "/api/download-invitation";
+        
+        const response = await fetch(downloadEndpoint, { method: "HEAD" });
+        addDebugResult("Server Endpoint Test", response.ok, {
+          status: response.status,
+          statusText: response.statusText,
+          endpoint: downloadEndpoint,
+          headers: {
+            contentType: response.headers.get("content-type"),
+            contentLength: response.headers.get("content-length"),
+          },
+        });
+      } catch (error) {
+        addDebugResult("Server Endpoint Test", false, {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      toast({
+        title: "Debug Complete! 🔍",
+        description: "Check the results below to see what's happening with invitation download.",
+        duration: 3000,
       });
     } catch (error) {
-      setPhotoStats({
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
+      console.error("Debug error:", error);
+      toast({
+        title: "Debug Error ❌",
+        description: "An error occurred during debugging.",
+        variant: "destructive",
+        duration: 3000,
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  useEffect(() => {
-    // Auto-test on page load
-    testConnection();
-    testSupabaseDebug();
-    testPhotosLoad();
-  }, []);
+  const testDirectDownload = async () => {
+    try {
+      // Test the exact same logic as in Index.tsx
+      console.log("🔍 Testing direct invitation download...");
+
+      const uploadedInvitation = await database.invitation.get();
+      console.log("📋 Database invitation result:", uploadedInvitation);
+
+      if (uploadedInvitation && uploadedInvitation.pdf_data) {
+        toast({
+          title: "Database Invitation Found! ✅",
+          description: `Found invitation: ${uploadedInvitation.filename || "wedding-invitation.pdf"}`,
+          duration: 5000,
+        });
+
+        // Actually try to download it
+        const link = document.createElement("a");
+        link.href = uploadedInvitation.pdf_data;
+        link.download = uploadedInvitation.filename || "debug-invitation-test.pdf";
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast({
+          title: "No Database Invitation Found ❌",
+          description: "No invitation found in database - will fall back to other methods.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error("Direct download test error:", error);
+      toast({
+        title: "Direct Download Test Failed ❌",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 via-sage-50 to-olive-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-sage-50 p-4">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-serif text-olive-700 mb-2">
-            Debug & Connection Test
+          <h1 className="text-4xl font-serif text-olive-700 mb-4">
+            Debug Console
           </h1>
           <p className="text-sage-600">
-            Test Supabase connection and photo functionality
+            Debug tools for troubleshooting the wedding website
           </p>
         </div>
 
-        {/* Environment Info */}
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-olive-700">
-              Environment Information
-            </CardTitle>
+            <CardTitle className="text-olive-700">Invitation Download Debug</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <strong>Platform:</strong>{" "}
-                {window.location.hostname.includes("netlify")
-                  ? "Netlify"
-                  : "Local/Other"}
-              </div>
-              <div>
-                <strong>Hostname:</strong> {window.location.hostname}
-              </div>
-              <div>
-                <strong>Storage Type:</strong>{" "}
-                {database.isUsingSupabase() ? "Supabase" : "localStorage"}
-              </div>
-              <div>
-                <strong>Deployment Platform:</strong>{" "}
-                {import.meta.env.VITE_DEPLOYMENT_PLATFORM || "Not set"}
-              </div>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <Button
+                onClick={debugInvitationDownload}
+                disabled={isLoading}
+                className="bg-olive-600 hover:bg-olive-700"
+              >
+                {isLoading ? "Debugging..." : "Debug Invitation Download"}
+              </Button>
+              <Button
+                onClick={testDirectDownload}
+                variant="outline"
+                className="border-olive-600 text-olive-700"
+              >
+                Test Direct Download
+              </Button>
+              <Button
+                onClick={clearResults}
+                variant="outline"
+                className="border-sage-400 text-sage-600"
+              >
+                Clear Results
+              </Button>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Connection Test */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-olive-700 flex items-center justify-between">
-              Supabase Connection Test
-              <Button
-                onClick={testConnection}
-                disabled={isLoading}
-                variant="outline"
-                size="sm"
-              >
-                {isLoading ? "Testing..." : "Retest"}
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {connectionStatus ? (
-              <div
-                className={`p-4 rounded-lg ${connectionStatus.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
-              >
-                <div className="flex items-center mb-2">
-                  <span
-                    className={`w-3 h-3 rounded-full mr-2 ${connectionStatus.success ? "bg-green-500" : "bg-red-500"}`}
-                  ></span>
-                  <strong>{connectionStatus.message}</strong>
-                </div>
-                <div className="text-sm text-gray-600">
-                  Tested at:{" "}
-                  {new Date(connectionStatus.timestamp).toLocaleString()}
-                </div>
-                {connectionStatus.details && (
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-sm font-medium">
-                      Show Details
-                    </summary>
-                    <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
-                      {JSON.stringify(connectionStatus.details, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            ) : (
-              <div className="text-gray-500">
-                No connection test results yet...
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Detailed Supabase Debug */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-olive-700 flex items-center justify-between">
-              Detailed Supabase Debug
-              <Button
-                onClick={testSupabaseDebug}
-                disabled={isLoading}
-                variant="outline"
-                size="sm"
-              >
-                {isLoading ? "Testing..." : "Retest"}
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {supabaseDebug ? (
-              <div>
-                {/* Environment Variables Status */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-2">Environment Variables</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div
-                      className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasUrl ? "bg-green-50" : "bg-red-50"}`}
-                    >
-                      <strong>Supabase URL:</strong>{" "}
-                      {supabaseDebug.debug?.environment?.hasUrl
-                        ? "✅ Set"
-                        : "❌ Missing"}
-                      <br />
-                      <span className="text-xs text-gray-600">
-                        Format: {supabaseDebug.debug?.environment?.urlFormat}
-                      </span>
-                    </div>
-                    <div
-                      className={`p-2 rounded ${supabaseDebug.debug?.environment?.hasKey ? "bg-green-50" : "bg-red-50"}`}
-                    >
-                      <strong>Supabase Key:</strong>{" "}
-                      {supabaseDebug.debug?.environment?.hasKey
-                        ? "✅ Set"
-                        : "❌ Missing"}
-                      <br />
-                      <span className="text-xs text-gray-600">
-                        Format: {supabaseDebug.debug?.environment?.keyFormat}
-                      </span>
-                    </div>
-                  </div>
-                  {supabaseDebug.debug?.environment?.urlPreview && (
-                    <div className="mt-2 text-xs text-gray-600">
-                      URL Preview: {supabaseDebug.debug.environment.urlPreview}
-                    </div>
-                  )}
-                </div>
-
-                {/* Connection Status */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-2">Connection Status</h4>
-                  <div
-                    className={`p-3 rounded-lg ${supabaseDebug.debug?.connection?.testResult === "Success" ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
+            {debugResults.length > 0 && (
+              <div className="space-y-4 mt-6">
+                <h3 className="text-lg font-semibold text-olive-700">Debug Results:</h3>
+                {debugResults.map((result, index) => (
+                  <Card
+                    key={index}
+                    className={`border-l-4 ${
+                      result.success
+                        ? "border-l-green-500 bg-green-50"
+                        : "border-l-red-500 bg-red-50"
+                    }`}
                   >
-                    <strong>Result:</strong>{" "}
-                    {supabaseDebug.debug?.connection?.testResult || "Unknown"}
-                    {supabaseDebug.debug?.connection?.error && (
-                      <div className="mt-2">
-                        <strong>Error:</strong>{" "}
-                        {supabaseDebug.debug.connection.error.message}
-                        {supabaseDebug.debug.connection.error.hint && (
-                          <div className="text-sm text-gray-600 mt-1">
-                            Hint: {supabaseDebug.debug.connection.error.hint}
-                          </div>
-                        )}
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`w-3 h-3 rounded-full ${
+                            result.success ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        ></span>
+                        <span className="font-medium">{result.step}</span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(result.timestamp).toLocaleTimeString()}
+                        </span>
                       </div>
-                    )}
-                    {supabaseDebug.debug?.connection?.connectionError && (
-                      <div className="mt-2">
-                        <strong>Connection Error:</strong>{" "}
-                        {supabaseDebug.debug.connection.connectionError}
-                      </div>
-                    )}
-                    {supabaseDebug.debug?.connection?.missingVars && (
-                      <div className="mt-2">
-                        <strong>Missing Variables:</strong>{" "}
-                        {supabaseDebug.debug.connection.missingVars.join(", ")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Tables Status */}
-                {supabaseDebug.debug?.tables && (
-                  <div className="mb-6">
-                    <h4 className="font-medium mb-2">Database Tables</h4>
-
-                    {supabaseDebug.debug.tables.photosTable && (
-                      <div
-                        className={`p-3 rounded mb-2 ${supabaseDebug.debug.tables.photosTable.exists ? "bg-green-50" : "bg-red-50"}`}
-                      >
-                        <strong>Photos Table:</strong>{" "}
-                        {supabaseDebug.debug.tables.photosTable.exists
-                          ? "✅ Exists"
-                          : "❌ Missing"}
-                        {supabaseDebug.debug.tables.photosTable.exists && (
-                          <div className="mt-1 text-sm">
-                            <div>
-                              Has Data:{" "}
-                              {supabaseDebug.debug.tables.photosTable.hasData
-                                ? "Yes"
-                                : "No"}
-                            </div>
-                            {supabaseDebug.debug.tables.photosTable
-                              .sampleColumns?.length > 0 && (
-                              <div>
-                                Columns:{" "}
-                                {supabaseDebug.debug.tables.photosTable.sampleColumns.join(
-                                  ", ",
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {supabaseDebug.debug.tables.photosTable.error && (
-                          <div className="mt-1 text-sm text-red-600">
-                            Error:{" "}
-                            {supabaseDebug.debug.tables.photosTable.error}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {supabaseDebug.debug.tables.storage && (
-                      <div
-                        className={`p-3 rounded ${supabaseDebug.debug.tables.storage.hasWeddingBucket ? "bg-green-50" : "bg-yellow-50"}`}
-                      >
-                        <strong>Storage:</strong>
-                        {supabaseDebug.debug.tables.storage.error ? (
-                          <span className="text-red-600">
-                            {" "}
-                            Error accessing storage
-                          </span>
-                        ) : (
-                          <span>
-                            {" "}
-                            Found{" "}
-                            {
-                              supabaseDebug.debug.tables.storage.bucketsFound
-                            }{" "}
-                            buckets
-                            {supabaseDebug.debug.tables.storage
-                              .hasWeddingBucket &&
-                              " (including wedding-photos)"}
-                          </span>
-                        )}
-
-                        {supabaseDebug.debug.tables.storage.bucketNames && (
-                          <div className="mt-1 text-sm">
-                            Buckets:{" "}
-                            {supabaseDebug.debug.tables.storage.bucketNames.join(
-                              ", ",
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-medium">
-                    Show Full Debug Data
-                  </summary>
-                  <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
-                    {JSON.stringify(supabaseDebug, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            ) : (
-              <div className="text-gray-500">
-                Loading Supabase debug info...
+                      <pre className="bg-white p-3 rounded text-xs overflow-x-auto border">
+                        {JSON.stringify(result.data, null, 2)}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Photo Stats */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-olive-700 flex items-center justify-between">
-              Photo Database Test
-              <Button
-                onClick={testPhotosLoad}
-                disabled={isLoading}
-                variant="outline"
-                size="sm"
-              >
-                {isLoading ? "Loading..." : "Reload"}
-              </Button>
-            </CardTitle>
+            <CardTitle className="text-olive-700">Quick Fixes</CardTitle>
           </CardHeader>
           <CardContent>
-            {photoStats ? (
-              <div>
-                {photoStats.error ? (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <strong>Error loading photos:</strong> {photoStats.error}
-                  </div>
-                ) : (
-                  <div>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <strong>Total Photos:</strong> {photoStats.totalPhotos}
-                      </div>
-                      <div>
-                        <strong>Valid Photos:</strong> {photoStats.validPhotos}
-                      </div>
-                    </div>
-
-                    {photoStats.photos && photoStats.photos.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Sample Photos:</h4>
-                        <div className="grid grid-cols-3 gap-2">
-                          {photoStats.photos.map(
-                            (photo: any, index: number) => (
-                              <div
-                                key={index}
-                                className="border rounded p-2 text-xs"
-                              >
-                                <div>
-                                  <strong>ID:</strong> {photo.id}
-                                </div>
-                                <div>
-                                  <strong>By:</strong> {photo.uploaded_by}
-                                </div>
-                                <div>
-                                  <strong>Data:</strong>{" "}
-                                  {photo.photo_data
-                                    ? photo.photo_data.substring(0, 30) + "..."
-                                    : "No data"}
-                                </div>
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="mt-4 text-sm text-gray-600">
-                      Last checked:{" "}
-                      {new Date(photoStats.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                )}
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-800 mb-2">
+                  If Supabase is not configured:
+                </h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Check your .env.local file has VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY</li>
+                  <li>• Restart the dev server after adding environment variables</li>
+                  <li>• Verify your Supabase project is active and accessible</li>
+                </ul>
               </div>
-            ) : (
-              <div className="text-gray-500">Loading photo statistics...</div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-olive-700">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Button
-                onClick={() => (window.location.href = "/")}
-                variant="outline"
-                className="mr-2"
-              >
-                ← Back to Home
-              </Button>
-              <Button
-                onClick={() => (window.location.href = "/admin")}
-                variant="outline"
-                className="mr-2"
-              >
-                Admin Dashboard
-              </Button>
-              <Button
-                onClick={() => localStorage.clear()}
-                variant="outline"
-                className="mr-2"
-              >
-                Clear localStorage
-              </Button>
+              <div className="p-4 bg-yellow-50 rounded-lg">
+                <h4 className="font-medium text-yellow-800 mb-2">
+                  If database has no invitation:
+                </h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• Go to Admin Dashboard → Invitation Management</li>
+                  <li>• Upload a PDF invitation file</li>
+                  <li>• Verify the upload was successful</li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-green-50 rounded-lg">
+                <h4 className="font-medium text-green-800 mb-2">
+                  If everything looks good:
+                </h4>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>• Clear your browser cache and localStorage</li>
+                  <li>• Try the download button again</li>
+                  <li>• Check browser console for any errors</li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
