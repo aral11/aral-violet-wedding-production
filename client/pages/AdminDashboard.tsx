@@ -134,8 +134,8 @@ export default function AdminDashboard() {
             (photo) =>
               photo.photo_data &&
               (photo.photo_data.startsWith("data:image/") ||
-               photo.photo_data.startsWith("http") ||
-               photo.photo_data.startsWith("blob:")),
+                photo.photo_data.startsWith("http") ||
+                photo.photo_data.startsWith("blob:")),
           );
 
           console.log(
@@ -154,7 +154,10 @@ export default function AdminDashboard() {
 
           // Force re-render to ensure display updates
           setTimeout(() => {
-            console.log("📷 Current uploadedPhotos state after load:", uploadedPhotos.length);
+            console.log(
+              "📷 Current uploadedPhotos state after load:",
+              uploadedPhotos.length,
+            );
           }, 100);
         } else {
           setUploadedPhotos([]);
@@ -165,7 +168,7 @@ export default function AdminDashboard() {
           const guestPhotos = localStorage.getItem("wedding_guest_photos");
           console.log("📷 Direct localStorage check:", {
             adminPhotos: localPhotos ? JSON.parse(localPhotos).length : 0,
-            guestPhotos: guestPhotos ? JSON.parse(guestPhotos).length : 0
+            guestPhotos: guestPhotos ? JSON.parse(guestPhotos).length : 0,
           });
         }
       } catch (error) {
@@ -2269,39 +2272,50 @@ export default function AdminDashboard() {
                           onClick={async () => {
                             try {
                               // Create a simple test image (1x1 red pixel)
-                              const canvas = document.createElement('canvas');
+                              const canvas = document.createElement("canvas");
                               canvas.width = 100;
                               canvas.height = 100;
-                              const ctx = canvas.getContext('2d');
+                              const ctx = canvas.getContext("2d");
                               if (ctx) {
-                                ctx.fillStyle = '#84a178';
+                                ctx.fillStyle = "#84a178";
                                 ctx.fillRect(0, 0, 100, 100);
-                                ctx.fillStyle = 'white';
-                                ctx.font = '16px Arial';
-                                ctx.textAlign = 'center';
-                                ctx.fillText('TEST', 50, 55);
+                                ctx.fillStyle = "white";
+                                ctx.font = "16px Arial";
+                                ctx.textAlign = "center";
+                                ctx.fillText("TEST", 50, 55);
                               }
 
-                              const testImageData = canvas.toDataURL('image/png');
-                              console.log("🧪 Created test image, uploading...");
+                              const testImageData =
+                                canvas.toDataURL("image/png");
+                              console.log(
+                                "🧪 Created test image, uploading...",
+                              );
 
                               // Save directly to database to test the system
-                              const savedPhoto = await database.photos.create(testImageData, "admin");
+                              const savedPhoto = await database.photos.create(
+                                testImageData,
+                                "admin",
+                              );
                               console.log("🧪 Test photo saved:", savedPhoto);
 
                               // Update the UI
-                              setUploadedPhotos(prev => [...prev, testImageData]);
+                              setUploadedPhotos((prev) => [
+                                ...prev,
+                                testImageData,
+                              ]);
 
                               toast({
                                 title: "Test Photo Added! 🧪",
-                                description: "Test image successfully uploaded to verify photo system.",
+                                description:
+                                  "Test image successfully uploaded to verify photo system.",
                                 duration: 3000,
                               });
                             } catch (error) {
                               console.error("Test photo upload failed:", error);
                               toast({
                                 title: "Test Failed",
-                                description: "Test photo upload failed. Check console for details.",
+                                description:
+                                  "Test photo upload failed. Check console for details.",
                                 variant: "destructive",
                               });
                             }

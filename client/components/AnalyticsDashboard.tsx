@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BarChart3, 
-  Users, 
-  MousePointer, 
-  Clock, 
-  Smartphone, 
-  Download, 
+import {
+  BarChart3,
+  Users,
+  MousePointer,
+  Clock,
+  Smartphone,
+  Download,
   Eye,
   Activity,
   Calendar,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
-import { analytics } from '@/lib/analytics';
+import { analytics } from "@/lib/analytics";
 
 interface AnalyticsData {
   totalPageViews: number;
@@ -31,7 +31,9 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsDashboard() {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   const loadAnalytics = () => {
@@ -40,7 +42,7 @@ export default function AnalyticsDashboard() {
       const data = analytics.getAnalyticsSummary();
       setAnalyticsData(data);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
+      console.error("Failed to load analytics:", error);
     } finally {
       setIsLoading(false);
     }
@@ -59,19 +61,19 @@ export default function AnalyticsDashboard() {
 
   const getPageDisplayName = (path: string): string => {
     const pages: Record<string, string> = {
-      '/': 'Home Page',
-      '/admin': 'Admin Dashboard',
-      '/login': 'Login Page',
-      '/guest-upload': 'Guest Photo Upload',
-      '/supabase-setup': 'Database Setup'
+      "/": "Home Page",
+      "/admin": "Admin Dashboard",
+      "/login": "Login Page",
+      "/guest-upload": "Guest Photo Upload",
+      "/supabase-setup": "Database Setup",
     };
     return pages[path] || path;
   };
 
   const getPeakHour = (hourlyData: Array<{ hour: number; count: number }>) => {
     if (!hourlyData.length) return null;
-    const peak = hourlyData.reduce((max, current) => 
-      current.count > max.count ? current : max
+    const peak = hourlyData.reduce((max, current) =>
+      current.count > max.count ? current : max,
     );
     return peak;
   };
@@ -98,9 +100,12 @@ export default function AnalyticsDashboard() {
   }
 
   const peakHour = getPeakHour(analyticsData.hourlyActivity);
-  const mobilePercentage = analyticsData.totalSessions > 0 
-    ? Math.round((analyticsData.mobileUsers / analyticsData.totalSessions) * 100)
-    : 0;
+  const mobilePercentage =
+    analyticsData.totalSessions > 0
+      ? Math.round(
+          (analyticsData.mobileUsers / analyticsData.totalSessions) * 100,
+        )
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -192,13 +197,19 @@ export default function AnalyticsDashboard() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sage-600">Page Views</span>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-800"
+                >
                   {analyticsData.recentActivity.pageViews}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sage-600">User Actions</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800"
+                >
                   {analyticsData.recentActivity.events}
                 </Badge>
               </div>
@@ -224,8 +235,13 @@ export default function AnalyticsDashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-sage-600">Mobile Users</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{mobilePercentage}%</span>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                  <span className="text-sm font-medium">
+                    {mobilePercentage}%
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 text-purple-800"
+                  >
                     {analyticsData.mobileUsers}
                   </Badge>
                 </div>
@@ -233,8 +249,13 @@ export default function AnalyticsDashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-sage-600">Desktop Users</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{100 - mobilePercentage}%</span>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <span className="text-sm font-medium">
+                    {100 - mobilePercentage}%
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-800"
+                  >
                     {analyticsData.totalSessions - analyticsData.mobileUsers}
                   </Badge>
                 </div>
@@ -242,7 +263,10 @@ export default function AnalyticsDashboard() {
               {peakHour && (
                 <div className="flex justify-between items-center">
                   <span className="text-sage-600">Peak Hour</span>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-100 text-orange-800"
+                  >
                     {peakHour.hour}:00 ({peakHour.count} views)
                   </Badge>
                 </div>
@@ -264,23 +288,34 @@ export default function AnalyticsDashboard() {
           {analyticsData.popularPages.length > 0 ? (
             <div className="space-y-3">
               {analyticsData.popularPages.slice(0, 5).map((page, index) => (
-                <div key={page.page} className="flex justify-between items-center">
+                <div
+                  key={page.page}
+                  className="flex justify-between items-center"
+                >
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="w-6 h-6 rounded-full p-0 flex items-center justify-center text-xs">
+                    <Badge
+                      variant="outline"
+                      className="w-6 h-6 rounded-full p-0 flex items-center justify-center text-xs"
+                    >
                       {index + 1}
                     </Badge>
                     <span className="text-sage-700 font-medium">
                       {getPageDisplayName(page.page)}
                     </span>
                   </div>
-                  <Badge variant="secondary" className="bg-sage-100 text-sage-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-sage-100 text-sage-800"
+                  >
                     {page.count} views
                   </Badge>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sage-500 text-center py-4">No page data available yet</p>
+            <p className="text-sage-500 text-center py-4">
+              No page data available yet
+            </p>
           )}
         </CardContent>
       </Card>
@@ -297,18 +332,26 @@ export default function AnalyticsDashboard() {
           {analyticsData.eventBreakdown.length > 0 ? (
             <div className="grid md:grid-cols-2 gap-4">
               {analyticsData.eventBreakdown.map((event) => (
-                <div key={event.event} className="flex justify-between items-center p-3 bg-sage-50 rounded-lg">
+                <div
+                  key={event.event}
+                  className="flex justify-between items-center p-3 bg-sage-50 rounded-lg"
+                >
                   <span className="text-sage-700 font-medium capitalize">
-                    {event.event.replace(/_/g, ' ')}
+                    {event.event.replace(/_/g, " ")}
                   </span>
-                  <Badge variant="secondary" className="bg-olive-100 text-olive-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-olive-100 text-olive-800"
+                  >
                     {event.count}
                   </Badge>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sage-500 text-center py-4">No user actions tracked yet</p>
+            <p className="text-sage-500 text-center py-4">
+              No user actions tracked yet
+            </p>
           )}
         </CardContent>
       </Card>
@@ -330,7 +373,11 @@ export default function AnalyticsDashboard() {
             </Button>
             <Button
               onClick={() => {
-                if (confirm('Are you sure you want to clear all analytics data? This action cannot be undone.')) {
+                if (
+                  confirm(
+                    "Are you sure you want to clear all analytics data? This action cannot be undone.",
+                  )
+                ) {
                   analytics.clearAnalytics();
                   loadAnalytics();
                 }
@@ -342,8 +389,8 @@ export default function AnalyticsDashboard() {
             </Button>
           </div>
           <p className="text-sm text-sage-500 mt-3">
-            Analytics data is stored locally and will persist across browser sessions.
-            Export data regularly for backup and reporting purposes.
+            Analytics data is stored locally and will persist across browser
+            sessions. Export data regularly for backup and reporting purposes.
           </p>
         </CardContent>
       </Card>

@@ -32,7 +32,12 @@ import {
   detectMobile,
   getDownloadInstructions,
 } from "@/lib/mobile-utils";
-import { trackClick, trackFormSubmit, trackDownload, trackRSVPSubmission } from "@/lib/analytics";
+import {
+  trackClick,
+  trackFormSubmit,
+  trackDownload,
+  trackRSVPSubmission,
+} from "@/lib/analytics";
 import MobileCompatibilityNotice from "@/components/MobileCompatibilityNotice";
 
 interface Guest {
@@ -189,7 +194,7 @@ export default function Index() {
     e.preventDefault();
 
     // Track RSVP form attempt
-    trackClick('rsvp_form_submit', 'rsvp_section');
+    trackClick("rsvp_form_submit", "rsvp_section");
 
     // Basic form validation
     if (!rsvpForm.name.trim()) {
@@ -1019,7 +1024,7 @@ Please RSVP at our wedding website
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={() => {
-                  trackClick('download_invitation_button', 'hero_section');
+                  trackClick("download_invitation_button", "hero_section");
                   downloadInvitation();
                 }}
                 className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg font-medium shadow-lg"
@@ -1029,7 +1034,7 @@ Please RSVP at our wedding website
               </Button>
               <Button
                 onClick={() => {
-                  trackClick('rsvp_button', 'hero_section');
+                  trackClick("rsvp_button", "hero_section");
                   const rsvpSection = document.getElementById("rsvp-section");
                   rsvpSection?.scrollIntoView({ behavior: "smooth" });
                 }}
