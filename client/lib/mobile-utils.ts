@@ -73,9 +73,20 @@ export function mobileOptimizedDownload(
     // Create blob from data
     if (typeof data === "string") {
       if (data.startsWith("data:")) {
-        // Handle data URLs
+        // Handle data URLs - convert to blob for better mobile compatibility
+        console.log("📱 Processing data URL, length:", data.length);
+
+        // For mobile devices, large data URLs can cause issues
+        // Convert data URL to blob for better handling
         const [header, base64Data] = data.split(",");
         const actualMimeType = header.split(":")[1]?.split(";")[0] || mimeType;
+
+        console.log("📱 Data URL details:", {
+          mimeType: actualMimeType,
+          base64Length: base64Data.length,
+          estimatedSize: Math.round(base64Data.length * 0.75), // Rough size estimate
+        });
+
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
 
@@ -85,6 +96,11 @@ export function mobileOptimizedDownload(
 
         const byteArray = new Uint8Array(byteNumbers);
         blob = new Blob([byteArray], { type: actualMimeType });
+
+        console.log("📱 Converted data URL to blob:", {
+          blobSize: blob.size,
+          blobType: blob.type,
+        });
       } else if (data.startsWith("blob:")) {
         // Handle blob URLs
         url = data;
