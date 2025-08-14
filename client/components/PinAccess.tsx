@@ -11,7 +11,11 @@ interface PinAccessProps {
   eventDate: string;
 }
 
-export default function PinAccess({ onAccessGranted, eventName, eventDate }: PinAccessProps) {
+export default function PinAccess({
+  onAccessGranted,
+  eventName,
+  eventDate,
+}: PinAccessProps) {
   const { toast } = useToast();
   const [pin, setPin] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -51,12 +55,8 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
           <CardTitle className="text-2xl font-serif text-sage-700">
             Access Required
           </CardTitle>
-          <p className="text-sage-600 mt-2">
-            {eventName}
-          </p>
-          <p className="text-sm text-sage-500">
-            {eventDate}
-          </p>
+          <p className="text-sage-600 mt-2">{eventName}</p>
+          <p className="text-sm text-sage-500">{eventDate}</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-center">
@@ -65,7 +65,8 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
             </p>
             <div className="bg-sage-50 p-4 rounded-lg border border-sage-200">
               <p className="text-sm text-sage-600 mb-2">
-                <strong>For Guests:</strong> This section will be accessible on {eventDate}
+                <strong>For Guests:</strong> This section will be accessible on{" "}
+                {eventDate}
               </p>
               <p className="text-sm text-sage-600">
                 <strong>Only admins can access before event dates</strong>
@@ -87,7 +88,7 @@ export default function PinAccess({ onAccessGranted, eventName, eventDate }: Pin
                 className="text-center text-lg tracking-widest border-sage-300 focus:border-sage-500"
               />
             </div>
-            
+
             <Button
               type="submit"
               disabled={pin.length !== 4 || isVerifying}

@@ -103,8 +103,9 @@ export default function Index() {
     if (today.getTime() === haldiDay.getTime()) {
       return {
         title: "Violet's Haldi Day",
-        subtitle: "A beautiful pre-wedding tradition filled with joy and blessings 💛",
-        showCountdown: false
+        subtitle:
+          "A beautiful pre-wedding tradition filled with joy and blessings 💛",
+        showCountdown: false,
       };
     }
 
@@ -113,7 +114,7 @@ export default function Index() {
       return {
         title: "Aral's Roce Day",
         subtitle: "A cherished Mangalorean tradition celebrating the groom 🌊",
-        showCountdown: false
+        showCountdown: false,
       };
     }
 
@@ -128,13 +129,13 @@ export default function Index() {
         return {
           title: "Aral Weds Violet Today",
           subtitle: "The big day is finally here! 🎉",
-          showCountdown: false
+          showCountdown: false,
         };
       } else {
         return {
           title: "We Are Hitched",
           subtitle: "Just married! Thanks for celebrating with us! 💒",
-          showCountdown: false
+          showCountdown: false,
         };
       }
     }
@@ -144,7 +145,7 @@ export default function Index() {
       return {
         title: "Wedding is done — we'll be back soon with something exciting!",
         subtitle: "Thank you for celebrating with us! 💕",
-        showCountdown: false
+        showCountdown: false,
       };
     }
 
@@ -152,7 +153,7 @@ export default function Index() {
     return {
       title: "Aral & Violet",
       subtitle: "Sunday, December 28, 2025 • Udupi, Karnataka, India",
-      showCountdown: true
+      showCountdown: true,
     };
   };
 
@@ -1203,35 +1204,41 @@ Please RSVP at our wedding website
           )}
 
           {/* Special message for post-wedding */}
-          {!currentMessage.showCountdown && currentMessage.title.includes("we'll be back soon") && (
-            <div className="mb-16">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
-                <div className="text-center">
-                  <Heart className="mx-auto mb-4 text-olive-600" size={48} />
-                  <p className="text-lg text-sage-700 mb-4">
-                    Our wedding day was absolutely magical! Thank you to everyone who celebrated with us.
-                  </p>
-                  <p className="text-sm text-sage-600">
-                    Stay tuned for some exciting updates coming soon! 💕
-                  </p>
+          {!currentMessage.showCountdown &&
+            currentMessage.title.includes("we'll be back soon") && (
+              <div className="mb-16">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                  <div className="text-center">
+                    <Heart className="mx-auto mb-4 text-olive-600" size={48} />
+                    <p className="text-lg text-sage-700 mb-4">
+                      Our wedding day was absolutely magical! Thank you to
+                      everyone who celebrated with us.
+                    </p>
+                    <p className="text-sm text-sage-600">
+                      Stay tuned for some exciting updates coming soon! 💕
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Special message for wedding day */}
-          {!currentMessage.showCountdown && !currentMessage.title.includes("we'll be back soon") && (
-            <div className="mb-16">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
-                <div className="text-center">
-                  <Sparkles className="mx-auto mb-4 text-olive-600" size={48} />
-                  <p className="text-lg text-sage-700">
-                    This is the day we've been waiting for! 🎉
-                  </p>
+          {!currentMessage.showCountdown &&
+            !currentMessage.title.includes("we'll be back soon") && (
+              <div className="mb-16">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 border border-sage-200 shadow-lg max-w-lg mx-auto">
+                  <div className="text-center">
+                    <Sparkles
+                      className="mx-auto mb-4 text-olive-600"
+                      size={48}
+                    />
+                    <p className="text-lg text-sage-700">
+                      This is the day we've been waiting for! 🎉
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </section>
 
