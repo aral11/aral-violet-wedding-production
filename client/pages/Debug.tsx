@@ -194,7 +194,7 @@ export default function Debug() {
             <CardTitle className="text-olive-700">Invitation Download Debug</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button
                 onClick={debugInvitationDownload}
                 disabled={isLoading}
@@ -216,6 +216,7 @@ export default function Debug() {
               >
                 Clear Results
               </Button>
+              <ClearStorageButton variant="destructive" />
             </div>
 
             {debugResults.length > 0 && (
