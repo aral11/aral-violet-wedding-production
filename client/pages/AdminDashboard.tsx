@@ -1984,7 +1984,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <Tabs defaultValue="rsvp" className="space-y-6">
           <div className="w-full overflow-x-auto scrollbar-hide">
-            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-6 gap-1 h-auto p-1">
+            <TabsList className="flex w-max min-w-full lg:grid lg:w-full lg:grid-cols-7 gap-1 h-auto p-1">
               <TabsTrigger
                 value="rsvp"
                 className="flex flex-col sm:flex-row items-center gap-1 text-xs px-2 sm:px-3 py-2 whitespace-nowrap min-w-[60px] sm:min-w-[80px]"
