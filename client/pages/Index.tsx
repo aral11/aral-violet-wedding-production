@@ -25,7 +25,7 @@ import {
   weddingFlowApi,
   handleApiError,
 } from "@/lib/api";
-import { database } from "@/lib/database-simple";
+import { database } from "@/lib/database";
 import { sendRSVPNotification, isSMSConfigured } from "@/lib/sms-service";
 import {
   mobileOptimizedDownload,
