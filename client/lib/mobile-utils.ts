@@ -108,17 +108,22 @@ export function mobileOptimizedDownload(
 
     // Mobile-specific download strategies
     if (isMobile) {
+      console.log("📱 Using mobile download strategy");
       if (isIOS) {
+        console.log("📱 iOS detected, using iOS fallback strategy");
         // iOS strategy: Try download link first, fallback to new window
         return downloadWithIOSFallback(url, filename);
       } else if (isAndroid) {
+        console.log("📱 Android detected, using Android optimization");
         // Android strategy: Use download attribute with click event
         return downloadWithAndroidOptimization(url, filename);
       } else {
+        console.log("📱 Generic mobile detected, using mobile fallback");
         // Generic mobile strategy
         return downloadWithMobileFallback(url, filename);
       }
     } else {
+      console.log("💻 Desktop detected, using desktop optimization");
       // Desktop strategy
       return downloadWithDesktopOptimization(url, filename);
     }
