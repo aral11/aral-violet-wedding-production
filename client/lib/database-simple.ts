@@ -84,7 +84,9 @@ export const photoService = {
     guestName?: string,
   ): Promise<SupabasePhoto> {
     if (!isSupabaseConfigured()) {
-      throw new Error("Supabase not configured - photos require database connection");
+      throw new Error(
+        "Supabase not configured - photos require database connection",
+      );
     }
 
     try {
@@ -100,8 +102,9 @@ export const photoService = {
       const filePath = `wedding-photos/${fileName}`;
 
       // Upload to Supabase Storage
-      const { data: storageData, error: storageError } =
-        await supabase.storage.from("wedding-photos").upload(filePath, blob, {
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from("wedding-photos")
+        .upload(filePath, blob, {
           cacheControl: "3600",
           upsert: false,
         });
@@ -156,7 +159,7 @@ export const photoService = {
   },
 };
 
-// Simplified Guest Database Service  
+// Simplified Guest Database Service
 export const guestService = {
   async getAll(): Promise<SupabaseGuest[]> {
     if (!isSupabaseConfigured()) {
@@ -199,7 +202,7 @@ export const guestService = {
 export const database = {
   photos: photoService,
   guests: guestService,
-  
+
   // Check if we're using Supabase
   isUsingSupabase: isSupabaseConfigured,
 

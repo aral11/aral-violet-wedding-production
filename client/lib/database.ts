@@ -160,7 +160,7 @@ export const photoService = {
     console.log("📸 Environment check:", {
       hostname,
       isNetlifyDeployment,
-      deploymentPlatform: import.meta.env.VITE_DEPLOYMENT_PLATFORM
+      deploymentPlatform: import.meta.env.VITE_DEPLOYMENT_PLATFORM,
     });
 
     // Only try Netlify functions if we're actually on Netlify
@@ -517,7 +517,9 @@ export const photoService = {
   },
 
   getFromLocalStorage(): SupabasePhoto[] {
-    console.log("📸 localStorage disabled for analytics fix - returning empty array");
+    console.log(
+      "📸 localStorage disabled for analytics fix - returning empty array",
+    );
     return [];
 
     console.log("📸 localStorage check:", {

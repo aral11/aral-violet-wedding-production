@@ -178,7 +178,9 @@ export const analytics = {
       localStorage.removeItem("wedding_invitation_filename");
       sessionStorage.removeItem("wedding_session_id");
 
-      console.log("🗑️ All wedding localStorage data cleared - analytics should now use database only");
+      console.log(
+        "🗑️ All wedding localStorage data cleared - analytics should now use database only",
+      );
     } catch (error) {
       console.warn("Failed to clear localStorage:", error);
     }
