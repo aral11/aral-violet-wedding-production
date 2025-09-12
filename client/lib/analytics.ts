@@ -332,7 +332,7 @@ export const analytics = {
             .limit(5000);
           const { data: ssData } = await supabase!
             .from("analytics_sessions")
-            .select("session_id,start_time,end_time,user_agent,is_mobile,visitor_id")
+            .select("session_id,start_time,end_time,user_agent,is_mobile")
             .gte("start_time", sinceISO)
             .limit(5000);
 
