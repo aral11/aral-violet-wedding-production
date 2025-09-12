@@ -215,16 +215,7 @@ export const analytics = {
             },
           ]);
 
-          // Increment events in session row
-          await supabase!.rpc("increment_session_events", {
-            p_session_id: sessionId,
-          }).catch(async () => {
-            // Fallback: fetch and update
-            await supabase!
-              .from("analytics_sessions")
-              .update({ events: (supabase as any) ? undefined : undefined, end_time: new Date().toISOString() })
-              .eq("session_id", sessionId);
-          });
+          // Note: session event counts are derived from events table during summary; no direct increment needed
         } catch (dbErr) {
           console.warn("Supabase event insert failed, falling back:", dbErr);
           const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
@@ -258,7 +249,7 @@ export const analytics = {
   },
 
   // Update session information
-  updateSession(sessionId: string) {
+  async updateSession(sessionId: string) {
     try {
       if (isSupabaseConfigured()) {
         try {
