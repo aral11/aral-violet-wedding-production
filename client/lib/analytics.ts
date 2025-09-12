@@ -1,4 +1,5 @@
 import { database } from "./database";
+import { supabase } from "./supabase";
 
 // Types for analytics
 export interface AnalyticsEvent {
@@ -83,7 +84,10 @@ function saveJSON<T>(key: string, value: T) {
   } catch {}
 }
 
-// Analytics service - uses localStorage for persistence
+// Supabase config check
+const isSupabaseConfigured = () => supabase !== null && supabase !== undefined;
+
+// Analytics service - uses Supabase when available, falls back to localStorage
 export const analytics = {
   // Track page views
   async trackPageView(
@@ -101,28 +105,83 @@ export const analytics = {
         session_id: sessionId,
       };
 
-      // Append page view
-      const pageViews = loadJSON<PageView[]>(PV_KEY, []);
-      pageViews.push(pageView);
-      saveJSON(PV_KEY, pageViews);
+      // Try Supabase first
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase!.from("analytics_pageviews").insert([
+            {
+              page_url: pageView.page_url,
+              referrer: pageView.referrer,
+              user_agent: pageView.user_agent,
+              viewport_size: pageView.viewport_size,
+              timestamp: pageView.timestamp,
+              session_id: pageView.session_id,
+            },
+          ]);
 
-      // Ensure session exists and update counts
-      const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
-      if (!sessions[sessionId]) {
-        sessions[sessionId] = {
-          session_id: sessionId,
-          start_time: new Date().toISOString(),
-          end_time: undefined,
-          page_views: 0,
-          events: 0,
-          user_agent: navigator.userAgent,
-          is_mobile: isMobileDevice(),
-          visitor_id: visitorId,
-        };
+          // Upsert session summary
+          await supabase!.from("analytics_sessions").upsert(
+            [
+              {
+                session_id: sessionId,
+                start_time: new Date().toISOString(),
+                end_time: new Date().toISOString(),
+                page_views: 1,
+                events: 0,
+                user_agent: navigator.userAgent,
+                is_mobile: isMobileDevice(),
+                visitor_id: visitorId,
+              },
+            ],
+            { onConflict: "session_id" },
+          );
+        } catch (dbErr) {
+          console.warn("Supabase pageview insert failed, falling back:", dbErr);
+          // Fallback to local
+          const pageViews = loadJSON<PageView[]>(PV_KEY, []);
+          pageViews.push(pageView);
+          saveJSON(PV_KEY, pageViews);
+
+          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+          if (!sessions[sessionId]) {
+            sessions[sessionId] = {
+              session_id: sessionId,
+              start_time: new Date().toISOString(),
+              end_time: undefined,
+              page_views: 0,
+              events: 0,
+              user_agent: navigator.userAgent,
+              is_mobile: isMobileDevice(),
+              visitor_id: visitorId,
+            };
+          }
+          sessions[sessionId].page_views += 1;
+          sessions[sessionId].end_time = new Date().toISOString();
+          saveJSON(SS_KEY, sessions);
+        }
+      } else {
+        // Local storage path
+        const pageViews = loadJSON<PageView[]>(PV_KEY, []);
+        pageViews.push(pageView);
+        saveJSON(PV_KEY, pageViews);
+
+        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+        if (!sessions[sessionId]) {
+          sessions[sessionId] = {
+            session_id: sessionId,
+            start_time: new Date().toISOString(),
+            end_time: undefined,
+            page_views: 0,
+            events: 0,
+            user_agent: navigator.userAgent,
+            is_mobile: isMobileDevice(),
+            visitor_id: visitorId,
+          };
+        }
+        sessions[sessionId].page_views += 1;
+        sessions[sessionId].end_time = new Date().toISOString();
+        saveJSON(SS_KEY, sessions);
       }
-      sessions[sessionId].page_views += 1;
-      sessions[sessionId].end_time = new Date().toISOString();
-      saveJSON(SS_KEY, sessions);
 
       console.log("📊 Page view tracked:", url);
     } catch (error) {
@@ -143,16 +202,53 @@ export const analytics = {
         session_id: sessionId,
       };
 
-      const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
-      events.push(event);
-      saveJSON(EV_KEY, events);
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase!.from("analytics_events").insert([
+            {
+              event_type: event.event_type,
+              event_data: event.event_data,
+              page_url: event.page_url,
+              user_agent: event.user_agent,
+              timestamp: event.timestamp,
+              session_id: event.session_id,
+            },
+          ]);
 
-      // Update session events count
-      const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
-      if (sessions[sessionId]) {
-        sessions[sessionId].events += 1;
-        sessions[sessionId].end_time = new Date().toISOString();
-        saveJSON(SS_KEY, sessions);
+          // Increment events in session row
+          await supabase!.rpc("increment_session_events", {
+            p_session_id: sessionId,
+          }).catch(async () => {
+            // Fallback: fetch and update
+            await supabase!
+              .from("analytics_sessions")
+              .update({ events: (supabase as any) ? undefined : undefined, end_time: new Date().toISOString() })
+              .eq("session_id", sessionId);
+          });
+        } catch (dbErr) {
+          console.warn("Supabase event insert failed, falling back:", dbErr);
+          const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
+          events.push(event);
+          saveJSON(EV_KEY, events);
+
+          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+          if (sessions[sessionId]) {
+            sessions[sessionId].events += 1;
+            sessions[sessionId].end_time = new Date().toISOString();
+            saveJSON(SS_KEY, sessions);
+          }
+        }
+      } else {
+        const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
+        events.push(event);
+        saveJSON(EV_KEY, events);
+
+        const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+        if (sessions[sessionId]) {
+          sessions[sessionId].events += 1;
+          sessions[sessionId].end_time = new Date().toISOString();
+          saveJSON(SS_KEY, sessions);
+        }
       }
 
       console.log("📊 Event tracked:", eventType, eventData);
@@ -164,10 +260,26 @@ export const analytics = {
   // Update session information
   updateSession(sessionId: string) {
     try {
-      const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
-      if (sessions[sessionId]) {
-        sessions[sessionId].end_time = new Date().toISOString();
-        saveJSON(SS_KEY, sessions);
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase!
+            .from("analytics_sessions")
+            .update({ end_time: new Date().toISOString() })
+            .eq("session_id", sessionId);
+        } catch (dbErr) {
+          console.warn("Supabase session update failed, falling back:", dbErr);
+          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+          if (sessions[sessionId]) {
+            sessions[sessionId].end_time = new Date().toISOString();
+            saveJSON(SS_KEY, sessions);
+          }
+        }
+      } else {
+        const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+        if (sessions[sessionId]) {
+          sessions[sessionId].end_time = new Date().toISOString();
+          saveJSON(SS_KEY, sessions);
+        }
       }
       console.log("📊 Session updated:", sessionId);
     } catch (error) {
@@ -177,39 +289,76 @@ export const analytics = {
 
   // Get analytics summary
   getAnalyticsSummary() {
-    const pageViews = loadJSON<PageView[]>(PV_KEY, []);
-    const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
-    const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+    // If Supabase configured, try to build from DB synchronously via async wrapper
+    // Note: For simplicity in this SPA, we fetch synchronously by returning latest cached if available
+    // Use local fallback immediately; trigger background refresh for DB
+    const localSummary = (() => {
+      const pageViews = loadJSON<PageView[]>(PV_KEY, []);
+      const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
+      const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
 
-    const sessionList = Object.values(sessions);
-    const totalPageViews = pageViews.length;
-    const totalEvents = events.length;
-    const totalSessions = sessionList.length;
-    const uniqueVisitors = new Set(
-      sessionList.map((s) => s["visitor_id"] || s.session_id),
-    ).size;
-    const mobileUsers = sessionList.filter((s) => s.is_mobile).length;
-    const averageSessionDuration = analytics.calculateAverageSessionDuration(
-      sessionList,
-    );
+      const sessionList = Object.values(sessions);
+      const totalPageViews = pageViews.length;
+      const totalEvents = events.length;
+      const totalSessions = sessionList.length;
+      const uniqueVisitors = new Set(
+        sessionList.map((s) => s["visitor_id"] || s.session_id),
+      ).size;
+      const mobileUsers = sessionList.filter((s) => s.is_mobile).length;
+      const averageSessionDuration = analytics.calculateAverageSessionDuration(
+        sessionList,
+      );
 
-    const popularPages = analytics.getPopularPages(pageViews);
-    const recentActivity = analytics.getRecentActivity(pageViews, events);
-    const eventBreakdown = analytics.getEventBreakdown(events);
-    const hourlyActivity = analytics.getHourlyActivity(pageViews);
+      const popularPages = analytics.getPopularPages(pageViews);
+      const recentActivity = analytics.getRecentActivity(pageViews, events);
+      const eventBreakdown = analytics.getEventBreakdown(events);
+      const hourlyActivity = analytics.getHourlyActivity(pageViews);
 
-    return {
-      totalPageViews,
-      totalEvents,
-      totalSessions,
-      uniqueVisitors,
-      mobileUsers,
-      averageSessionDuration,
-      popularPages,
-      recentActivity,
-      eventBreakdown,
-      hourlyActivity,
-    };
+      return {
+        totalPageViews,
+        totalEvents,
+        totalSessions,
+        uniqueVisitors,
+        mobileUsers,
+        averageSessionDuration,
+        popularPages,
+        recentActivity,
+        eventBreakdown,
+        hourlyActivity,
+      };
+    })();
+
+    if (isSupabaseConfigured()) {
+      // Fire-and-forget background sync to refresh local cache from DB
+      (async () => {
+        try {
+          const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          const { data: pvData } = await supabase!
+            .from("analytics_pageviews")
+            .select("page_url,timestamp")
+            .gte("timestamp", sinceISO)
+            .limit(5000);
+          const { data: evData } = await supabase!
+            .from("analytics_events")
+            .select("event_type,timestamp")
+            .gte("timestamp", sinceISO)
+            .limit(5000);
+          const { data: ssData } = await supabase!
+            .from("analytics_sessions")
+            .select("session_id,start_time,end_time,user_agent,is_mobile,visitor_id")
+            .gte("start_time", sinceISO)
+            .limit(5000);
+
+          if (pvData) saveJSON(PV_KEY, pvData as any);
+          if (evData) saveJSON(EV_KEY, evData as any);
+          if (ssData) saveJSON(SS_KEY, (ssData as any[]).reduce((acc, s: any) => { acc[s.session_id] = s; return acc; }, {} as Record<string, any>));
+        } catch (dbErr) {
+          console.warn("Supabase analytics fetch failed:", dbErr);
+        }
+      })();
+    }
+
+    return localSummary;
   },
 
   // Calculate average session duration
@@ -265,8 +414,17 @@ export const analytics = {
   },
 
   // Clear analytics (local)
-  clearAnalytics() {
+  async clearAnalytics() {
     try {
+      if (isSupabaseConfigured()) {
+        try {
+          await supabase!.from("analytics_pageviews").delete().neq("session_id", "");
+          await supabase!.from("analytics_events").delete().neq("session_id", "");
+          await supabase!.from("analytics_sessions").delete().neq("session_id", "");
+        } catch (dbErr) {
+          console.warn("Supabase clear failed:", dbErr);
+        }
+      }
       localStorage.removeItem(PV_KEY);
       localStorage.removeItem(EV_KEY);
       localStorage.removeItem(SS_KEY);
@@ -278,12 +436,29 @@ export const analytics = {
   },
 
   // Export analytics data
-  exportAnalytics() {
+  async exportAnalytics() {
     try {
+      let pageViews = loadJSON<PageView[]>(PV_KEY, []);
+      let events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
+      let sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+
+      if (isSupabaseConfigured()) {
+        try {
+          const { data: pvData } = await supabase!.from("analytics_pageviews").select("*").limit(10000);
+          const { data: evData } = await supabase!.from("analytics_events").select("*").limit(10000);
+          const { data: ssData } = await supabase!.from("analytics_sessions").select("*").limit(10000);
+          if (pvData) pageViews = pvData as any;
+          if (evData) events = evData as any;
+          if (ssData) sessions = (ssData as any[]).reduce((acc, s: any) => { acc[s.session_id] = s; return acc; }, {} as Record<string, any>);
+        } catch (dbErr) {
+          console.warn("Supabase export fetch failed, using local cache:", dbErr);
+        }
+      }
+
       const data = {
-        pageViews: loadJSON<PageView[]>(PV_KEY, []),
-        events: loadJSON<AnalyticsEvent[]>(EV_KEY, []),
-        sessions: loadJSON<Record<string, UserSession>>(SS_KEY, {}),
+        pageViews,
+        events,
+        sessions,
         exportedAt: new Date().toISOString(),
       };
 
