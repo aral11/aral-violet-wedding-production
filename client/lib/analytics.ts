@@ -284,15 +284,13 @@ export const analytics = {
     const localSummary = (() => {
       const pageViews = loadJSON<PageView[]>(PV_KEY, []);
       const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
-      const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+      const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
 
       const sessionList = Object.values(sessions);
       const totalPageViews = pageViews.length;
       const totalEvents = events.length;
       const totalSessions = sessionList.length;
-      const uniqueVisitors = new Set(
-        sessionList.map((s) => s["visitor_id"] || s.session_id),
-      ).size;
+      const uniqueVisitors = totalSessions;
       const mobileUsers = sessionList.filter((s) => s.is_mobile).length;
       const averageSessionDuration = analytics.calculateAverageSessionDuration(
         sessionList,
