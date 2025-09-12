@@ -72,7 +72,11 @@ export default function AdminDashboard() {
     }>
   >([]);
   const [weddingFlow, setWeddingFlow] = useState<WeddingFlowItem[]>([]);
-  const [invitationPDF, setInvitationPDF] = useState<string | null>(null);
+  const [invitation, setInvitation] = useState<{
+    pdf_data: string;
+    filename?: string;
+    uploaded_at?: string;
+  } | null>(null);
   const [newFlowItem, setNewFlowItem] = useState<Omit<WeddingFlowItem, "id">>({
     time: "",
     title: "",
@@ -294,11 +298,15 @@ export default function AdminDashboard() {
         }
       }
 
-      // Load invitation PDF using database service
+      // Load invitation via database service
       try {
-        const invitation = await database.invitation.get();
-        if (invitation && invitation.pdf_data) {
-          setInvitationPDF(invitation.pdf_data);
+        const inv = await database.invitation.get();
+        if (inv && inv.pdf_data) {
+          setInvitation({
+            pdf_data: inv.pdf_data,
+            filename: (inv as any).filename,
+            uploaded_at: (inv as any).uploaded_at,
+          });
           const storageType = database.isUsingSupabase()
             ? "Supabase"
             : "localStorage";
@@ -307,9 +315,11 @@ export default function AdminDashboard() {
       } catch (error) {
         console.log("Error loading invitation:", error);
         // Fallback to localStorage
-        const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-        if (savedInvitation) {
-          setInvitationPDF(savedInvitation);
+        const savedPdf = localStorage.getItem("wedding_invitation_pdf");
+        const savedFilename =
+          localStorage.getItem("wedding_invitation_filename") || undefined;
+        if (savedPdf) {
+          setInvitation({ pdf_data: savedPdf, filename: savedFilename });
         }
       }
 
@@ -1437,8 +1447,21 @@ export default function AdminDashboard() {
           await database.invitation.upload(base64String, file.name);
           console.log("Invitation saved to database");
 
-          // Update local state
-          setInvitationPDF(base64String);
+          // Re-fetch latest from DB to reflect filename/timestamp
+          try {
+            const latest = await database.invitation.get();
+            if (latest && latest.pdf_data) {
+              setInvitation({
+                pdf_data: latest.pdf_data,
+                filename: (latest as any).filename,
+                uploaded_at: (latest as any).uploaded_at,
+              });
+            } else {
+              setInvitation({ pdf_data: base64String, filename: file.name });
+            }
+          } catch {
+            setInvitation({ pdf_data: base64String, filename: file.name });
+          }
 
           const storageType = database.isUsingSupabase()
             ? "Supabase database"
@@ -1452,7 +1475,7 @@ export default function AdminDashboard() {
         } catch (error) {
           console.error("Error saving invitation:", error);
           // Fallback to localStorage only
-          setInvitationPDF(base64String);
+          setInvitation({ pdf_data: base64String, filename: file.name });
           localStorage.setItem("wedding_invitation_pdf", base64String);
           localStorage.setItem("wedding_invitation_filename", file.name);
 
@@ -3158,21 +3181,23 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {/* Upload Invitation */}
+                  {/* Upload / Replace Invitation */}
                   <div className="text-center p-8 border-2 border-dashed border-sage-300 rounded-lg">
                     <FileText
                       className="mx-auto mb-4 text-olive-600"
                       size={48}
                     />
                     <h3 className="text-xl font-serif text-olive-700 mb-4">
-                      Upload Wedding Invitation PDF
+                      {invitation
+                        ? "Replace Wedding Invitation PDF"
+                        : "Upload Wedding Invitation PDF"}
                     </h3>
                     <p className="text-sage-600 mb-4">
-                      Upload your custom wedding invitation PDF. This will be
-                      downloaded when guests click the "Download Invitation"
-                      button.
+                      {invitation
+                        ? "Upload a new PDF to replace the current invitation. Guests will immediately receive the latest version."
+                        : 'Upload your custom wedding invitation PDF. This will be downloaded when guests click the "Download Invitation" button.'}
                     </p>
-                    <div>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -3185,7 +3210,36 @@ export default function AdminDashboard() {
                         className="bg-olive-600 hover:bg-olive-700 text-white"
                       >
                         <Upload className="mr-2" size={16} />
-                        Choose PDF Invitation
+                        {invitation
+                          ? "Replace PDF Invitation"
+                          : "Choose PDF Invitation"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          const latest = await database.invitation.get();
+                          if (latest && latest.pdf_data) {
+                            setInvitation({
+                              pdf_data: latest.pdf_data,
+                              filename: (latest as any).filename,
+                              uploaded_at: (latest as any).uploaded_at,
+                            });
+                            toast({
+                              title: "Reloaded",
+                              description: "Invitation reloaded from database.",
+                              duration: 2000,
+                            });
+                          } else {
+                            setInvitation(null);
+                            toast({
+                              title: "No Invitation",
+                              description: "No invitation found in database.",
+                              duration: 2000,
+                            });
+                          }
+                        }}
+                      >
+                        Reload from DB
                       </Button>
                     </div>
                     <p className="text-xs text-sage-500 mt-2">
@@ -3195,30 +3249,48 @@ export default function AdminDashboard() {
 
                   {/* Current Invitation Status */}
                   <Card
-                    className={`border-l-4 ${invitationPDF ? "border-l-green-500 bg-green-50" : "border-l-amber-500 bg-amber-50"}`}
+                    className={`border-l-4 ${invitation ? "border-l-green-500 bg-green-50" : "border-l-amber-500 bg-amber-50"}`}
                   >
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-start justify-between">
                         <div>
                           <h4 className="font-semibold text-lg mb-2">
-                            {invitationPDF
+                            {invitation
                               ? "✅ Custom Invitation Active"
                               : "⚠️ Using Default Text Invitation"}
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            {invitationPDF
+                          <p className="text-sm text-gray-600 mb-2">
+                            {invitation
                               ? "Your custom PDF invitation is active. Guests will download your uploaded PDF when they click the invitation button."
                               : "No custom invitation uploaded. Guests will download a basic text invitation. Upload a PDF above for a professional invitation."}
                           </p>
+                          {invitation && (
+                            <div className="text-xs text-gray-600">
+                              <div>
+                                Filename:{" "}
+                                {invitation.filename ||
+                                  "wedding-invitation.pdf"}
+                              </div>
+                              {invitation.uploaded_at && (
+                                <div>
+                                  Uploaded:{" "}
+                                  {new Date(
+                                    invitation.uploaded_at,
+                                  ).toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {invitationPDF && (
+                        {invitation && (
                           <div className="flex gap-2">
                             <Button
                               size="sm"
                               onClick={() => {
                                 const link = document.createElement("a");
-                                link.href = invitationPDF;
+                                link.href = invitation.pdf_data;
                                 link.download =
+                                  invitation.filename ||
                                   "Wedding-Invitation-Preview.pdf";
                                 link.click();
                               }}
@@ -3233,8 +3305,7 @@ export default function AdminDashboard() {
                               onClick={async () => {
                                 try {
                                   await database.invitation.delete();
-                                  setInvitationPDF(null);
-
+                                  setInvitation(null);
                                   toast({
                                     title: "Invitation Removed! 🗑️",
                                     description:
@@ -3246,15 +3317,13 @@ export default function AdminDashboard() {
                                     "Error removing invitation:",
                                     error,
                                   );
-                                  // Fallback to local removal
-                                  setInvitationPDF(null);
+                                  setInvitation(null);
                                   localStorage.removeItem(
                                     "wedding_invitation_pdf",
                                   );
                                   localStorage.removeItem(
                                     "wedding_invitation_filename",
                                   );
-
                                   toast({
                                     title: "Invitation Removed! 🗑️",
                                     description:

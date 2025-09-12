@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { eventDatabase, EventPhoto } from "@/lib/event-database";
-import PinAccess from "./PinAccess";
 
 export default function AralRoce() {
   const { toast } = useToast();
@@ -67,50 +66,37 @@ export default function AralRoce() {
 
   const checkAccess = async () => {
     const now = new Date();
-    const roceDate = new Date("2025-12-27"); // Dec 27, 2025
-    const weddingDate = new Date("2025-12-29"); // Dec 29, 2025 (allow until day after wedding)
+    // Use local date boundaries to avoid timezone issues
+    const roceDate = new Date(2025, 11, 27); // Dec 27, 2025 (local)
+    const dayAfterRoce = new Date(2025, 11, 28); // Dec 28, 2025 (only same-day access)
 
-    // Check if it's before the event date
+    // Before event: hide from homepage
     if (now < roceDate) {
-      // Before event: Admin access only
-      setAccessMode("admin");
+      setAccessMode("hidden");
       setHasAccess(false);
     }
-    // Check if it's during the event period
-    else if (now >= roceDate && now < weddingDate) {
-      // During event: Guest access
+    // Only on event day: Guest access
+    else if (now >= roceDate && now < dayAfterRoce) {
       setAccessMode("guest");
       setHasAccess(true);
     }
-    // After event date
+    // After event day: view-only if photos exist, else hide
     else {
-      // Check if photos exist in Supabase
       try {
         const rocePhotos =
           await eventDatabase.photos.getByEventType("aral_roce");
         if (rocePhotos.length > 0) {
-          // Photos exist: Show view-only mode
           setAccessMode("view-only");
           setHasAccess(true);
         } else {
-          // No photos: Hide section completely
           setAccessMode("hidden");
           setHasAccess(false);
         }
       } catch (error) {
         console.error("Error checking for existing photos:", error);
-        // If we can't check, default to hidden
         setAccessMode("hidden");
         setHasAccess(false);
       }
-    }
-  };
-
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-    // If admin PIN was used, set to admin mode
-    if (accessMode === "admin") {
-      setAccessMode("admin");
     }
   };
 
@@ -253,27 +239,6 @@ export default function AralRoce() {
   // Hide section completely if no photos exist after event
   if (accessMode === "hidden") {
     return null;
-  }
-
-  // Show PIN access screen for admin access before event
-  if (!hasAccess && accessMode === "admin") {
-    return (
-      <section className="py-20 px-4 bg-gradient-to-br from-teal-50 to-blue-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-serif text-teal-700 mb-4">
-              Aral's Roce
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-teal-600 to-blue-600 mx-auto mb-6"></div>
-          </div>
-          <PinAccess
-            onAccessGranted={handleAccessGranted}
-            eventName="Aral's Roce"
-            eventDate="Friday, December 27, 2025 (Evening)"
-          />
-        </div>
-      </section>
-    );
   }
 
   // Show Supabase requirement if not connected

@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { eventDatabase, EventPhoto } from "@/lib/event-database";
-import PinAccess from "./PinAccess";
 
 export default function VioletHaldi() {
   const { toast } = useToast();
@@ -67,50 +66,37 @@ export default function VioletHaldi() {
 
   const checkAccess = async () => {
     const now = new Date();
-    const haldiDate = new Date("2025-12-26"); // Dec 26, 2025
-    const dayAfterHaldi = new Date("2025-12-28"); // Dec 28, 2025 (allow until wedding day)
+    // Use local date boundaries to avoid timezone issues
+    const haldiDate = new Date(2025, 11, 26); // Dec 26, 2025 (local)
+    const dayAfterHaldi = new Date(2025, 11, 27); // Dec 27, 2025 (only same-day access)
 
-    // Check if it's before the event date
+    // Before event: hide from homepage
     if (now < haldiDate) {
-      // Before event: Admin access only
-      setAccessMode("admin");
+      setAccessMode("hidden");
       setHasAccess(false);
     }
-    // Check if it's during the event period
+    // Only on event day: Guest access
     else if (now >= haldiDate && now < dayAfterHaldi) {
-      // During event: Guest access
       setAccessMode("guest");
       setHasAccess(true);
     }
-    // After event date
+    // After event day: view-only if photos exist, else hide
     else {
-      // Check if photos exist in Supabase
       try {
         const haldiPhotos =
           await eventDatabase.photos.getByEventType("violet_haldi");
         if (haldiPhotos.length > 0) {
-          // Photos exist: Show view-only mode
           setAccessMode("view-only");
           setHasAccess(true);
         } else {
-          // No photos: Hide section completely
           setAccessMode("hidden");
           setHasAccess(false);
         }
       } catch (error) {
         console.error("Error checking for existing photos:", error);
-        // If we can't check, default to hidden
         setAccessMode("hidden");
         setHasAccess(false);
       }
-    }
-  };
-
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-    // If admin PIN was used, set to admin mode
-    if (accessMode === "admin") {
-      setAccessMode("admin");
     }
   };
 
@@ -254,27 +240,6 @@ export default function VioletHaldi() {
   // Hide section completely if no photos exist after event
   if (accessMode === "hidden") {
     return null;
-  }
-
-  // Show PIN access screen for admin access before event
-  if (!hasAccess && accessMode === "admin") {
-    return (
-      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-pink-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-serif text-purple-700 mb-4">
-              Violet's Haldi
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 mx-auto mb-6"></div>
-          </div>
-          <PinAccess
-            onAccessGranted={handleAccessGranted}
-            eventName="Violet's Haldi"
-            eventDate="Thursday, December 26, 2025 (Evening)"
-          />
-        </div>
-      </section>
-    );
   }
 
   // Show Supabase requirement if not connected
