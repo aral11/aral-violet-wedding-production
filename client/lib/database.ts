@@ -517,84 +517,48 @@ export const photoService = {
   },
 
   getFromLocalStorage(): SupabasePhoto[] {
-    console.log(
-      "📸 localStorage disabled for analytics fix - returning empty array",
-    );
-    return [];
+    try {
+      const saved = localStorage.getItem("wedding_photos");
+      const guestSaved = localStorage.getItem("wedding_guest_photos");
+      const photos: SupabasePhoto[] = [];
 
-    console.log("📸 localStorage check:", {
-      adminPhotos: saved ? "found" : "not found",
-      guestPhotos: guestSaved ? "found" : "not found",
-    });
-
-    // No fallback photos - show empty state when no real photos exist
-    // This ensures users only see actual uploaded photos
-
-    // Load admin photos
-    if (saved) {
-      try {
-        const photoData = JSON.parse(saved);
-        console.log(
-          `📸 Found ${photoData.length} admin photos in localStorage`,
-        );
-
-        const adminPhotos = photoData
-          .filter((data: string) => data && data.startsWith("data:image/"))
-          .map((data: string, index: number) => ({
-            id: `admin_${index}`,
-            photo_data: data,
-            uploaded_by: "admin",
-            guest_name: null,
-            created_at: new Date().toISOString(),
-          }));
-        photos.push(...adminPhotos);
-        console.log(`📸 Loaded ${adminPhotos.length} valid admin photos`);
-      } catch (error) {
-        console.warn(
-          "��� Error parsing admin photos from localStorage:",
-          error,
-        );
+      if (saved) {
+        const adminList: string[] = JSON.parse(saved);
+        for (let i = 0; i < adminList.length; i++) {
+          const data = adminList[i];
+          if (typeof data === "string" && (data.startsWith("data:image/") || data.startsWith("http"))) {
+            photos.push({
+              id: `admin_${i}`,
+              photo_data: data,
+              uploaded_by: "admin",
+              guest_name: null,
+              created_at: new Date().toISOString(),
+            });
+          }
+        }
       }
-    }
 
-    // Load guest photos
-    if (guestSaved) {
-      try {
-        const guestPhotoData = JSON.parse(guestSaved);
-        console.log(
-          `📸 Found ${guestPhotoData.length} guest photos in localStorage`,
-        );
-
-        const guestPhotos = guestPhotoData
-          .filter(
-            (photo: any) => photo && (photo.photoData || photo.photo_data),
-          )
-          .map((photo: any, index: number) => ({
-            id: `guest_${index}`,
-            photo_data: photo.photoData || photo.photo_data,
-            uploaded_by:
-              photo.uploadedBy ||
-              photo.uploaded_by ||
-              `guest_${photo.guestName || "anonymous"}_${Date.now()}`,
-            guest_name: photo.guestName || photo.guest_name,
-            created_at:
-              photo.createdAt || photo.created_at || new Date().toISOString(),
-          }));
-        photos.push(...guestPhotos);
-        console.log(`📸 Loaded ${guestPhotos.length} valid guest photos`);
-      } catch (error) {
-        console.warn("📸 Error parsing guest photos from localStorage:", error);
+      if (guestSaved) {
+        const guestList: any[] = JSON.parse(guestSaved);
+        guestList.forEach((p, idx) => {
+          const data = p.photoData || p.photo_data;
+          if (data && (typeof data === "string") && (data.startsWith("data:image/") || data.startsWith("http"))) {
+            photos.push({
+              id: `guest_${idx}`,
+              photo_data: data,
+              uploaded_by: p.uploadedBy || p.uploaded_by || "guest",
+              guest_name: p.guestName || p.guest_name || null,
+              created_at: p.createdAt || p.created_at || new Date().toISOString(),
+            });
+          }
+        });
       }
+
+      return photos.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    } catch (e) {
+      console.warn("📸 Error reading local photos:", e);
+      return [];
     }
-
-    const sortedPhotos = photos.sort(
-      (a, b) =>
-        new Date(b.created_at || 0).getTime() -
-        new Date(a.created_at || 0).getTime(),
-    );
-
-    console.log(`📸 localStorage total: ${sortedPhotos.length} photos`);
-    return sortedPhotos;
   },
 
   saveToLocalStorage(
