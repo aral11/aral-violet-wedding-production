@@ -130,7 +130,6 @@ export const analytics = {
                 events: 0,
                 user_agent: navigator.userAgent,
                 is_mobile: isMobileDevice(),
-                visitor_id: visitorId,
               },
             ],
             { onConflict: "session_id" },
