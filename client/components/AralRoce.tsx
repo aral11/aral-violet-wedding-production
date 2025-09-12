@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { eventDatabase, EventPhoto } from "@/lib/event-database";
-import PinAccess from "./PinAccess";
 
 export default function AralRoce() {
   const { toast } = useToast();
@@ -71,11 +70,11 @@ export default function AralRoce() {
     const roceDate = new Date(2025, 11, 27); // Dec 27, 2025 (local)
     const dayAfterRoce = new Date(2025, 11, 28); // Dec 28, 2025 (only same-day access)
 
-    // Before event: Admin access only
-    if (now < roceDate) {
-      setAccessMode("admin");
-      setHasAccess(false);
-    }
+    // Before event: hide from homepage
+  if (now < roceDate) {
+    setAccessMode("hidden");
+    setHasAccess(false);
+  }
     // Only on event day: Guest access
     else if (now >= roceDate && now < dayAfterRoce) {
       setAccessMode("guest");
@@ -100,13 +99,6 @@ export default function AralRoce() {
     }
   };
 
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-    // If admin PIN was used, set to admin mode
-    if (accessMode === "admin") {
-      setAccessMode("admin");
-    }
-  };
 
   const loadRocePhotos = async () => {
     try {
@@ -249,26 +241,6 @@ export default function AralRoce() {
     return null;
   }
 
-  // Show PIN access screen for admin access before event
-  if (!hasAccess && accessMode === "admin") {
-    return (
-      <section className="py-20 px-4 bg-gradient-to-br from-teal-50 to-blue-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-serif text-teal-700 mb-4">
-              Aral's Roce
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-teal-600 to-blue-600 mx-auto mb-6"></div>
-          </div>
-          <PinAccess
-            onAccessGranted={handleAccessGranted}
-            eventName="Aral's Roce"
-            eventDate="Friday, December 27, 2025 (Evening)"
-          />
-        </div>
-      </section>
-    );
-  }
 
   // Show Supabase requirement if not connected
   if (!isSupabaseConnected) {
