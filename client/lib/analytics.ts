@@ -405,7 +405,7 @@ export const analytics = {
     try {
       if (isSupabaseConfigured()) {
         try {
-          await supabase!.from("analytics_pageviews").delete().neq("session_id", "");
+          await supabase!.from("analytics_page_views").delete().neq("session_id", "");
           await supabase!.from("analytics_events").delete().neq("session_id", "");
           await supabase!.from("analytics_sessions").delete().neq("session_id", "");
         } catch (dbErr) {
