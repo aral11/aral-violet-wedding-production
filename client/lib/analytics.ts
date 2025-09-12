@@ -321,7 +321,7 @@ export const analytics = {
         try {
           const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
           const { data: pvData } = await supabase!
-            .from("analytics_pageviews")
+            .from("analytics_page_views")
             .select("page_url,timestamp")
             .gte("timestamp", sinceISO)
             .limit(5000);
