@@ -294,22 +294,21 @@ export default function AdminDashboard() {
         }
       }
 
-      // Load invitation PDF using database service
+      // Load invitation via database service
       try {
-        const invitation = await database.invitation.get();
-        if (invitation && invitation.pdf_data) {
-          setInvitationPDF(invitation.pdf_data);
-          const storageType = database.isUsingSupabase()
-            ? "Supabase"
-            : "localStorage";
+        const inv = await database.invitation.get();
+        if (inv && inv.pdf_data) {
+          setInvitation({ pdf_data: inv.pdf_data, filename: (inv as any).filename, uploaded_at: (inv as any).uploaded_at });
+          const storageType = database.isUsingSupabase() ? "Supabase" : "localStorage";
           console.log(`Invitation loaded from ${storageType}`);
         }
       } catch (error) {
         console.log("Error loading invitation:", error);
         // Fallback to localStorage
-        const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
-        if (savedInvitation) {
-          setInvitationPDF(savedInvitation);
+        const savedPdf = localStorage.getItem("wedding_invitation_pdf");
+        const savedFilename = localStorage.getItem("wedding_invitation_filename") || undefined;
+        if (savedPdf) {
+          setInvitation({ pdf_data: savedPdf, filename: savedFilename });
         }
       }
 
@@ -1361,7 +1360,7 @@ export default function AdminDashboard() {
           ? "Supabase database"
           : "local storage";
         toast({
-          title: "Event Added Successfully! ����",
+          title: "Event Added Successfully! 📅",
           description: `Event saved to ${storageType} and synced across devices!`,
           duration: 3000,
         });
@@ -3292,7 +3291,7 @@ export default function AdminDashboard() {
                           • You can preview or remove the invitation anytime
                         </li>
                         <li>
-                          • If no PDF is uploaded, guests get a basic text
+                          �� If no PDF is uploaded, guests get a basic text
                           invitation
                         </li>
                         <li>
