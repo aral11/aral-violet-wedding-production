@@ -151,7 +151,6 @@ export const analytics = {
               events: 0,
               user_agent: navigator.userAgent,
               is_mobile: isMobileDevice(),
-              visitor_id: visitorId,
             };
           }
           sessions[sessionId].page_views += 1;
