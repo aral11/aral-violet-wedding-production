@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { eventDatabase, EventPhoto } from "@/lib/event-database";
-import PinAccess from "./PinAccess";
 
 export default function VioletHaldi() {
   const { toast } = useToast();
@@ -71,11 +70,11 @@ export default function VioletHaldi() {
     const haldiDate = new Date(2025, 11, 26); // Dec 26, 2025 (local)
     const dayAfterHaldi = new Date(2025, 11, 27); // Dec 27, 2025 (only same-day access)
 
-    // Before event: Admin access only
-    if (now < haldiDate) {
-      setAccessMode("admin");
-      setHasAccess(false);
-    }
+    // Before event: hide from homepage
+  if (now < haldiDate) {
+    setAccessMode("hidden");
+    setHasAccess(false);
+  }
     // Only on event day: Guest access
     else if (now >= haldiDate && now < dayAfterHaldi) {
       setAccessMode("guest");
@@ -100,13 +99,6 @@ export default function VioletHaldi() {
     }
   };
 
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-    // If admin PIN was used, set to admin mode
-    if (accessMode === "admin") {
-      setAccessMode("admin");
-    }
-  };
 
   const loadHaldiPhotos = async () => {
     try {
@@ -250,26 +242,6 @@ export default function VioletHaldi() {
     return null;
   }
 
-  // Show PIN access screen for admin access before event
-  if (!hasAccess && accessMode === "admin") {
-    return (
-      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-pink-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-serif text-purple-700 mb-4">
-              Violet's Haldi
-            </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 mx-auto mb-6"></div>
-          </div>
-          <PinAccess
-            onAccessGranted={handleAccessGranted}
-            eventName="Violet's Haldi"
-            eventDate="Thursday, December 26, 2025 (Evening)"
-          />
-        </div>
-      </section>
-    );
-  }
 
   // Show Supabase requirement if not connected
   if (!isSupabaseConnected) {
