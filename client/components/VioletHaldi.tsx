@@ -71,10 +71,10 @@ export default function VioletHaldi() {
     const dayAfterHaldi = new Date(2025, 11, 27); // Dec 27, 2025 (only same-day access)
 
     // Before event: hide from homepage
-  if (now < haldiDate) {
-    setAccessMode("hidden");
-    setHasAccess(false);
-  }
+    if (now < haldiDate) {
+      setAccessMode("hidden");
+      setHasAccess(false);
+    }
     // Only on event day: Guest access
     else if (now >= haldiDate && now < dayAfterHaldi) {
       setAccessMode("guest");
@@ -83,7 +83,8 @@ export default function VioletHaldi() {
     // After event day: view-only if photos exist, else hide
     else {
       try {
-        const haldiPhotos = await eventDatabase.photos.getByEventType("violet_haldi");
+        const haldiPhotos =
+          await eventDatabase.photos.getByEventType("violet_haldi");
         if (haldiPhotos.length > 0) {
           setAccessMode("view-only");
           setHasAccess(true);
@@ -98,7 +99,6 @@ export default function VioletHaldi() {
       }
     }
   };
-
 
   const loadHaldiPhotos = async () => {
     try {
@@ -241,7 +241,6 @@ export default function VioletHaldi() {
   if (accessMode === "hidden") {
     return null;
   }
-
 
   // Show Supabase requirement if not connected
   if (!isSupabaseConnected) {

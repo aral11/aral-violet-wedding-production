@@ -142,7 +142,9 @@ export const analytics = {
           pageViews.push(pageView);
           saveJSON(PV_KEY, pageViews);
 
-          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+          const sessions = loadJSON<
+            Record<string, UserSession & { visitor_id?: string }>
+          >(SS_KEY, {});
           if (!sessions[sessionId]) {
             sessions[sessionId] = {
               session_id: sessionId,
@@ -164,7 +166,9 @@ export const analytics = {
         pageViews.push(pageView);
         saveJSON(PV_KEY, pageViews);
 
-        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+        const sessions = loadJSON<
+          Record<string, UserSession & { visitor_id?: string }>
+        >(SS_KEY, {});
         if (!sessions[sessionId]) {
           sessions[sessionId] = {
             session_id: sessionId,
@@ -221,7 +225,9 @@ export const analytics = {
           events.push(event);
           saveJSON(EV_KEY, events);
 
-          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+          const sessions = loadJSON<
+            Record<string, UserSession & { visitor_id?: string }>
+          >(SS_KEY, {});
           if (sessions[sessionId]) {
             sessions[sessionId].events += 1;
             sessions[sessionId].end_time = new Date().toISOString();
@@ -233,7 +239,9 @@ export const analytics = {
         events.push(event);
         saveJSON(EV_KEY, events);
 
-        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+        const sessions = loadJSON<
+          Record<string, UserSession & { visitor_id?: string }>
+        >(SS_KEY, {});
         if (sessions[sessionId]) {
           sessions[sessionId].events += 1;
           sessions[sessionId].end_time = new Date().toISOString();
@@ -258,14 +266,18 @@ export const analytics = {
             .eq("session_id", sessionId);
         } catch (dbErr) {
           console.warn("Supabase session update failed, falling back:", dbErr);
-          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+          const sessions = loadJSON<
+            Record<string, UserSession & { visitor_id?: string }>
+          >(SS_KEY, {});
           if (sessions[sessionId]) {
             sessions[sessionId].end_time = new Date().toISOString();
             saveJSON(SS_KEY, sessions);
           }
         }
       } else {
-        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+        const sessions = loadJSON<
+          Record<string, UserSession & { visitor_id?: string }>
+        >(SS_KEY, {});
         if (sessions[sessionId]) {
           sessions[sessionId].end_time = new Date().toISOString();
           saveJSON(SS_KEY, sessions);
@@ -285,17 +297,20 @@ export const analytics = {
     const localSummary = (() => {
       const pageViews = loadJSON<PageView[]>(PV_KEY, []);
       const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
-      const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+      const sessions = loadJSON<
+        Record<string, UserSession & { visitor_id?: string }>
+      >(SS_KEY, {});
 
       const sessionList = Object.values(sessions);
       const totalPageViews = pageViews.length;
       const totalEvents = events.length;
       const totalSessions = sessionList.length;
-      const uniqueVisitors = new Set(sessionList.map((s) => s.visitor_id || s.session_id)).size;
+      const uniqueVisitors = new Set(
+        sessionList.map((s) => s.visitor_id || s.session_id),
+      ).size;
       const mobileUsers = sessionList.filter((s) => s.is_mobile).length;
-      const averageSessionDuration = analytics.calculateAverageSessionDuration(
-        sessionList,
-      );
+      const averageSessionDuration =
+        analytics.calculateAverageSessionDuration(sessionList);
 
       const popularPages = analytics.getPopularPages(pageViews);
       const recentActivity = analytics.getRecentActivity(pageViews, events);
@@ -320,7 +335,9 @@ export const analytics = {
       // Fire-and-forget background sync to refresh local cache from DB
       (async () => {
         try {
-          const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          const sinceISO = new Date(
+            Date.now() - 30 * 24 * 60 * 60 * 1000,
+          ).toISOString();
           const { data: pvData } = await supabase!
             .from("analytics_page_views")
             .select("page_url,timestamp")
@@ -339,7 +356,17 @@ export const analytics = {
 
           if (pvData) saveJSON(PV_KEY, pvData as any);
           if (evData) saveJSON(EV_KEY, evData as any);
-          if (ssData) saveJSON(SS_KEY, (ssData as any[]).reduce((acc, s: any) => { acc[s.session_id] = s; return acc; }, {} as Record<string, any>));
+          if (ssData)
+            saveJSON(
+              SS_KEY,
+              (ssData as any[]).reduce(
+                (acc, s: any) => {
+                  acc[s.session_id] = s;
+                  return acc;
+                },
+                {} as Record<string, any>,
+              ),
+            );
         } catch (dbErr) {
           console.warn("Supabase analytics fetch failed:", dbErr);
         }
@@ -350,9 +377,18 @@ export const analytics = {
   },
 
   // Expose cached raw data for UI drilldowns
-  getCachedPageViews(): PageView[] { return loadJSON<PageView[]>(PV_KEY, []); },
-  getCachedEvents(): AnalyticsEvent[] { return loadJSON<AnalyticsEvent[]>(EV_KEY, []); },
-  getCachedSessions(): Record<string, UserSession & { visitor_id?: string }> { return loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {}); },
+  getCachedPageViews(): PageView[] {
+    return loadJSON<PageView[]>(PV_KEY, []);
+  },
+  getCachedEvents(): AnalyticsEvent[] {
+    return loadJSON<AnalyticsEvent[]>(EV_KEY, []);
+  },
+  getCachedSessions(): Record<string, UserSession & { visitor_id?: string }> {
+    return loadJSON<Record<string, UserSession & { visitor_id?: string }>>(
+      SS_KEY,
+      {},
+    );
+  },
 
   // Calculate average session duration
   calculateAverageSessionDuration(sessions: UserSession[]): number {
@@ -362,7 +398,9 @@ export const analytics = {
       const end = new Date(s.end_time || new Date().toISOString()).getTime();
       return Math.max(0, Math.floor((end - start) / 1000));
     });
-    const avg = Math.floor(durations.reduce((a, b) => a + b, 0) / durations.length);
+    const avg = Math.floor(
+      durations.reduce((a, b) => a + b, 0) / durations.length,
+    );
     return avg;
   },
 
@@ -380,8 +418,12 @@ export const analytics = {
   // Get recent activity (last 24h)
   getRecentActivity(pageViews: PageView[], events: AnalyticsEvent[]) {
     const since = Date.now() - 24 * 60 * 60 * 1000;
-    const pv = pageViews.filter((p) => new Date(p.timestamp).getTime() >= since).length;
-    const ev = events.filter((e) => new Date(e.timestamp).getTime() >= since).length;
+    const pv = pageViews.filter(
+      (p) => new Date(p.timestamp).getTime() >= since,
+    ).length;
+    const ev = events.filter(
+      (e) => new Date(e.timestamp).getTime() >= since,
+    ).length;
     return { pageViews: pv, events: ev, total: pv + ev };
   },
 
@@ -398,7 +440,10 @@ export const analytics = {
 
   // Get hourly activity pattern
   getHourlyActivity(pageViews: PageView[]) {
-    const buckets = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
+    const buckets = Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      count: 0,
+    }));
     for (const pv of pageViews) {
       const h = new Date(pv.timestamp).getHours();
       buckets[h].count += 1;
@@ -411,9 +456,18 @@ export const analytics = {
     try {
       if (isSupabaseConfigured()) {
         try {
-          await supabase!.from("analytics_page_views").delete().neq("session_id", "");
-          await supabase!.from("analytics_events").delete().neq("session_id", "");
-          await supabase!.from("analytics_sessions").delete().neq("session_id", "");
+          await supabase!
+            .from("analytics_page_views")
+            .delete()
+            .neq("session_id", "");
+          await supabase!
+            .from("analytics_events")
+            .delete()
+            .neq("session_id", "");
+          await supabase!
+            .from("analytics_sessions")
+            .delete()
+            .neq("session_id", "");
         } catch (dbErr) {
           console.warn("Supabase clear failed:", dbErr);
         }
@@ -437,14 +491,33 @@ export const analytics = {
 
       if (isSupabaseConfigured()) {
         try {
-          const { data: pvData } = await supabase!.from("analytics_page_views").select("*").limit(10000);
-          const { data: evData } = await supabase!.from("analytics_events").select("*").limit(10000);
-          const { data: ssData } = await supabase!.from("analytics_sessions").select("*").limit(10000);
+          const { data: pvData } = await supabase!
+            .from("analytics_page_views")
+            .select("*")
+            .limit(10000);
+          const { data: evData } = await supabase!
+            .from("analytics_events")
+            .select("*")
+            .limit(10000);
+          const { data: ssData } = await supabase!
+            .from("analytics_sessions")
+            .select("*")
+            .limit(10000);
           if (pvData) pageViews = pvData as any;
           if (evData) events = evData as any;
-          if (ssData) sessions = (ssData as any[]).reduce((acc, s: any) => { acc[s.session_id] = s; return acc; }, {} as Record<string, any>);
+          if (ssData)
+            sessions = (ssData as any[]).reduce(
+              (acc, s: any) => {
+                acc[s.session_id] = s;
+                return acc;
+              },
+              {} as Record<string, any>,
+            );
         } catch (dbErr) {
-          console.warn("Supabase export fetch failed, using local cache:", dbErr);
+          console.warn(
+            "Supabase export fetch failed, using local cache:",
+            dbErr,
+          );
         }
       }
 

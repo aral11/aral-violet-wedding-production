@@ -364,28 +364,57 @@ export default function AnalyticsDashboard() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-semibold text-sage-700 mb-3">Recent Page Views</h4>
+              <h4 className="font-semibold text-sage-700 mb-3">
+                Recent Page Views
+              </h4>
               <div className="space-y-2 max-h-64 overflow-auto">
-                {analytics.getCachedPageViews().slice(-10).reverse().map((pv, i) => (
-                  <div key={i} className="text-sm p-2 rounded border bg-white/60 flex justify-between">
-                    <span className="truncate max-w-[65%]" title={pv.page_url}>{pv.page_url}</span>
-                    <span className="text-sage-500">{new Date(pv.timestamp).toLocaleString()}</span>
-                  </div>
-                ))}
+                {analytics
+                  .getCachedPageViews()
+                  .slice(-10)
+                  .reverse()
+                  .map((pv, i) => (
+                    <div
+                      key={i}
+                      className="text-sm p-2 rounded border bg-white/60 flex justify-between"
+                    >
+                      <span
+                        className="truncate max-w-[65%]"
+                        title={pv.page_url}
+                      >
+                        {pv.page_url}
+                      </span>
+                      <span className="text-sage-500">
+                        {new Date(pv.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
                 {analytics.getCachedPageViews().length === 0 && (
                   <p className="text-sage-500 text-sm">No page views yet</p>
                 )}
               </div>
             </div>
             <div>
-              <h4 className="font-semibold text-sage-700 mb-3">Recent Events</h4>
+              <h4 className="font-semibold text-sage-700 mb-3">
+                Recent Events
+              </h4>
               <div className="space-y-2 max-h-64 overflow-auto">
-                {analytics.getCachedEvents().slice(-10).reverse().map((ev, i) => (
-                  <div key={i} className="text-sm p-2 rounded border bg-white/60 flex justify-between">
-                    <span className="capitalize">{ev.event_type.replace(/_/g, " ")}</span>
-                    <span className="text-sage-500">{new Date(ev.timestamp).toLocaleString()}</span>
-                  </div>
-                ))}
+                {analytics
+                  .getCachedEvents()
+                  .slice(-10)
+                  .reverse()
+                  .map((ev, i) => (
+                    <div
+                      key={i}
+                      className="text-sm p-2 rounded border bg-white/60 flex justify-between"
+                    >
+                      <span className="capitalize">
+                        {ev.event_type.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-sage-500">
+                        {new Date(ev.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
                 {analytics.getCachedEvents().length === 0 && (
                   <p className="text-sage-500 text-sm">No events yet</p>
                 )}
@@ -428,7 +457,8 @@ export default function AnalyticsDashboard() {
             </Button>
           </div>
           <p className="text-sm text-sage-500 mt-3">
-            Analytics syncs with your database when available; otherwise cached locally. Export data regularly for backup.
+            Analytics syncs with your database when available; otherwise cached
+            locally. Export data regularly for backup.
           </p>
         </CardContent>
       </Card>

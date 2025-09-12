@@ -71,10 +71,10 @@ export default function AralRoce() {
     const dayAfterRoce = new Date(2025, 11, 28); // Dec 28, 2025 (only same-day access)
 
     // Before event: hide from homepage
-  if (now < roceDate) {
-    setAccessMode("hidden");
-    setHasAccess(false);
-  }
+    if (now < roceDate) {
+      setAccessMode("hidden");
+      setHasAccess(false);
+    }
     // Only on event day: Guest access
     else if (now >= roceDate && now < dayAfterRoce) {
       setAccessMode("guest");
@@ -83,7 +83,8 @@ export default function AralRoce() {
     // After event day: view-only if photos exist, else hide
     else {
       try {
-        const rocePhotos = await eventDatabase.photos.getByEventType("aral_roce");
+        const rocePhotos =
+          await eventDatabase.photos.getByEventType("aral_roce");
         if (rocePhotos.length > 0) {
           setAccessMode("view-only");
           setHasAccess(true);
@@ -98,7 +99,6 @@ export default function AralRoce() {
       }
     }
   };
-
 
   const loadRocePhotos = async () => {
     try {
@@ -240,7 +240,6 @@ export default function AralRoce() {
   if (accessMode === "hidden") {
     return null;
   }
-
 
   // Show Supabase requirement if not connected
   if (!isSupabaseConnected) {

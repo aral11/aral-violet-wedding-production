@@ -526,7 +526,10 @@ export const photoService = {
         const adminList: string[] = JSON.parse(saved);
         for (let i = 0; i < adminList.length; i++) {
           const data = adminList[i];
-          if (typeof data === "string" && (data.startsWith("data:image/") || data.startsWith("http"))) {
+          if (
+            typeof data === "string" &&
+            (data.startsWith("data:image/") || data.startsWith("http"))
+          ) {
             photos.push({
               id: `admin_${i}`,
               photo_data: data,
@@ -542,19 +545,28 @@ export const photoService = {
         const guestList: any[] = JSON.parse(guestSaved);
         guestList.forEach((p, idx) => {
           const data = p.photoData || p.photo_data;
-          if (data && (typeof data === "string") && (data.startsWith("data:image/") || data.startsWith("http"))) {
+          if (
+            data &&
+            typeof data === "string" &&
+            (data.startsWith("data:image/") || data.startsWith("http"))
+          ) {
             photos.push({
               id: `guest_${idx}`,
               photo_data: data,
               uploaded_by: p.uploadedBy || p.uploaded_by || "guest",
               guest_name: p.guestName || p.guest_name || null,
-              created_at: p.createdAt || p.created_at || new Date().toISOString(),
+              created_at:
+                p.createdAt || p.created_at || new Date().toISOString(),
             });
           }
         });
       }
 
-      return photos.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+      return photos.sort(
+        (a, b) =>
+          new Date(b.created_at || 0).getTime() -
+          new Date(a.created_at || 0).getTime(),
+      );
     } catch (e) {
       console.warn("📸 Error reading local photos:", e);
       return [];
