@@ -291,7 +291,7 @@ export const analytics = {
       const totalPageViews = pageViews.length;
       const totalEvents = events.length;
       const totalSessions = sessionList.length;
-      const uniqueVisitors = totalSessions;
+      const uniqueVisitors = new Set(sessionList.map((s) => s.visitor_id || s.session_id)).size;
       const mobileUsers = sessionList.filter((s) => s.is_mobile).length;
       const averageSessionDuration = analytics.calculateAverageSessionDuration(
         sessionList,
