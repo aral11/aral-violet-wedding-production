@@ -72,7 +72,7 @@ export default function AdminDashboard() {
     }>
   >([]);
   const [weddingFlow, setWeddingFlow] = useState<WeddingFlowItem[]>([]);
-  const [invitationPDF, setInvitationPDF] = useState<string | null>(null);
+  const [invitation, setInvitation] = useState<{ pdf_data: string; filename?: string; uploaded_at?: string } | null>(null);
   const [newFlowItem, setNewFlowItem] = useState<Omit<WeddingFlowItem, "id">>({
     time: "",
     title: "",
@@ -1361,7 +1361,7 @@ export default function AdminDashboard() {
           ? "Supabase database"
           : "local storage";
         toast({
-          title: "Event Added Successfully! 📅",
+          title: "Event Added Successfully! ����",
           description: `Event saved to ${storageType} and synced across devices!`,
           duration: 3000,
         });
