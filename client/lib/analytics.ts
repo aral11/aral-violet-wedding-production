@@ -431,7 +431,7 @@ export const analytics = {
 
       if (isSupabaseConfigured()) {
         try {
-          const { data: pvData } = await supabase!.from("analytics_pageviews").select("*").limit(10000);
+          const { data: pvData } = await supabase!.from("analytics_page_views").select("*").limit(10000);
           const { data: evData } = await supabase!.from("analytics_events").select("*").limit(10000);
           const { data: ssData } = await supabase!.from("analytics_sessions").select("*").limit(10000);
           if (pvData) pageViews = pvData as any;
