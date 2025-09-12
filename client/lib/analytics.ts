@@ -108,7 +108,7 @@ export const analytics = {
       // Try Supabase first
       if (isSupabaseConfigured()) {
         try {
-          await supabase!.from("analytics_pageviews").insert([
+          await supabase!.from("analytics_page_views").insert([
             {
               page_url: pageView.page_url,
               referrer: pageView.referrer,
@@ -130,6 +130,7 @@ export const analytics = {
                 events: 0,
                 user_agent: navigator.userAgent,
                 is_mobile: isMobileDevice(),
+                visitor_id: visitorId,
               },
             ],
             { onConflict: "session_id" },
@@ -141,7 +142,7 @@ export const analytics = {
           pageViews.push(pageView);
           saveJSON(PV_KEY, pageViews);
 
-          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
           if (!sessions[sessionId]) {
             sessions[sessionId] = {
               session_id: sessionId,
@@ -163,7 +164,7 @@ export const analytics = {
         pageViews.push(pageView);
         saveJSON(PV_KEY, pageViews);
 
-        const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
         if (!sessions[sessionId]) {
           sessions[sessionId] = {
             session_id: sessionId,
@@ -220,7 +221,7 @@ export const analytics = {
           events.push(event);
           saveJSON(EV_KEY, events);
 
-          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
           if (sessions[sessionId]) {
             sessions[sessionId].events += 1;
             sessions[sessionId].end_time = new Date().toISOString();
@@ -232,7 +233,7 @@ export const analytics = {
         events.push(event);
         saveJSON(EV_KEY, events);
 
-        const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
         if (sessions[sessionId]) {
           sessions[sessionId].events += 1;
           sessions[sessionId].end_time = new Date().toISOString();
@@ -257,14 +258,14 @@ export const analytics = {
             .eq("session_id", sessionId);
         } catch (dbErr) {
           console.warn("Supabase session update failed, falling back:", dbErr);
-          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
           if (sessions[sessionId]) {
             sessions[sessionId].end_time = new Date().toISOString();
             saveJSON(SS_KEY, sessions);
           }
         }
       } else {
-        const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+        const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
         if (sessions[sessionId]) {
           sessions[sessionId].end_time = new Date().toISOString();
           saveJSON(SS_KEY, sessions);
@@ -284,7 +285,7 @@ export const analytics = {
     const localSummary = (() => {
       const pageViews = loadJSON<PageView[]>(PV_KEY, []);
       const events = loadJSON<AnalyticsEvent[]>(EV_KEY, []);
-      const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
+      const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
 
       const sessionList = Object.values(sessions);
       const totalPageViews = pageViews.length;
@@ -347,6 +348,11 @@ export const analytics = {
 
     return localSummary;
   },
+
+  // Expose cached raw data for UI drilldowns
+  getCachedPageViews(): PageView[] { return loadJSON<PageView[]>(PV_KEY, []); },
+  getCachedEvents(): AnalyticsEvent[] { return loadJSON<AnalyticsEvent[]>(EV_KEY, []); },
+  getCachedSessions(): Record<string, UserSession & { visitor_id?: string }> { return loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {}); },
 
   // Calculate average session duration
   calculateAverageSessionDuration(sessions: UserSession[]): number {
