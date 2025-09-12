@@ -141,7 +141,7 @@ export const analytics = {
           pageViews.push(pageView);
           saveJSON(PV_KEY, pageViews);
 
-          const sessions = loadJSON<Record<string, UserSession & { visitor_id?: string }>>(SS_KEY, {});
+          const sessions = loadJSON<Record<string, UserSession>>(SS_KEY, {});
           if (!sessions[sessionId]) {
             sessions[sessionId] = {
               session_id: sessionId,
