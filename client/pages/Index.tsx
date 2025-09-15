@@ -923,12 +923,15 @@ Made with love ❤️ By Aral D'Souza
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "Aral-Violet-Wedding-Invitation.pdf";
+        const disposition = response.headers.get("content-disposition") || "";
+        const match = disposition.match(/filename="?([^";]+)"?/i);
+        const serverFilename = match ? match[1] : "Aral-Violet-Wedding-Invitation.pdf";
+        link.download = serverFilename;
         link.target = "_blank";
 
         // Use mobile-optimized download utility
         const downloadSuccess = mobileOptimizedDownload(blob, {
-          filename: "Aral-Violet-Wedding-Invitation.pdf",
+          filename: serverFilename,
           mimeType: "application/pdf",
         });
 
