@@ -833,14 +833,18 @@ Made with love ❤️ By Aral D'Souza
               for (let i = 0; i < byteChars.length; i++)
                 byteNums[i] = byteChars.charCodeAt(i);
               const byteArray = new Uint8Array(byteNums);
-              dataForDownload = new Blob([byteArray], { type: "application/pdf" });
+              dataForDownload = new Blob([byteArray], {
+                type: "application/pdf",
+              });
             } catch {
               dataForDownload = `data:application/pdf;base64,${dataForDownload}`;
             }
           }
 
           // Download the uploaded PDF invitation - Mobile-friendly approach
-          console.log("📱 Attempting mobile-optimized download from database...");
+          console.log(
+            "📱 Attempting mobile-optimized download from database...",
+          );
 
           const filename =
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
@@ -876,7 +880,10 @@ Made with love ❤️ By Aral D'Souza
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            if (typeof dataForDownload !== "string" && link.href.startsWith("blob:")) {
+            if (
+              typeof dataForDownload !== "string" &&
+              link.href.startsWith("blob:")
+            ) {
               URL.revokeObjectURL(link.href);
             }
             console.log("📱 Standard download method executed");
@@ -925,7 +932,9 @@ Made with love ❤️ By Aral D'Souza
         link.href = url;
         const disposition = response.headers.get("content-disposition") || "";
         const match = disposition.match(/filename="?([^";]+)"?/i);
-        const serverFilename = match ? match[1] : "Aral-Violet-Wedding-Invitation.pdf";
+        const serverFilename = match
+          ? match[1]
+          : "Aral-Violet-Wedding-Invitation.pdf";
         link.download = serverFilename;
         link.target = "_blank";
 
@@ -978,7 +987,9 @@ Made with love ❤️ By Aral D'Souza
               for (let i = 0; i < byteChars.length; i++)
                 byteNums[i] = byteChars.charCodeAt(i);
               const byteArray = new Uint8Array(byteNums);
-              dataForDownload = new Blob([byteArray], { type: "application/pdf" });
+              dataForDownload = new Blob([byteArray], {
+                type: "application/pdf",
+              });
             } catch {
               dataForDownload = `data:application/pdf;base64,${dataForDownload}`;
             }
@@ -1008,7 +1019,10 @@ Made with love ❤️ By Aral D'Souza
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            if (typeof dataForDownload !== "string" && link.href.startsWith("blob:")) {
+            if (
+              typeof dataForDownload !== "string" &&
+              link.href.startsWith("blob:")
+            ) {
               URL.revokeObjectURL(link.href);
             }
           }
