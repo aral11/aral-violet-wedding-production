@@ -479,7 +479,7 @@ export default function Index() {
           ? "RSVP Updated Successfully! ��️"
           : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
-          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " �� Synced across all devices!" : ""}`
+          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
           : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
@@ -876,6 +876,9 @@ Made with love ❤️ By Aral D'Souza
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            if (typeof dataForDownload !== "string" && link.href.startsWith("blob:")) {
+              URL.revokeObjectURL(link.href);
+            }
             console.log("📱 Standard download method executed");
           }
 
