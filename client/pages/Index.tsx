@@ -959,17 +959,42 @@ Made with love ❤️ By Aral D'Souza
         const invitation = await invitationApi.get();
 
         if (invitation) {
+          // Handle both API response format (pdfData) and database format (pdf_data)
+          const rawPdf = invitation.pdfData || (invitation as any).pdf_data;
+          let dataForDownload: string | Blob = rawPdf;
+          if (
+            typeof dataForDownload === "string" &&
+            !dataForDownload.startsWith("data:")
+          ) {
+            try {
+              const base64 = dataForDownload.includes(",")
+                ? dataForDownload.split(",")[1]
+                : dataForDownload;
+              const byteChars = atob(base64);
+              const byteNums = new Array(byteChars.length);
+              for (let i = 0; i < byteChars.length; i++)
+                byteNums[i] = byteChars.charCodeAt(i);
+              const byteArray = new Uint8Array(byteNums);
+              dataForDownload = new Blob([byteArray], { type: "application/pdf" });
+            } catch {
+              dataForDownload = `data:application/pdf;base64,${dataForDownload}`;
+            }
+          }
+
           // Download the uploaded PDF invitation - Mobile-friendly
           const link = document.createElement("a");
-          // Handle both API response format (pdfData) and database format (pdf_data)
-          const pdfData = invitation.pdfData || (invitation as any).pdf_data;
-          link.href = pdfData;
+          if (typeof dataForDownload === "string") {
+            link.href = dataForDownload;
+          } else {
+            const objectUrl = URL.createObjectURL(dataForDownload);
+            link.href = objectUrl;
+          }
           link.download =
             invitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
           link.target = "_blank";
 
           // Use mobile-optimized download utility
-          const downloadSuccess = mobileOptimizedDownload(pdfData, {
+          const downloadSuccess = mobileOptimizedDownload(dataForDownload, {
             filename:
               invitation.filename || "Aral-Violet-Wedding-Invitation.pdf",
             mimeType: "application/pdf",
@@ -1004,7 +1029,7 @@ Made with love ❤️ By Aral D'Souza
         });
 
         // Fourth priority: Direct localStorage fallback
-        console.log("💾 Checking localStorage for saved invitation...");
+        console.log("��� Checking localStorage for saved invitation...");
         const savedInvitation = localStorage.getItem("wedding_invitation_pdf");
         const savedFilename = localStorage.getItem(
           "wedding_invitation_filename",
