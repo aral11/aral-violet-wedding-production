@@ -479,7 +479,7 @@ export default function Index() {
           ? "RSVP Updated Successfully! ��️"
           : "RSVP Submitted Successfully! 🎉",
         description: isEditMode
-          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`
+          ? `Thank you ${rsvpForm.name}! Your RSVP has been updated successfully.${database.isUsingSupabase() ? " �� Synced across all devices!" : ""}`
           : `Thank you ${rsvpForm.name}! We can't wait to celebrate with you on December 28, 2025!${database.isUsingSupabase() ? " ✨ Synced across all devices!" : ""}`,
         duration: 5000,
       });
@@ -857,7 +857,12 @@ Made with love ❤️ By Aral D'Souza
             // Fallback to standard download method
             console.log("📱 Mobile download failed, using standard method...");
             const link = document.createElement("a");
-            link.href = uploadedInvitation.pdf_data;
+            if (typeof dataForDownload === "string") {
+              link.href = dataForDownload;
+            } else {
+              const objectUrl = URL.createObjectURL(dataForDownload);
+              link.href = objectUrl;
+            }
             link.download = filename;
             link.target = "_blank";
 
@@ -903,7 +908,7 @@ Made with love ❤️ By Aral D'Souza
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
-      console.log("���� Trying server endpoint as fallback...");
+      console.log("🌐 Trying server endpoint as fallback...");
       const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
       const downloadEndpoint = isNetlify
         ? "/.netlify/functions/download-invitation"
@@ -1591,7 +1596,7 @@ Please RSVP at our wedding website
                         decoding="async"
                       />
                       <p className="text-sm font-medium text-olive-700 mb-2">
-                        ���� Scan to Upload Couple Photos
+                        📸 Scan to Upload Couple Photos
                       </p>
                       <p className="text-xs text-sage-500 mb-3">
                         Point your camera here
