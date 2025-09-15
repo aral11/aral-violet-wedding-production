@@ -818,30 +818,38 @@ Made with love ❤️ By Aral D'Souza
             uploadedInvitation.pdf_data.length,
           );
 
-          // Validate PDF data format
-          if (!uploadedInvitation.pdf_data.startsWith("data:")) {
-            console.log(
-              "�� Invalid PDF data format, trying server endpoint...",
-            );
-            throw new Error("Invalid PDF data format");
+          // Normalize PDF data (handle both data URLs and raw base64)
+          let dataForDownload: string | Blob = uploadedInvitation.pdf_data;
+          if (
+            typeof dataForDownload === "string" &&
+            !dataForDownload.startsWith("data:")
+          ) {
+            try {
+              const base64 = dataForDownload.includes(",")
+                ? dataForDownload.split(",")[1]
+                : dataForDownload;
+              const byteChars = atob(base64);
+              const byteNums = new Array(byteChars.length);
+              for (let i = 0; i < byteChars.length; i++)
+                byteNums[i] = byteChars.charCodeAt(i);
+              const byteArray = new Uint8Array(byteNums);
+              dataForDownload = new Blob([byteArray], { type: "application/pdf" });
+            } catch {
+              dataForDownload = `data:application/pdf;base64,${dataForDownload}`;
+            }
           }
 
           // Download the uploaded PDF invitation - Mobile-friendly approach
-          console.log(
-            "📱 Attempting mobile-optimized download from database...",
-          );
+          console.log("📱 Attempting mobile-optimized download from database...");
 
           const filename =
             uploadedInvitation.filename || "Aral-Violet-Wedding-Invitation.pdf";
 
           // Use mobile-optimized download utility
-          const downloadSuccess = mobileOptimizedDownload(
-            uploadedInvitation.pdf_data,
-            {
-              filename: filename,
-              mimeType: "application/pdf",
-            },
-          );
+          const downloadSuccess = mobileOptimizedDownload(dataForDownload, {
+            filename: filename,
+            mimeType: "application/pdf",
+          });
 
           console.log("📱 Mobile download result:", downloadSuccess);
 
@@ -895,7 +903,7 @@ Made with love ❤️ By Aral D'Souza
       }
 
       // Second priority: Try the server endpoint (which has its own fallback logic)
-      console.log("🌐 Trying server endpoint as fallback...");
+      console.log("���� Trying server endpoint as fallback...");
       const isNetlify = import.meta.env.VITE_DEPLOYMENT_PLATFORM === "netlify";
       const downloadEndpoint = isNetlify
         ? "/.netlify/functions/download-invitation"
@@ -1583,7 +1591,7 @@ Please RSVP at our wedding website
                         decoding="async"
                       />
                       <p className="text-sm font-medium text-olive-700 mb-2">
-                        📸 Scan to Upload Couple Photos
+                        ���� Scan to Upload Couple Photos
                       </p>
                       <p className="text-xs text-sage-500 mb-3">
                         Point your camera here
