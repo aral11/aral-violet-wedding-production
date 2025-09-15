@@ -1005,6 +1005,9 @@ Made with love ❤️ By Aral D'Souza
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            if (typeof dataForDownload !== "string" && link.href.startsWith("blob:")) {
+              URL.revokeObjectURL(link.href);
+            }
           }
 
           toast({
