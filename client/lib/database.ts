@@ -790,7 +790,9 @@ export const invitationService = {
 
         // Check if we got any data
         if (!data || data.length === 0) {
-          console.log("📋 No invitation found in Supabase, checking localStorage...");
+          console.log(
+            "📋 No invitation found in Supabase, checking localStorage...",
+          );
           return this.getFromLocalStorage();
         }
 
@@ -808,7 +810,10 @@ export const invitationService = {
 
         return latestInvitation;
       } catch (error) {
-        console.warn("⚠️ Error fetching from Supabase, falling back to localStorage:", error);
+        console.warn(
+          "⚠️ Error fetching from Supabase, falling back to localStorage:",
+          error,
+        );
         return this.getFromLocalStorage();
       }
     }
@@ -832,7 +837,10 @@ export const invitationService = {
           .neq("id", 0);
 
         if (deleteError) {
-          console.warn("⚠️ Warning: Could not delete old invitations:", deleteError);
+          console.warn(
+            "⚠️ Warning: Could not delete old invitations:",
+            deleteError,
+          );
           // Don't throw, continue with insert
         } else {
           console.log("✅ Old invitations deleted");

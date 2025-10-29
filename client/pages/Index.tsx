@@ -553,21 +553,21 @@ export default function Index() {
           setIsEditMode(true);
           setEditingGuestId(existingLocalGuest.id);
           setRsvpForm({
-          name: existingLocalGuest.name,
-          email: existingLocalGuest.email,
-          phone: existingLocalGuest.phone || "",
-          attending: existingLocalGuest.attending,
-          guests: existingLocalGuest.guests,
-          side: existingLocalGuest.side,
-          message: existingLocalGuest.message || "",
-          dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
-          needsAccommodation: existingLocalGuest.needsAccommodation,
-          needsPickup: existingLocalGuest.needsPickup || false,
-          pickupFrom: existingLocalGuest.pickupFrom || "",
-          arrivalTime: existingLocalGuest.arrivalTime || "",
-          pickupPeopleCount: existingLocalGuest.pickupPeopleCount || 1,
-          pickupNotes: existingLocalGuest.pickupNotes || "",
-        });
+            name: existingLocalGuest.name,
+            email: existingLocalGuest.email,
+            phone: existingLocalGuest.phone || "",
+            attending: existingLocalGuest.attending,
+            guests: existingLocalGuest.guests,
+            side: existingLocalGuest.side,
+            message: existingLocalGuest.message || "",
+            dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
+            needsAccommodation: existingLocalGuest.needsAccommodation,
+            needsPickup: existingLocalGuest.needsPickup || false,
+            pickupFrom: existingLocalGuest.pickupFrom || "",
+            arrivalTime: existingLocalGuest.arrivalTime || "",
+            pickupPeopleCount: existingLocalGuest.pickupPeopleCount || 1,
+            pickupNotes: existingLocalGuest.pickupNotes || "",
+          });
 
           toast({
             title: "Existing RSVP Found! ✏️",
@@ -2123,9 +2123,15 @@ Please RSVP at our wedding website
                           className="w-full px-3 py-2 border border-sage-300 rounded-md focus:outline-none focus:border-olive-500 bg-white"
                         >
                           <option value="">Select location...</option>
-                          <option value="Mangalore Airport">Mangalore Airport</option>
-                          <option value="Udupi Railway Station">Udupi Railway Station</option>
-                          <option value="Manipal Bus Station">Manipal Bus Station</option>
+                          <option value="Mangalore Airport">
+                            Mangalore Airport
+                          </option>
+                          <option value="Udupi Railway Station">
+                            Udupi Railway Station
+                          </option>
+                          <option value="Manipal Bus Station">
+                            Manipal Bus Station
+                          </option>
                           <option value="Other">Other</option>
                         </select>
                       </div>

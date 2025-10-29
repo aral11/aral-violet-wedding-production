@@ -67,7 +67,10 @@ export const handler: Handler = async (event, context) => {
         .neq("id", 0);
 
       if (deleteError) {
-        console.warn("⚠️ Warning: Could not delete old invitations:", deleteError);
+        console.warn(
+          "⚠️ Warning: Could not delete old invitations:",
+          deleteError,
+        );
         // Don't throw, continue with insert
       } else {
         console.log("✅ Old invitations deleted");
