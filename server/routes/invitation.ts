@@ -27,26 +27,34 @@ export const getInvitation: RequestHandler = async (req, res) => {
         .from("invitations")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== "PGRST116") {
-        // PGRST116 = no rows returned
+      if (error) {
+        console.error("Supabase error fetching invitation:", error);
         throw error;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
+        console.log("No invitation found in database");
         return res.status(404).json({ error: "No invitation found" });
       }
 
+      const invitation = data[0];
+      console.log("✅ Invitation fetched from Supabase:", {
+        id: invitation.id,
+        filename: invitation.filename,
+        dataLength: invitation.pdf_data?.length || 0,
+      });
+
       res.json({
-        id: data.id,
-        pdfData: data.pdf_data,
-        filename: data.filename,
-        uploadedAt: data.created_at,
+        id: invitation.id,
+        pdfData: invitation.pdf_data,
+        filename: invitation.filename,
+        uploadedAt: invitation.created_at,
       });
     } else {
       // Fallback to localStorage check (though this won't work server-side)
+      console.log("Supabase not configured");
       return res.status(404).json({ error: "No invitation found" });
     }
   } catch (error) {
