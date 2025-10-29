@@ -394,6 +394,11 @@ export default function Index() {
           message: existingGuest.message || "",
           dietaryRestrictions: existingGuest.dietary_restrictions || "",
           needsAccommodation: existingGuest.needs_accommodation,
+          needsPickup: existingGuest.needs_pickup || false,
+          pickupFrom: existingGuest.pickup_from || "",
+          arrivalTime: existingGuest.arrival_time || "",
+          pickupPeopleCount: existingGuest.pickup_people_count || 1,
+          pickupNotes: existingGuest.pickup_notes || "",
         });
 
         toast({
