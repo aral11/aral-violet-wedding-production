@@ -606,6 +606,11 @@ export default function Index() {
                   message: rsvpForm.message,
                   dietaryRestrictions: rsvpForm.dietaryRestrictions,
                   needsAccommodation: rsvpForm.needsAccommodation,
+                  needsPickup: rsvpForm.needsPickup,
+                  pickupFrom: rsvpForm.pickupFrom,
+                  arrivalTime: rsvpForm.arrivalTime,
+                  pickupPeopleCount: rsvpForm.pickupPeopleCount,
+                  pickupNotes: rsvpForm.pickupNotes,
                 }
               : guest,
           );
