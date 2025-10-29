@@ -432,6 +432,11 @@ export default function Index() {
           message: rsvpForm.message || undefined,
           dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
           needs_accommodation: rsvpForm.needsAccommodation,
+          needs_pickup: rsvpForm.needsPickup,
+          pickup_from: rsvpForm.pickupFrom || undefined,
+          arrival_time: rsvpForm.arrivalTime || undefined,
+          pickup_people_count: rsvpForm.pickupPeopleCount || undefined,
+          pickup_notes: rsvpForm.pickupNotes || undefined,
         });
       } else {
         // Create new guest
@@ -445,6 +450,11 @@ export default function Index() {
           message: rsvpForm.message || undefined,
           dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
           needs_accommodation: rsvpForm.needsAccommodation,
+          needs_pickup: rsvpForm.needsPickup,
+          pickup_from: rsvpForm.pickupFrom || undefined,
+          arrival_time: rsvpForm.arrivalTime || undefined,
+          pickup_people_count: rsvpForm.pickupPeopleCount || undefined,
+          pickup_notes: rsvpForm.pickupNotes || undefined,
         });
       }
 
@@ -721,7 +731,7 @@ Generated on: ${currentDate}
 
 ${scheduleContent}
 
-Made with love ���️ By Aral D'Souza
+Made with love ❤️ By Aral D'Souza
     `;
 
     const blob = new Blob([weddingFlowContent], { type: "text/plain" });
