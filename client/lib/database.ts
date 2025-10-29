@@ -775,31 +775,44 @@ export const invitationService = {
   async get(): Promise<SupabaseInvitation | null> {
     if (isSupabaseConfigured()) {
       try {
+        console.log("📋 Fetching invitation from Supabase...");
+
         const { data, error } = await supabase
           .from("invitations")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (error && error.code !== "PGRST116") {
-          // PGRST116 = no rows returned
+        if (error) {
+          console.warn("❌ Supabase error fetching invitation:", error);
           throw error;
         }
 
-        if (!data) {
+        // Check if we got any data
+        if (!data || data.length === 0) {
+          console.log("📋 No invitation found in Supabase, checking localStorage...");
           return this.getFromLocalStorage();
         }
 
-        // Sync to localStorage
-        this.saveToLocalStorage(data);
+        // Get the latest invitation
+        const latestInvitation = data[0];
+        console.log("✅ Invitation fetched from Supabase:", {
+          id: latestInvitation.id,
+          filename: latestInvitation.filename,
+          hasData: !!latestInvitation.pdf_data,
+          dataLength: latestInvitation.pdf_data?.length || 0,
+        });
 
-        return data;
+        // Sync to localStorage
+        this.saveToLocalStorage(latestInvitation);
+
+        return latestInvitation;
       } catch (error) {
-        console.warn("Supabase unavailable, using localStorage:", error);
+        console.warn("⚠️ Error fetching from Supabase, falling back to localStorage:", error);
         return this.getFromLocalStorage();
       }
     }
+    console.log("📋 Supabase not configured, using localStorage");
     return this.getFromLocalStorage();
   },
 
