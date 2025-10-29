@@ -2105,6 +2105,11 @@ Please RSVP at our wedding website
                         message: "",
                         dietaryRestrictions: "",
                         needsAccommodation: false,
+                        needsPickup: false,
+                        pickupFrom: "",
+                        arrivalTime: "",
+                        pickupPeopleCount: 1,
+                        pickupNotes: "",
                       });
                     }}
                     variant="outline"
