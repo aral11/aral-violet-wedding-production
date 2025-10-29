@@ -553,16 +553,21 @@ export default function Index() {
           setIsEditMode(true);
           setEditingGuestId(existingLocalGuest.id);
           setRsvpForm({
-            name: existingLocalGuest.name,
-            email: existingLocalGuest.email,
-            phone: existingLocalGuest.phone || "",
-            attending: existingLocalGuest.attending,
-            guests: existingLocalGuest.guests,
-            side: existingLocalGuest.side,
-            message: existingLocalGuest.message || "",
-            dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
-            needsAccommodation: existingLocalGuest.needsAccommodation,
-          });
+          name: existingLocalGuest.name,
+          email: existingLocalGuest.email,
+          phone: existingLocalGuest.phone || "",
+          attending: existingLocalGuest.attending,
+          guests: existingLocalGuest.guests,
+          side: existingLocalGuest.side,
+          message: existingLocalGuest.message || "",
+          dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
+          needsAccommodation: existingLocalGuest.needsAccommodation,
+          needsPickup: existingLocalGuest.needsPickup || false,
+          pickupFrom: existingLocalGuest.pickupFrom || "",
+          arrivalTime: existingLocalGuest.arrivalTime || "",
+          pickupPeopleCount: existingLocalGuest.pickupPeopleCount || 1,
+          pickupNotes: existingLocalGuest.pickupNotes || "",
+        });
 
           toast({
             title: "Existing RSVP Found! ✏️",
