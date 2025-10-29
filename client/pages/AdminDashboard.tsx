@@ -111,6 +111,11 @@ export default function AdminDashboard() {
               message: guest.message,
               dietaryRestrictions: guest.dietary_restrictions,
               needsAccommodation: guest.needs_accommodation,
+              needsPickup: guest.needs_pickup,
+              pickupFrom: guest.pickup_from,
+              arrivalTime: guest.arrival_time,
+              pickupPeopleCount: guest.pickup_people_count,
+              pickupNotes: guest.pickup_notes,
               createdAt: guest.created_at || new Date().toISOString(),
             })),
           );
@@ -3444,7 +3449,7 @@ export default function AdminDashboard() {
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
                             <li>• Guest experience overview</li>
-                            <li>• Wedding day information</li>
+                            <li>��� Wedding day information</li>
                           </ul>
                         </div>
                         <div>
