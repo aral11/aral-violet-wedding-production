@@ -910,6 +910,10 @@ export default function AdminDashboard() {
                 <div class="stat-number">${accommodationNeeded.length}</div>
                 <div class="stat-label">Need Accommodation</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number">${pickupNeeded.length}</div>
+                <div class="stat-label">Need Pickup</div>
+            </div>
         </div>
         <div class="stats">
             <div class="stat-card">
