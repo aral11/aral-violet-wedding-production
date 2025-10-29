@@ -730,7 +730,7 @@ export default function Index() {
 💒 Introduction of the newly married couple
 
 8:00 PM | Dinner Service (60 min)
-🍽�� Multi-cuisine buffet dinner
+🍽️ Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
 ������ Traditional dance and music performances
@@ -2064,6 +2064,129 @@ Please RSVP at our wedding website
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-sage-700 mb-2">
+                    Need Pickup from Airport/Station?
+                    <span className="block text-xs text-sage-500 font-normal mt-1">
+                      We can arrange transportation if you need it
+                    </span>
+                  </label>
+                  <div className="flex gap-4 mt-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={rsvpForm.needsPickup}
+                        onChange={() =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            needsPickup: true,
+                          })
+                        }
+                        className="mr-2 text-olive-600"
+                      />
+                      Yes, I need pickup
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={!rsvpForm.needsPickup}
+                        onChange={() =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            needsPickup: false,
+                          })
+                        }
+                        className="mr-2 text-olive-600"
+                      />
+                      No, thank you
+                    </label>
+                  </div>
+                </div>
+
+                {rsvpForm.needsPickup && (
+                  <>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-sage-700 mb-2">
+                          Pickup From *
+                        </label>
+                        <select
+                          value={rsvpForm.pickupFrom || ""}
+                          onChange={(e) =>
+                            setRsvpForm({
+                              ...rsvpForm,
+                              pickupFrom: e.target.value,
+                            })
+                          }
+                          required={rsvpForm.needsPickup}
+                          className="w-full px-3 py-2 border border-sage-300 rounded-md focus:outline-none focus:border-olive-500 bg-white"
+                        >
+                          <option value="">Select location...</option>
+                          <option value="Mangalore Airport">Mangalore Airport</option>
+                          <option value="Udupi Railway Station">Udupi Railway Station</option>
+                          <option value="Manipal Bus Station">Manipal Bus Station</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-sage-700 mb-2">
+                          Arrival Time *
+                        </label>
+                        <Input
+                          type="text"
+                          value={rsvpForm.arrivalTime || ""}
+                          onChange={(e) =>
+                            setRsvpForm({
+                              ...rsvpForm,
+                              arrivalTime: e.target.value,
+                            })
+                          }
+                          placeholder="e.g., 2:30 PM on Dec 26"
+                          required={rsvpForm.needsPickup}
+                          className="border-sage-300 focus:border-olive-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-sage-700 mb-2">
+                        Number of People for Pickup *
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={rsvpForm.pickupPeopleCount || 1}
+                        onChange={(e) =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            pickupPeopleCount: parseInt(e.target.value),
+                          })
+                        }
+                        required={rsvpForm.needsPickup}
+                        className="border-sage-300 focus:border-olive-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-sage-700 mb-2">
+                        Additional Pickup Notes
+                      </label>
+                      <Textarea
+                        value={rsvpForm.pickupNotes || ""}
+                        onChange={(e) =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            pickupNotes: e.target.value,
+                          })
+                        }
+                        placeholder="Any special requirements or additional information about your arrival?"
+                        className="border-sage-300 focus:border-olive-500"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-sage-700 mb-2">
