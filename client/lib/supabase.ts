@@ -62,6 +62,11 @@ export interface SupabaseGuest {
   message?: string;
   dietary_restrictions?: string;
   needs_accommodation: boolean;
+  needs_pickup?: boolean;
+  pickup_from?: string;
+  arrival_time?: string;
+  pickup_people_count?: number;
+  pickup_notes?: string;
   created_at?: string;
   updated_at?: string;
 }
