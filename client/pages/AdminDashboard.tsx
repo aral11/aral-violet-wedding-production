@@ -1751,7 +1751,7 @@ export default function AdminDashboard() {
 
                 <strong>⛪ Church Nuptials:</strong><br>
                 📍 Mother of Sorrows Church, Udupi<br>
-                🕐 4:00 PM – 5:15 PM<br>
+                �� 4:00 PM – 5:15 PM<br>
                 🗺️ <a href="https://g.co/kgs/kCfjJUM">Google Maps Directions</a><br><br>
 
                 <strong>🎉 Reception:</strong><br>
@@ -2149,6 +2149,27 @@ export default function AdminDashboard() {
                                       <strong>Accommodation:</strong>{" "}
                                       {guest.needsAccommodation ? "Yes" : "No"}
                                     </p>
+                                    {guest.needsPickup && (
+                                      <div className="mt-2 p-2 bg-blue-100 rounded">
+                                        <p className="font-medium text-blue-800">
+                                          🚗 Pickup Needed
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          From: {guest.pickupFrom}
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          Arrival: {guest.arrivalTime}
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          People: {guest.pickupPeopleCount}
+                                        </p>
+                                        {guest.pickupNotes && (
+                                          <p className="text-sm text-blue-700">
+                                            Notes: {guest.pickupNotes}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
                                     {guest.dietaryRestrictions && (
                                       <p>
                                         <strong>Dietary:</strong>{" "}
