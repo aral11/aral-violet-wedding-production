@@ -27,26 +27,34 @@ export const getInvitation: RequestHandler = async (req, res) => {
         .from("invitations")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== "PGRST116") {
-        // PGRST116 = no rows returned
+      if (error) {
+        console.error("Supabase error fetching invitation:", error);
         throw error;
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
+        console.log("No invitation found in database");
         return res.status(404).json({ error: "No invitation found" });
       }
 
+      const invitation = data[0];
+      console.log("✅ Invitation fetched from Supabase:", {
+        id: invitation.id,
+        filename: invitation.filename,
+        dataLength: invitation.pdf_data?.length || 0,
+      });
+
       res.json({
-        id: data.id,
-        pdfData: data.pdf_data,
-        filename: data.filename,
-        uploadedAt: data.created_at,
+        id: invitation.id,
+        pdfData: invitation.pdf_data,
+        filename: invitation.filename,
+        uploadedAt: invitation.created_at,
       });
     } else {
       // Fallback to localStorage check (though this won't work server-side)
+      console.log("Supabase not configured");
       return res.status(404).json({ error: "No invitation found" });
     }
   } catch (error) {
@@ -65,10 +73,27 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
     }
 
     if (supabase) {
-      // Delete existing invitation first (only keep the latest)
-      await supabase.from("invitations").delete().neq("id", 0);
+      console.log("📋 Uploading invitation to Supabase...");
+
+      // Delete existing invitations first (only keep the latest)
+      console.log("🗑️ Deleting old invitations...");
+      const { error: deleteError } = await supabase
+        .from("invitations")
+        .delete()
+        .neq("id", 0);
+
+      if (deleteError) {
+        console.warn(
+          "⚠️ Warning: Could not delete old invitations:",
+          deleteError,
+        );
+        // Don't throw, continue with insert
+      } else {
+        console.log("✅ Old invitations deleted");
+      }
 
       // Insert new invitation
+      console.log("📤 Inserting new invitation...");
       const { data, error } = await supabase
         .from("invitations")
         .insert([
@@ -77,21 +102,34 @@ export const uploadInvitation: RequestHandler = async (req, res) => {
             filename: filename || "wedding-invitation.pdf",
           },
         ])
-        .select()
-        .single();
+        .select();
 
       if (error) {
+        console.error("❌ Error inserting invitation:", error);
         throw error;
       }
 
+      if (!data || data.length === 0) {
+        console.error("❌ No data returned from insert");
+        throw new Error("Failed to upload invitation - no data returned");
+      }
+
+      const uploadedInvitation = data[0];
+      console.log("✅ Invitation uploaded successfully:", {
+        id: uploadedInvitation.id,
+        filename: uploadedInvitation.filename,
+        dataLength: uploadedInvitation.pdf_data?.length || 0,
+      });
+
       res.status(201).json({
-        id: data.id,
-        pdfData: data.pdf_data,
-        filename: data.filename,
-        uploadedAt: data.created_at,
+        id: uploadedInvitation.id,
+        pdfData: uploadedInvitation.pdf_data,
+        filename: uploadedInvitation.filename,
+        uploadedAt: uploadedInvitation.created_at,
       });
     } else {
       // Fallback response
+      console.log("📋 Supabase not configured, returning fallback response");
       const newInvitation = {
         id: 1,
         pdfData: pdfData,

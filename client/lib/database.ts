@@ -775,31 +775,49 @@ export const invitationService = {
   async get(): Promise<SupabaseInvitation | null> {
     if (isSupabaseConfigured()) {
       try {
+        console.log("📋 Fetching invitation from Supabase...");
+
         const { data, error } = await supabase
           .from("invitations")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (error && error.code !== "PGRST116") {
-          // PGRST116 = no rows returned
+        if (error) {
+          console.warn("❌ Supabase error fetching invitation:", error);
           throw error;
         }
 
-        if (!data) {
+        // Check if we got any data
+        if (!data || data.length === 0) {
+          console.log(
+            "📋 No invitation found in Supabase, checking localStorage...",
+          );
           return this.getFromLocalStorage();
         }
 
-        // Sync to localStorage
-        this.saveToLocalStorage(data);
+        // Get the latest invitation
+        const latestInvitation = data[0];
+        console.log("✅ Invitation fetched from Supabase:", {
+          id: latestInvitation.id,
+          filename: latestInvitation.filename,
+          hasData: !!latestInvitation.pdf_data,
+          dataLength: latestInvitation.pdf_data?.length || 0,
+        });
 
-        return data;
+        // Sync to localStorage
+        this.saveToLocalStorage(latestInvitation);
+
+        return latestInvitation;
       } catch (error) {
-        console.warn("Supabase unavailable, using localStorage:", error);
+        console.warn(
+          "⚠️ Error fetching from Supabase, falling back to localStorage:",
+          error,
+        );
         return this.getFromLocalStorage();
       }
     }
+    console.log("📋 Supabase not configured, using localStorage");
     return this.getFromLocalStorage();
   },
 
@@ -809,10 +827,27 @@ export const invitationService = {
   ): Promise<SupabaseInvitation> {
     if (isSupabaseConfigured()) {
       try {
-        // Delete existing invitation first (only keep the latest)
-        await supabase.from("invitations").delete().neq("id", 0);
+        console.log("📋 Uploading invitation to Supabase...");
+
+        // Delete existing invitations first (only keep the latest)
+        console.log("🗑️ Deleting old invitations...");
+        const { error: deleteError } = await supabase
+          .from("invitations")
+          .delete()
+          .neq("id", 0);
+
+        if (deleteError) {
+          console.warn(
+            "⚠️ Warning: Could not delete old invitations:",
+            deleteError,
+          );
+          // Don't throw, continue with insert
+        } else {
+          console.log("✅ Old invitations deleted");
+        }
 
         // Insert new invitation
+        console.log("📤 Inserting new invitation...");
         const { data, error } = await supabase
           .from("invitations")
           .insert([
@@ -821,17 +856,32 @@ export const invitationService = {
               filename: filename || "wedding-invitation.pdf",
             },
           ])
-          .select()
-          .single();
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("❌ Error inserting invitation:", error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          console.error("❌ No data returned from insert");
+          throw new Error("Failed to upload invitation - no data returned");
+        }
+
+        const uploadedInvitation = data[0];
+        console.log("✅ Invitation uploaded successfully:", {
+          id: uploadedInvitation.id,
+          filename: uploadedInvitation.filename,
+          dataLength: uploadedInvitation.pdf_data?.length || 0,
+        });
 
         // Also save to localStorage
-        this.saveToLocalStorage(data);
+        this.saveToLocalStorage(uploadedInvitation);
 
-        return data;
+        return uploadedInvitation;
       } catch (error) {
-        console.warn("Supabase unavailable, saving to localStorage:", error);
+        console.error("❌ Error uploading to Supabase:", error);
+        console.warn("⚠️ Saving to localStorage fallback...");
         return this.saveToLocalStorage({
           id: 1,
           pdf_data: pdfData,
@@ -841,6 +891,7 @@ export const invitationService = {
       }
     }
 
+    console.log("📋 Supabase not configured, saving to localStorage only");
     return this.saveToLocalStorage({
       id: 1,
       pdf_data: pdfData,

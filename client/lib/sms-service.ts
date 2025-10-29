@@ -8,6 +8,11 @@ export interface RSVPDetails {
   message?: string;
   dietaryRestrictions?: string;
   needsAccommodation: boolean;
+  needsPickup?: boolean;
+  pickupFrom?: string;
+  arrivalTime?: string;
+  pickupPeopleCount?: number;
+  pickupNotes?: string;
 }
 
 // Check deployment platform and use appropriate API endpoints

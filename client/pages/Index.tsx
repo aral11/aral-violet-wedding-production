@@ -53,6 +53,11 @@ interface Guest {
   message?: string;
   dietaryRestrictions?: string;
   needsAccommodation: boolean;
+  needsPickup?: boolean;
+  pickupFrom?: string;
+  arrivalTime?: string;
+  pickupPeopleCount?: number;
+  pickupNotes?: string;
   createdAt: string;
 }
 
@@ -75,6 +80,11 @@ export default function Index() {
     message: "",
     dietaryRestrictions: "",
     needsAccommodation: false,
+    needsPickup: false,
+    pickupFrom: "",
+    arrivalTime: "",
+    pickupPeopleCount: 1,
+    pickupNotes: "",
   });
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -384,6 +394,11 @@ export default function Index() {
           message: existingGuest.message || "",
           dietaryRestrictions: existingGuest.dietary_restrictions || "",
           needsAccommodation: existingGuest.needs_accommodation,
+          needsPickup: existingGuest.needs_pickup || false,
+          pickupFrom: existingGuest.pickup_from || "",
+          arrivalTime: existingGuest.arrival_time || "",
+          pickupPeopleCount: existingGuest.pickup_people_count || 1,
+          pickupNotes: existingGuest.pickup_notes || "",
         });
 
         toast({
@@ -422,6 +437,11 @@ export default function Index() {
           message: rsvpForm.message || undefined,
           dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
           needs_accommodation: rsvpForm.needsAccommodation,
+          needs_pickup: rsvpForm.needsPickup,
+          pickup_from: rsvpForm.pickupFrom || undefined,
+          arrival_time: rsvpForm.arrivalTime || undefined,
+          pickup_people_count: rsvpForm.pickupPeopleCount || undefined,
+          pickup_notes: rsvpForm.pickupNotes || undefined,
         });
       } else {
         // Create new guest
@@ -435,6 +455,11 @@ export default function Index() {
           message: rsvpForm.message || undefined,
           dietary_restrictions: rsvpForm.dietaryRestrictions || undefined,
           needs_accommodation: rsvpForm.needsAccommodation,
+          needs_pickup: rsvpForm.needsPickup,
+          pickup_from: rsvpForm.pickupFrom || undefined,
+          arrival_time: rsvpForm.arrivalTime || undefined,
+          pickup_people_count: rsvpForm.pickupPeopleCount || undefined,
+          pickup_notes: rsvpForm.pickupNotes || undefined,
         });
       }
 
@@ -457,6 +482,11 @@ export default function Index() {
             message: rsvpForm.message,
             dietaryRestrictions: rsvpForm.dietaryRestrictions,
             needsAccommodation: rsvpForm.needsAccommodation,
+            needsPickup: rsvpForm.needsPickup,
+            pickupFrom: rsvpForm.pickupFrom,
+            arrivalTime: rsvpForm.arrivalTime,
+            pickupPeopleCount: rsvpForm.pickupPeopleCount,
+            pickupNotes: rsvpForm.pickupNotes,
           });
 
           if (smsSuccess) {
@@ -532,6 +562,11 @@ export default function Index() {
             message: existingLocalGuest.message || "",
             dietaryRestrictions: existingLocalGuest.dietaryRestrictions || "",
             needsAccommodation: existingLocalGuest.needsAccommodation,
+            needsPickup: existingLocalGuest.needsPickup || false,
+            pickupFrom: existingLocalGuest.pickupFrom || "",
+            arrivalTime: existingLocalGuest.arrivalTime || "",
+            pickupPeopleCount: existingLocalGuest.pickupPeopleCount || 1,
+            pickupNotes: existingLocalGuest.pickupNotes || "",
           });
 
           toast({
@@ -571,6 +606,11 @@ export default function Index() {
                   message: rsvpForm.message,
                   dietaryRestrictions: rsvpForm.dietaryRestrictions,
                   needsAccommodation: rsvpForm.needsAccommodation,
+                  needsPickup: rsvpForm.needsPickup,
+                  pickupFrom: rsvpForm.pickupFrom,
+                  arrivalTime: rsvpForm.arrivalTime,
+                  pickupPeopleCount: rsvpForm.pickupPeopleCount,
+                  pickupNotes: rsvpForm.pickupNotes,
                 }
               : guest,
           );
@@ -623,6 +663,11 @@ export default function Index() {
       message: "",
       dietaryRestrictions: "",
       needsAccommodation: false,
+      needsPickup: false,
+      pickupFrom: "",
+      arrivalTime: "",
+      pickupPeopleCount: 1,
+      pickupNotes: "",
     });
     setIsEditMode(false);
     setEditingGuestId(null);
@@ -2022,6 +2067,135 @@ Please RSVP at our wedding website
 
                 <div>
                   <label className="block text-sm font-medium text-sage-700 mb-2">
+                    Need Pickup from Airport/Station?
+                    <span className="block text-xs text-sage-500 font-normal mt-1">
+                      We can arrange transportation if you need it
+                    </span>
+                  </label>
+                  <div className="flex gap-4 mt-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={rsvpForm.needsPickup}
+                        onChange={() =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            needsPickup: true,
+                          })
+                        }
+                        className="mr-2 text-olive-600"
+                      />
+                      Yes, I need pickup
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        checked={!rsvpForm.needsPickup}
+                        onChange={() =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            needsPickup: false,
+                          })
+                        }
+                        className="mr-2 text-olive-600"
+                      />
+                      No, thank you
+                    </label>
+                  </div>
+                </div>
+
+                {rsvpForm.needsPickup && (
+                  <>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-sage-700 mb-2">
+                          Pickup From *
+                        </label>
+                        <select
+                          value={rsvpForm.pickupFrom || ""}
+                          onChange={(e) =>
+                            setRsvpForm({
+                              ...rsvpForm,
+                              pickupFrom: e.target.value,
+                            })
+                          }
+                          required={rsvpForm.needsPickup}
+                          className="w-full px-3 py-2 border border-sage-300 rounded-md focus:outline-none focus:border-olive-500 bg-white"
+                        >
+                          <option value="">Select location...</option>
+                          <option value="Mangalore Airport">
+                            Mangalore Airport
+                          </option>
+                          <option value="Udupi Railway Station">
+                            Udupi Railway Station
+                          </option>
+                          <option value="Manipal Bus Station">
+                            Manipal Bus Station
+                          </option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-sage-700 mb-2">
+                          Arrival Time *
+                        </label>
+                        <Input
+                          type="text"
+                          value={rsvpForm.arrivalTime || ""}
+                          onChange={(e) =>
+                            setRsvpForm({
+                              ...rsvpForm,
+                              arrivalTime: e.target.value,
+                            })
+                          }
+                          placeholder="e.g., 2:30 PM on Dec 26"
+                          required={rsvpForm.needsPickup}
+                          className="border-sage-300 focus:border-olive-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-sage-700 mb-2">
+                        Number of People for Pickup *
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={rsvpForm.pickupPeopleCount || 1}
+                        onChange={(e) =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            pickupPeopleCount: parseInt(e.target.value),
+                          })
+                        }
+                        required={rsvpForm.needsPickup}
+                        className="border-sage-300 focus:border-olive-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-sage-700 mb-2">
+                        Additional Pickup Notes
+                      </label>
+                      <Textarea
+                        value={rsvpForm.pickupNotes || ""}
+                        onChange={(e) =>
+                          setRsvpForm({
+                            ...rsvpForm,
+                            pickupNotes: e.target.value,
+                          })
+                        }
+                        placeholder="Any special requirements or additional information about your arrival?"
+                        className="border-sage-300 focus:border-olive-500"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-sage-700 mb-2">
                     Dietary Restrictions
                   </label>
                   <Input
@@ -2075,6 +2249,11 @@ Please RSVP at our wedding website
                         message: "",
                         dietaryRestrictions: "",
                         needsAccommodation: false,
+                        needsPickup: false,
+                        pickupFrom: "",
+                        arrivalTime: "",
+                        pickupPeopleCount: 1,
+                        pickupNotes: "",
                       });
                     }}
                     variant="outline"

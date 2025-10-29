@@ -111,6 +111,11 @@ export default function AdminDashboard() {
               message: guest.message,
               dietaryRestrictions: guest.dietary_restrictions,
               needsAccommodation: guest.needs_accommodation,
+              needsPickup: guest.needs_pickup,
+              pickupFrom: guest.pickup_from,
+              arrivalTime: guest.arrival_time,
+              pickupPeopleCount: guest.pickup_people_count,
+              pickupNotes: guest.pickup_notes,
               createdAt: guest.created_at || new Date().toISOString(),
             })),
           );
@@ -695,6 +700,7 @@ export default function AdminDashboard() {
     const accommodationNeeded = attendingGuests.filter(
       (g) => g.needsAccommodation,
     );
+    const pickupNeeded = attendingGuests.filter((g) => g.needsPickup);
 
     const currentDate = new Date().toLocaleDateString("en-IN", {
       day: "numeric",
@@ -904,6 +910,10 @@ export default function AdminDashboard() {
                 <div class="stat-number">${accommodationNeeded.length}</div>
                 <div class="stat-label">Need Accommodation</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number">${pickupNeeded.length}</div>
+                <div class="stat-label">Need Pickup</div>
+            </div>
         </div>
         <div class="stats">
             <div class="stat-card">
@@ -943,6 +953,7 @@ export default function AdminDashboard() {
                 <div class="guest-details">
                     <div style="margin-bottom: 8px;"><strong>👥 Total Guests:</strong> ${guest.guests}</div>
                     <div style="margin-bottom: 8px;"><strong>🏨 Accommodation:</strong> ${guest.needsAccommodation ? "✅ Required" : "❌ Not needed"}</div>
+                    ${guest.needsPickup ? `<div style="margin-bottom: 8px;"><strong>🚗 Pickup:</strong> ✅ From ${guest.pickupFrom} at ${guest.arrivalTime} (${guest.pickupPeopleCount} people)</div>` : ""}
                     ${guest.dietaryRestrictions ? `<div style="margin-bottom: 8px;"><strong>🍽️ Dietary:</strong> ${guest.dietaryRestrictions}</div>` : '<div style="margin-bottom: 8px;"><strong>🍽️ Dietary:</strong> None specified</div>'}
                 </div>
                 <div class="guest-details">
@@ -981,6 +992,45 @@ export default function AdminDashboard() {
                 <div class="guest-details">
                     <div style="margin-bottom: 8px;"><strong>👥 Total Guests:</strong> ${guest.guests}</div>
                     <div style="margin-bottom: 8px;"><strong>🏨 Accommodation:</strong> �� Required</div>
+                </div>
+                <div class="guest-details">
+                    <div style="margin-bottom: 5px;"><strong>📅 RSVP Date:</strong></div>
+                    <div style="font-size: 0.9em;">${new Date(guest.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
+                    <div style="font-size: 0.8em; color: #a0aec0; margin-top: 5px;">${new Date(guest.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>
+                </div>
+            </div>
+            `,
+              )
+              .join("")}
+        </div>
+    </div>
+    `
+        : ""
+    }
+
+    ${
+      pickupNeeded.length > 0
+        ? `
+    <div class="section">
+        <div class="section-header">🚗 Pickup Required (${pickupNeeded.length})</div>
+        <div class="guest-list">
+            ${pickupNeeded
+              .map(
+                (guest) => `
+            <div class="guest-item">
+                <div class="guest-main">
+                    <div class="guest-name">${guest.name}</div>
+                    <div class="guest-contact">📧 ${guest.email}</div>
+                    <div class="guest-contact">📱 ${guest.phone}</div>
+                    <span class="side-badge ${guest.side === "groom" ? "groom-side" : "bride-side"}">
+                        ${guest.side === "groom" ? "Aral's Side" : "Violet's Side"}
+                    </span>
+                </div>
+                <div class="guest-details">
+                    <div style="margin-bottom: 8px;"><strong>📍 Pickup From:</strong> ${guest.pickupFrom}</div>
+                    <div style="margin-bottom: 8px;"><strong>⏰ Arrival Time:</strong> ${guest.arrivalTime}</div>
+                    <div style="margin-bottom: 8px;"><strong>👥 People Count:</strong> ${guest.pickupPeopleCount}</div>
+                    ${guest.pickupNotes ? `<div style="margin-bottom: 8px;"><strong>📝 Notes:</strong> ${guest.pickupNotes}</div>` : ""}
                 </div>
                 <div class="guest-details">
                     <div style="margin-bottom: 5px;"><strong>📅 RSVP Date:</strong></div>
@@ -1751,7 +1801,7 @@ export default function AdminDashboard() {
 
                 <strong>⛪ Church Nuptials:</strong><br>
                 📍 Mother of Sorrows Church, Udupi<br>
-                🕐 4:00 PM – 5:15 PM<br>
+                �� 4:00 PM – 5:15 PM<br>
                 🗺️ <a href="https://g.co/kgs/kCfjJUM">Google Maps Directions</a><br><br>
 
                 <strong>🎉 Reception:</strong><br>
@@ -2149,6 +2199,27 @@ export default function AdminDashboard() {
                                       <strong>Accommodation:</strong>{" "}
                                       {guest.needsAccommodation ? "Yes" : "No"}
                                     </p>
+                                    {guest.needsPickup && (
+                                      <div className="mt-2 p-2 bg-blue-100 rounded">
+                                        <p className="font-medium text-blue-800">
+                                          🚗 Pickup Needed
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          From: {guest.pickupFrom}
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          Arrival: {guest.arrivalTime}
+                                        </p>
+                                        <p className="text-sm text-blue-700">
+                                          People: {guest.pickupPeopleCount}
+                                        </p>
+                                        {guest.pickupNotes && (
+                                          <p className="text-sm text-blue-700">
+                                            Notes: {guest.pickupNotes}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
                                     {guest.dietaryRestrictions && (
                                       <p>
                                         <strong>Dietary:</strong>{" "}
@@ -3423,7 +3494,7 @@ export default function AdminDashboard() {
                             <li>• Login credentials for admin access</li>
                             <li>• Complete feature walkthrough</li>
                             <li>• Guest experience overview</li>
-                            <li>• Wedding day information</li>
+                            <li>��� Wedding day information</li>
                           </ul>
                         </div>
                         <div>
