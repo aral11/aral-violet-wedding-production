@@ -700,6 +700,7 @@ export default function AdminDashboard() {
     const accommodationNeeded = attendingGuests.filter(
       (g) => g.needsAccommodation,
     );
+    const pickupNeeded = attendingGuests.filter((g) => g.needsPickup);
 
     const currentDate = new Date().toLocaleDateString("en-IN", {
       day: "numeric",
@@ -880,7 +881,7 @@ export default function AdminDashboard() {
 </head>
 <body>
     <div class="header">
-        <div class="logo">❤������ TheVIRALWedding</div>
+        <div class="logo">❤���� TheVIRALWedding</div>
         <div class="couple-names">Aral & Violet</div>
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
@@ -3334,7 +3335,7 @@ export default function AdminDashboard() {
                                   await database.invitation.delete();
                                   setInvitation(null);
                                   toast({
-                                    title: "Invitation Removed! 🗑���",
+                                    title: "Invitation Removed! 🗑️",
                                     description:
                                       "Custom invitation has been removed. Guests will now download the default text invitation.",
                                     duration: 3000,
