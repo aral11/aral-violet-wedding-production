@@ -53,6 +53,11 @@ interface Guest {
   message?: string;
   dietaryRestrictions?: string;
   needsAccommodation: boolean;
+  needsPickup?: boolean;
+  pickupFrom?: string;
+  arrivalTime?: string;
+  pickupPeopleCount?: number;
+  pickupNotes?: string;
   createdAt: string;
 }
 
