@@ -80,6 +80,11 @@ export default function Index() {
     message: "",
     dietaryRestrictions: "",
     needsAccommodation: false,
+    needsPickup: false,
+    pickupFrom: "",
+    arrivalTime: "",
+    pickupPeopleCount: 1,
+    pickupNotes: "",
   });
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -716,7 +721,7 @@ Generated on: ${currentDate}
 
 ${scheduleContent}
 
-Made with love ❤️ By Aral D'Souza
+Made with love ���️ By Aral D'Souza
     `;
 
     const blob = new Blob([weddingFlowContent], { type: "text/plain" });
