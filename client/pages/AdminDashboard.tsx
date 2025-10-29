@@ -880,7 +880,7 @@ export default function AdminDashboard() {
 </head>
 <body>
     <div class="header">
-        <div class="logo">❤���� TheVIRALWedding</div>
+        <div class="logo">❤������ TheVIRALWedding</div>
         <div class="couple-names">Aral & Violet</div>
         <div class="wedding-date">December 28, 2025</div>
         <div style="margin: 15px 0; font-size: 1em; color: #718096;">
@@ -948,6 +948,7 @@ export default function AdminDashboard() {
                 <div class="guest-details">
                     <div style="margin-bottom: 8px;"><strong>👥 Total Guests:</strong> ${guest.guests}</div>
                     <div style="margin-bottom: 8px;"><strong>🏨 Accommodation:</strong> ${guest.needsAccommodation ? "✅ Required" : "❌ Not needed"}</div>
+                    ${guest.needsPickup ? `<div style="margin-bottom: 8px;"><strong>🚗 Pickup:</strong> ✅ From ${guest.pickupFrom} at ${guest.arrivalTime} (${guest.pickupPeopleCount} people)</div>` : ""}
                     ${guest.dietaryRestrictions ? `<div style="margin-bottom: 8px;"><strong>🍽️ Dietary:</strong> ${guest.dietaryRestrictions}</div>` : '<div style="margin-bottom: 8px;"><strong>🍽️ Dietary:</strong> None specified</div>'}
                 </div>
                 <div class="guest-details">
@@ -3333,7 +3334,7 @@ export default function AdminDashboard() {
                                   await database.invitation.delete();
                                   setInvitation(null);
                                   toast({
-                                    title: "Invitation Removed! 🗑️",
+                                    title: "Invitation Removed! 🗑���",
                                     description:
                                       "Custom invitation has been removed. Guests will now download the default text invitation.",
                                     duration: 3000,
