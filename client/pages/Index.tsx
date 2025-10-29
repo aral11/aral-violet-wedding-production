@@ -663,6 +663,11 @@ export default function Index() {
       message: "",
       dietaryRestrictions: "",
       needsAccommodation: false,
+      needsPickup: false,
+      pickupFrom: "",
+      arrivalTime: "",
+      pickupPeopleCount: 1,
+      pickupNotes: "",
     });
     setIsEditMode(false);
     setEditingGuestId(null);
@@ -725,7 +730,7 @@ export default function Index() {
 💒 Introduction of the newly married couple
 
 8:00 PM | Dinner Service (60 min)
-🍽️ Multi-cuisine buffet dinner
+🍽�� Multi-cuisine buffet dinner
 
 9:00 PM | Cultural Performances (45 min)
 ������ Traditional dance and music performances
